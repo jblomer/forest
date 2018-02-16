@@ -4,8 +4,10 @@
 
 #include <iostream>
 #include <memory>
+#include <string>
 #include <string_view>
 #include <typeinfo>
+#include <vector>
 
 #include "ROOT/TDirectory.hxx"
 #include "TClass.h"
@@ -28,10 +30,35 @@ struct Point {
  */
 namespace Toy {
 
+class TBranch {
+   std::string fName;
+
+public:
+   TBranch(std::string_view name) : fName(name) { }
+   std::string GetName() { return fName; }
+};
+
+
+class TBranchCollection {
+   std::vector<TBranch> fElements;
+public:
+   void Add(const TBranch &branch) { fElements.emplace_back(branch); }
+
+   std::vector<TBranch>::const_iterator begin() const {
+      return fElements.begin();
+   }
+   std::vector<TBranch>::const_iterator end() const {
+      return fElements.end();
+   }
+};
+
+
 class TTree {
    using TDirectory = ROOT::Experimental::TDirectory;
 
    ::TTree *fClassicTree;
+   // Should TTree own the TBranch objects?
+   TBranchCollection fBranches;
 
 public:
    TTree() = delete;
@@ -39,7 +66,9 @@ public:
    // FixMe01: Should the constructor become private?
    TTree(std::string_view name)
       : fClassicTree(new ::TTree(name.to_string().c_str(), ""))
-   { };
+   {
+      fBranches.Add(TBranch("/"));  // tree's root branch (stem)
+   };
 
    ~TTree() {
       delete fClassicTree;
@@ -54,7 +83,14 @@ public:
          std::cout << "OOPS, unknown type" << std::endl;
          return;
       }
-      std::cout << "Building branches from event " << type->GetName() << std::endl;
+      std::cout << "Building branches from class " << type->GetName() << std::endl;
+      // Here we actually figured out the members of the Event class
+      fBranches.Add(TBranch("/" + name.to_string()));
+      fBranches.Add(TBranch("/" + name.to_string() + "/fEnergy"));
+   }
+
+   const TBranchCollection &GetBranches() {
+      return fBranches;
    }
 
    void Print() { fClassicTree->Print(); }
@@ -72,7 +108,8 @@ public:
 // Has to be in the namespace of Float_t
 template <>
 void Toy::TTree::Branch<Float_t>(std::string_view name) {
-   std::cout << "Created float_t branch" << std::endl;
+   std::cout << "Adding float_t branch" << std::endl;
+   fBranches.Add(TBranch("/" + name.to_string()));
 }
 
 
@@ -89,12 +126,21 @@ int main() {
    auto tree_transient = std::make_unique<TTree>("MyTransientTree");
    // TTree::CreateFromFolder ?
 
+   // Q02: Should we split createion of the branches (schema) from binding
+   // variables to them for filling?
+   // Q03: Should we have "bulk filling"?
    tree_transient->Branch<int>("oops");  // <-- no specialization for int
    tree_transient->Branch<Float_t>("px");  // <-- OK
    tree_transient->Branch<Event>("EventBranch");  // <-- OK, processed by cling
    tree_transient->Branch<Point>("oops");  // <-- no reflection info available
 
+   for (auto branch : tree_transient->GetBranches()) {
+      std::cout << "Listing branch " << branch.GetName() << std::endl;
+   }
 
+   // Iterate through events
+   // for (auto WhatTypeShouldIBe : tree_transient) {
+   // }
 
    /*T->Branch("px",&px,"px/F");
    T->Branch("py",&py,"py/F");
