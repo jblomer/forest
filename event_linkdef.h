@@ -3,5 +3,4 @@
 #pragma link off all functions;
 #pragma link C++ nestedclasses;
 
-#pragma link C++ class KaonCandidate+;
 #pragma link C++ class Event+;
