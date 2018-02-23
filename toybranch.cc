@@ -2,6 +2,8 @@
  * Playground for possible TTree/TBranch interfaces.
  */
 
+#include <cmath>
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -30,27 +32,63 @@ struct Point {
  */
 namespace Toy {
 
+
+template <typename T>
 class TBranch {
    std::string fName;
 
 public:
    TBranch(std::string_view name) : fName(name) { }
    std::string GetName() { return fName; }
+
+
+   // Bind could be the right place to look whether all branches are bound,
+   // so that Fill() only needs to check one bool.
+
+   // Equivalent to SetBranchAddress
+   void Bind(T &data) {
+     std::cout << "binding reference of type " << typeid(data).name() << std::endl;
+     std::cout << "   ... current value " << data << std::endl;
+   }
+
+   // Write a constant value
+   void Bind(const T &data) {
+     std::cout << "binding constant of type " << typeid(data).name() << std::endl;
+     std::cout << "   ... value " << data << std::endl;
+   }
+
+   // Evaluate a function on write
+   void Bind(std::function<T()> fn) {
+     std::cout << "binding lambda" << std::endl;
+     std::cout << "   ... evaluating to " << fn() << std::endl;
+   }
 };
 
 
-class TBranchCollection {
-   std::vector<TBranch> fElements;
+/*class TBranchCollection {
+   std::vector<std::unique_ptr<TBranch>> fElements;
 public:
-   void Add(const TBranch &branch) { fElements.emplace_back(branch); }
+   struct Iterator {
+      const TBranchCollection *fCollection;
+      unsigned fPos;
+   public:
+      Iterator(const TBranchCollection *collection, unsigned pos)
+         : fCollection(collection), fPos(pos) { }
+      bool operator != (const Iterator &other) const { return fPos != other.fPos; }
+      TBranch *operator* () const { return fCollection->fElements[fPos].get(); }
+      const Iterator &operator++ () { ++fPos; return *this; }
+   };
 
-   std::vector<TBranch>::const_iterator begin() const {
-      return fElements.begin();
+   TBranch *Add(std::string_view name) {
+      auto element = std::make_unique<TBranch>(name);
+      TBranch *observer = element.get();
+      fElements.emplace_back(std::move(element));
+      return observer;
    }
-   std::vector<TBranch>::const_iterator end() const {
-      return fElements.end();
-   }
-};
+
+   Iterator begin() const { return Iterator(this, 0); }
+   Iterator end() const { return Iterator(this, fElements.size()); }
+};*/
 
 
 class TTree {
@@ -58,7 +96,7 @@ class TTree {
 
    ::TTree *fClassicTree;
    // Should TTree own the TBranch objects?
-   TBranchCollection fBranches;
+   //TBranchCollection fBranches;
 
 public:
    TTree() = delete;
@@ -67,7 +105,7 @@ public:
    TTree(std::string_view name)
       : fClassicTree(new ::TTree(name.to_string().c_str(), ""))
    {
-      fBranches.Add(TBranch("/"));  // tree's root branch (stem)
+      //fBranches.Add("/");  // tree's root branch (stem)
    };
 
    ~TTree() {
@@ -77,24 +115,25 @@ public:
    // Tamplates instead of "BranchFloat" because that allows us to add a user
    // provided event class branch with the same syntax
    template <typename T>
-   void Branch(std::string_view name) {
+   TBranch<T> *Branch(std::string_view name) {
       TClass *type = TClass::GetClass(typeid(T));
       if (!type) {
          std::cout << "OOPS, unknown type" << std::endl;
-         return;
+         return NULL;
       }
       std::cout << "Building branches from class " << type->GetName() << std::endl;
       // Here we actually figured out the members of the Event class
-      fBranches.Add(TBranch("/" + name.to_string()));
-      fBranches.Add(TBranch("/" + name.to_string() + "/fEnergy"));
+      //fBranches.Add("/" + name.to_string() + "/fEnergy");
+      //return fBranches.Add("/" + name.to_string());
+      return new TBranch<T>("/" + name.to_string());
    }
 
-   const TBranchCollection &GetBranches() {
+   /*(const TBranchCollection &GetBranches() {
       return fBranches;
-   }
+   }*/
 
    void Print() { fClassicTree->Print(); }
-   void Fill() { fClassicTree->Print(); }
+   void Fill() { }
 
    static std::shared_ptr<TTree> Create(std::string_view name, TDirectory &where) {
       auto t = std::make_shared<TTree>(name);
@@ -107,40 +146,80 @@ public:
 
 // Has to be in the namespace of Float_t
 template <>
-void Toy::TTree::Branch<Float_t>(std::string_view name) {
+Toy::TBranch<Float_t> *Toy::TTree::Branch<Float_t>(std::string_view name) {
    std::cout << "Adding float_t branch" << std::endl;
-   fBranches.Add(TBranch("/" + name.to_string()));
+   //return fBranches.Add("/" + name.to_string());
+   return new TBranch<Float_t>("/" + name.to_string());
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
 
 
 int main() {
    using TDirectory = ROOT::Experimental::TDirectory;
    using TTree = Toy::TTree;
 
-   if (!TClassTable::GetDict("FlatEvent")) {
+   if (!TClassTable::GetDict("Event")) {
       gSystem->Load("./libEvent.so");
    }
 
    // Constructing
-   auto tree_persistent = TTree::Create("MyPersistentTree", TDirectory::Heap());
+   auto tree_persistent = TTree::Create("MyPersistentTree", TDirectory::Heap());  // <-- shared_ptr
    auto tree_transient = std::make_unique<TTree>("MyTransientTree");
    // TTree::CreateFromFolder ?
 
-   // Q02: Should we split createion of the branches (schema) from binding
-   // variables to them for filling?
+   // Interface for writing into a tree, rationale:
+   //    - Separate branch creation from SetBranchAddress
+   //    - Type-safe binding
+   //      (runtime check, otherwise the entire TBranch class must be templated)
+   //    - Allow to bind/write
+   //      * Values and literals
+   //      * Callables
+   //
+   // Q05: Can we bind variables in such a way that we know they are not
+   //      invalid when Fill() is called?  We probably do not want shared
+   //      pointers here.
+   //
    // Q03: Should we have "bulk filling"?
+   // Q06: How should addition of a branch work
    tree_transient->Branch<int>("oops");  // <-- no specialization for int
-   tree_transient->Branch<Float_t>("px");  // <-- OK
+   auto branch_px = tree_transient->Branch<Float_t>("px");  // <-- OK
    tree_transient->Branch<Event>("EventBranch");  // <-- OK, processed by cling
    tree_transient->Branch<Point>("oops");  // <-- no reflection info available
 
-   for (auto branch : tree_transient->GetBranches()) {
-      std::cout << "Listing branch " << branch.GetName() << std::endl;
+   Float_t chi2 = 1.0;
+   tree_transient->Branch<Float_t>("chi2")->Bind(chi2);
+   branch_px->Bind(0.0);
+   branch_px->Bind(log10(100.0));
+   branch_px->Bind([]() -> Float_t { return 42.0; });
+
+   // branch_px->Bind("0.0");  <-- compiler error
+
+   // Scalar filling
+   for (auto i = 0; i < 100; i++) {
+     tree_transient->Fill();
    }
+
+
+   // Iterate over available branches in the tree
+   // Q04: Should we be able to iterate over branches of a particular nesting
+   // level only?
+
+   /*for (auto branch : tree_transient->GetBranches()) {
+      std::cout << "Listing branch " << branch->GetName() << std::endl;
+   }*/
+
+   // Other iterators
+   //   - Clusters
+   //   - Baskets
+   //   - Leaves
 
    // Iterate through events
    // for (auto WhatTypeShouldIBe : tree_transient) {
    // }
+
+   // Iterate through branches
 
    /*T->Branch("px",&px,"px/F");
    T->Branch("py",&py,"py/F");
