@@ -33,6 +33,12 @@ struct Point {
 namespace Toy {
 
 
+// Implementation notes
+//   - arbitrarily nested, split collections
+//   - can we ensure sequential writing?
+//   - can we recover partial file data if writing fails?
+//   - besides random access by event entry, possibility for secondary index desirable (timestamp)
+
 template <typename T>
 class TBranch {
    std::string fName;
@@ -57,7 +63,7 @@ public:
      std::cout << "   ... value " << data << std::endl;
    }
 
-   // Evaluate a function on write
+   // Evaluate a function on Fill
    void Bind(std::function<T()> fn) {
      std::cout << "binding lambda" << std::endl;
      std::cout << "   ... evaluating to " << fn() << std::endl;
@@ -181,9 +187,8 @@ int main() {
    //      invalid when Fill() is called?  We probably do not want shared
    //      pointers here.
    //
-   // Q03: Should we have "bulk filling"?
+   // Q03: Should we have "bulk filling"?  -->  vectorized fill interface should cover "bulk I/O"
    // Q06: How should addition of a branch work
-   tree_transient->Branch<int>("oops");  // <-- no specialization for int
    auto branch_px = tree_transient->Branch<Float_t>("px");  // <-- OK
    tree_transient->Branch<Event>("EventBranch");  // <-- OK, processed by cling
    tree_transient->Branch<Point>("oops");  // <-- no reflection info available
@@ -200,6 +205,8 @@ int main() {
    for (auto i = 0; i < 100; i++) {
      tree_transient->Fill();
    }
+
+   // Vector filling interface
 
 
    // Iterate over available branches in the tree
