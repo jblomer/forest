@@ -178,9 +178,9 @@ int main() {
    // Interface for writing into a tree, rationale:
    //    - Separate branch creation from SetBranchAddress
    //    - Type-safe binding
-   //      (runtime check, otherwise the entire TBranch class must be templated)
    //    - Allow to bind/write
-   //      * Values and literals
+   //      * lvalues (reference)
+   //      * Values and literals (rvalue)
    //      * Callables
    //
    // Q05: Can we bind variables in such a way that we know they are not
