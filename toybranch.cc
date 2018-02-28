@@ -188,7 +188,12 @@ int main() {
    //      pointers here.
    //
    // Q03: Should we have "bulk filling"?  -->  vectorized fill interface should cover "bulk I/O"
-   // Q06: How should addition of a branch work
+   // Q06: How should addition of a branch work?  Is it the only use case of friend trees?
+   // Q07: Should we have UUIDs for branches and trees?
+   // Q08: What does "multi-threaded filling" mean?  Do we need it?  Which thread model applies?
+   // Q09: Do we need branch-wise (row-wise) filling?  Perhaps overkill, requires a lot of checks
+   // Q10: Can we provide type-safe filling in experiment frameworks?  Is the current type system good enough for it?
+   // Q11: Do we need to construct TTree with a TFile to make sure auto-saving works?
    auto branch_px = tree_transient->Branch<Float_t>("px");  // <-- OK
    tree_transient->Branch<Event>("EventBranch");  // <-- OK, processed by cling
    tree_transient->Branch<Point>("oops");  // <-- no reflection info available
