@@ -42,10 +42,22 @@ namespace Toy {
 template <typename T>
 class TBranch {
    std::string fName;
+   std::shared_ptr<T> fBloom;
 
 public:
    TBranch(std::string_view name) : fName(name) { }
    std::string GetName() { return fName; }
+
+   template <typename... ArgsT>
+   std::shared_ptr<T> MakeBloom(ArgsT&&... args) {
+     fBloom = std::make_shared<T>(std::forward<ArgsT>(args)...);
+     return fBloom;
+   }
+
+   T& GetBloomRef() {
+     if (!fBloom) fBloom = std::make_shared<T>();
+     return *fBloom;
+   }
 
 
    // Bind could be the right place to look whether all branches are bound,
@@ -67,6 +79,11 @@ public:
    void Bind(std::function<T()> fn) {
      std::cout << "binding lambda" << std::endl;
      std::cout << "   ... evaluating to " << fn() << std::endl;
+   }
+
+   // Write a vector of values
+   void Bind(const T* data_v, unsigned sz) {
+     std::cout << "binding vector of size " << sz << std::endl;
    }
 };
 
@@ -105,7 +122,10 @@ class TTree {
    //TBranchCollection fBranches;
 
 public:
+   static const UShort_t kMaxVectorSize = 0;
+
    TTree() = delete;
+   TTree(const TTree &other) = default;
 
    // FixMe01: Should the constructor become private?
    TTree(std::string_view name)
@@ -139,7 +159,7 @@ public:
    }*/
 
    void Print() { fClassicTree->Print(); }
-   void Fill() { }
+   void Fill(UShort_t N = kMaxVectorSize) { }
 
    static std::shared_ptr<TTree> Create(std::string_view name, TDirectory &where) {
       auto t = std::make_shared<TTree>(name);
@@ -173,10 +193,11 @@ int main() {
    // Constructing
    auto tree_persistent = TTree::Create("MyPersistentTree", TDirectory::Heap());  // <-- shared_ptr
    auto tree_transient = std::make_unique<TTree>("MyTransientTree");
-   // TTree::CreateFromFolder ?
+   // Is TTree::CreateFromFolder needed/used?
 
    // Interface for writing into a tree, rationale:
    //    - Separate branch creation from SetBranchAddress
+   //    - Let the Tree/Branch lifetime dictate the lifetime of the memory object to fill from
    //    - Type-safe binding
    //    - Allow to bind/write
    //      * lvalues (reference)
@@ -194,22 +215,40 @@ int main() {
    // Q09: Do we need branch-wise (row-wise) filling?  Perhaps overkill, requires a lot of checks
    // Q10: Can we provide type-safe filling in experiment frameworks?  Is the current type system good enough for it?
    // Q11: Do we need to construct TTree with a TFile to make sure auto-saving works?
-   auto branch_px = tree_transient->Branch<Float_t>("px");  // <-- OK
-   tree_transient->Branch<Event>("EventBranch");  // <-- OK, processed by cling
-   tree_transient->Branch<Point>("oops");  // <-- no reflection info available
+   // Q12: Are we happy with the naming Tree, Branch, Basket, etc.?  Should we use Row, Column, DataSet, etc.?
 
-   Float_t chi2 = 1.0;
-   tree_transient->Branch<Float_t>("chi2")->Bind(chi2);
-   branch_px->Bind(0.0);
-   branch_px->Bind(log10(100.0));
-   branch_px->Bind([]() -> Float_t { return 42.0; });
+   auto tree = std::move(tree_transient);
+
+   auto event = /* shared pointer to Event */
+      tree->Branch<Event>("EventBranch")->MakeBloom(/* constructor arguments for Event */);
+
+   tree->Branch<Point>("oops");  // <-- no reflection info available
+
+   auto branch_px = tree->Branch<Float_t>("px");
+   auto& px = branch_px->GetBloomRef();
+   px = 0.42;  // <-- can assign to px without dereferencing
+
+   auto branch_chi2 = tree_transient->Branch<Float_t>("chi2");
+   branch_chi2->Bind(0.0);
+   branch_chi2->Bind(log10(100.0));
+   branch_chi2->Bind([]() -> Float_t { return 42.0; });
 
    // branch_px->Bind("0.0");  <-- compiler error
 
    // Scalar filling
    for (auto i = 0; i < 100; i++) {
-     tree_transient->Fill();
+     tree_transient->Fill();  // <-- implicit tree_transient->Fill(TTree:kVecMax)
    }
+
+   // Vector filling
+   /*for (auto i = 0; i < 10; i++) {
+     tree_transient->Fill(10);  // <-- Fails at runtime because there is only a scalar chi2
+   }
+   std::vector<Float_t> chi2_v = {0.0, 0.1, 0.2, 0.3};
+   branch_px->Bind(chi2_v.data(), chi2_v.size());
+   for (auto i = 0; i < 10; i++) {
+      tree_transient->Fill(10);  // <-- Fails at runtime because there is only a scalar chi2
+   }*/
 
    // Vector filling interface
 
@@ -249,7 +288,7 @@ int main() {
    /*for (unsigned i = 0; i < 8; ++i) {
       tree_transient->Fill();
    }*/
-   tree_transient->Print();
+   tree->Print();
 
    return 0;
 }
