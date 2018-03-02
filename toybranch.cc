@@ -170,8 +170,7 @@ int main() {
    //      * Callables
    //
    // Q05: Can we bind variables in such a way that we know they are not
-   //      invalid when Fill() is called?  We probably do not want shared
-   //      pointers here.
+   //      invalid when Fill() is called?  Is there a reason for not using shared pointers?
    //
    // Q03: Should we have "bulk filling"?  -->  vectorized fill interface should cover "bulk I/O"
    // Q06: How should addition of a branch work?  Is it the only use case of friend trees?
@@ -195,13 +194,12 @@ int main() {
 
    auto branch_chi2 = tree->Branch<Float_t>("chi2")->SetSprout(1.2);
    branch_chi2->SetSprout(log10(100.0));
+   // branch_chi2->SetSprout("0.0");   <-- Compile error
    branch_chi2->Bind([]() -> Float_t { return 42.0; });
-
-   // branch_px->Bind("0.0");  <-- compiler error
 
    // Scalar filling
    for (auto i = 0; i < 100; i++) {
-     tree_transient->Fill();  // <-- implicit tree_transient->Fill(TTree:kVecMax)
+     tree->Fill();  // <-- implicit tree->Fill(TTree:kVecMax)
    }
 
    // Vector filling
