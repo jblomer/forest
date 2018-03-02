@@ -42,21 +42,28 @@ namespace Toy {
 template <typename T>
 class TBranch {
    std::string fName;
-   std::shared_ptr<T> fBloom;
+   std::shared_ptr<T> fSprout;
 
 public:
    TBranch(std::string_view name) : fName(name) { }
    std::string GetName() { return fName; }
 
    template <typename... ArgsT>
-   std::shared_ptr<T> MakeBloom(ArgsT&&... args) {
-     fBloom = std::make_shared<T>(std::forward<ArgsT>(args)...);
-     return fBloom;
+   std::shared_ptr<T> MakeSprout(ArgsT&&... args) {
+     fSprout = std::make_shared<T>(std::forward<ArgsT>(args)...);
+     return fSprout;
    }
 
-   T& GetBloomRef() {
-     if (!fBloom) fBloom = std::make_shared<T>();
-     return *fBloom;
+   T& GetSproutRef() {
+     if (!fSprout) fSprout = std::make_shared<T>();
+     return *fSprout;
+   }
+
+   TBranch<T>* SetSprout(const T&& value) {
+     if (!fSprout) fSprout = std::make_shared<T>(value);
+     else *fSprout = value;
+     std::cout << "Fixed sprout to " << *fSprout << std::endl;
+     return this;
    }
 
 
@@ -197,7 +204,7 @@ int main() {
 
    // Interface for writing into a tree, rationale:
    //    - Separate branch creation from SetBranchAddress
-   //    - Let the Tree/Branch lifetime dictate the lifetime of the memory object to fill from
+   //    - Acknowledge shared management of memory locations that hold the tip of branches
    //    - Type-safe binding
    //    - Allow to bind/write
    //      * lvalues (reference)
@@ -220,17 +227,16 @@ int main() {
    auto tree = std::move(tree_transient);
 
    auto event = /* shared pointer to Event */
-      tree->Branch<Event>("EventBranch")->MakeBloom(/* constructor arguments for Event */);
+      tree->Branch<Event>("EventBranch")->MakeSprout(/* constructor arguments for Event */);
+   // We probably also want to be able to acquire an existing shared pointer
 
    tree->Branch<Point>("oops");  // <-- no reflection info available
 
-   auto branch_px = tree->Branch<Float_t>("px");
-   auto& px = branch_px->GetBloomRef();
+   auto& px = tree->Branch<Float_t>("px")->GetSproutRef();
    px = 0.42;  // <-- can assign to px without dereferencing
 
-   auto branch_chi2 = tree_transient->Branch<Float_t>("chi2");
-   branch_chi2->Bind(0.0);
-   branch_chi2->Bind(log10(100.0));
+   auto branch_chi2 = tree->Branch<Float_t>("chi2")->SetSprout(1.2);
+   branch_chi2->SetSprout(log10(100.0));
    branch_chi2->Bind([]() -> Float_t { return 42.0; });
 
    // branch_px->Bind("0.0");  <-- compiler error
