@@ -67,21 +67,6 @@ public:
    }
 
 
-   // Bind could be the right place to look whether all branches are bound,
-   // so that Fill() only needs to check one bool.
-
-   // Equivalent to SetBranchAddress
-   void Bind(T &data) {
-     std::cout << "binding reference of type " << typeid(data).name() << std::endl;
-     std::cout << "   ... current value " << data << std::endl;
-   }
-
-   // Write a constant value
-   void Bind(const T &data) {
-     std::cout << "binding constant of type " << typeid(data).name() << std::endl;
-     std::cout << "   ... value " << data << std::endl;
-   }
-
    // Evaluate a function on Fill
    void Bind(std::function<T()> fn) {
      std::cout << "binding lambda" << std::endl;
