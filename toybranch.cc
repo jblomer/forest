@@ -95,38 +95,11 @@ public:
 };
 
 
-/*class TBranchCollection {
-   std::vector<std::unique_ptr<TBranch>> fElements;
-public:
-   struct Iterator {
-      const TBranchCollection *fCollection;
-      unsigned fPos;
-   public:
-      Iterator(const TBranchCollection *collection, unsigned pos)
-         : fCollection(collection), fPos(pos) { }
-      bool operator != (const Iterator &other) const { return fPos != other.fPos; }
-      TBranch *operator* () const { return fCollection->fElements[fPos].get(); }
-      const Iterator &operator++ () { ++fPos; return *this; }
-   };
-
-   TBranch *Add(std::string_view name) {
-      auto element = std::make_unique<TBranch>(name);
-      TBranch *observer = element.get();
-      fElements.emplace_back(std::move(element));
-      return observer;
-   }
-
-   Iterator begin() const { return Iterator(this, 0); }
-   Iterator end() const { return Iterator(this, fElements.size()); }
-};*/
-
-
 class TTree {
    using TDirectory = ROOT::Experimental::TDirectory;
 
    ::TTree *fClassicTree;
    // Should TTree own the TBranch objects?
-   //TBranchCollection fBranches;
 
 public:
    static const UShort_t kMaxVectorSize = 0;
@@ -278,22 +251,6 @@ int main() {
 
    // Iterate through branches
 
-   /*T->Branch("px",&px,"px/F");
-   T->Branch("py",&py,"py/F");
-   T->Branch("pz",&pz,"pz/F");
-   T->Branch("random",&random,"random/D");
-   T->Branch("i",&i,"i/s");
-   T->SetCircular(20000);
-   for (i = 0; i < 65000; i++) {
-      r.Rannor(px,py);
-      pz = px*px + py*py;
-      random = r.Rndm();
-      T->Fill();
-   }*/
-
-   /*for (unsigned i = 0; i < 8; ++i) {
-      tree_transient->Fill();
-   }*/
    tree->Print();
 
    return 0;
