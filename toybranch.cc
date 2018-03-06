@@ -229,8 +229,10 @@ int main() {
    //   - Leaves
 
    // Iterate through events
-   // for (auto WhatTypeShouldIBe : tree_transient) {
-   // }
+   auto view_px = tree->GetView<int>("px");
+   for (auto entry : tree) {
+     std::cout << view_px() << std::endl;
+   }
 
    // Iterate through branches
 
