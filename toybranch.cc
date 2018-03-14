@@ -66,7 +66,6 @@ public:
      return this;
    }
 
-
    // Evaluate a function on Fill
    void Bind(std::function<T()> fn) {
      std::cout << "binding lambda" << std::endl;
@@ -80,12 +79,36 @@ public:
 };
 
 
+class TTreeModel {
+public:
+   // Templates instead of "BranchFloat" because that allows us to add a user
+   // provided event class branch with the same syntax
+   template <typename T>
+   std::shared_ptr<TBranch<T>> Branch(std::string_view name) {
+      TClass *type = TClass::GetClass(typeid(T));
+      if (!type) {
+         std::cout << "OOPS, unknown type" << std::endl;
+         return NULL;
+      }
+      std::cout << "Building branches from class " << type->GetName() << std::endl;
+      // Here we actually figured out the members of the Event class
+      //fBranches.Add("/" + name.to_string() + "/fEnergy");
+      //return fBranches.Add("/" + name.to_string());
+      return std::make_shared<TBranch<T>>("/" + name.to_string());
+   }
+};
+
+
+class TTreeMedium {
+};
+
+
 class TTree {
    using TDirectory = ROOT::Experimental::TDirectory;
 
-   ::TTree *fClassicTree;
-   // Should TTree own the TBranch objects?
-
+   std::string fName;
+   std::shared_ptr<TTreeModel> fModel;
+   std::unique_ptr<TTreeMedium> fMedium;
 public:
    static const UShort_t kMaxVectorSize = 0;
 
@@ -93,14 +116,12 @@ public:
    TTree(const TTree &other) = default;
 
    // FixMe01: Should the constructor become private?
-   TTree(std::string_view name)
-      : fClassicTree(new ::TTree(name.to_string().c_str(), ""))
+   TTree(std::string_view name, std::shared_ptr<TTreeModel> model, std::unique_ptr<TTreeMedium> &&medium)
+     : fName(name), fModel(model), fMedium(std::move(medium))
    {
-      //fBranches.Add("/");  // tree's root branch (stem)
-   };
+   }
 
    ~TTree() {
-      delete fClassicTree;
    }
 
    // Tamplates instead of "BranchFloat" because that allows us to add a user
@@ -123,12 +144,14 @@ public:
       return fBranches;
    }*/
 
-   void Print() { fClassicTree->Print(); }
    void Fill(UShort_t N = kMaxVectorSize) { }
 
-   static std::shared_ptr<TTree> Create(std::string_view name, TDirectory &where) {
-      auto t = std::make_shared<TTree>(name);
-      where.Add(name, t);
+   static std::shared_ptr<TTree> Create(std::string_view name,
+                                        std::shared_ptr<TTreeModel> model,
+                                        std::unique_ptr<TTreeMedium> &&medium)
+   {
+      auto t = std::make_shared<TTree>(name, model, std::move(medium));
+      //where.Add(name, t);
       return t;
    }
 };
@@ -137,10 +160,9 @@ public:
 
 // Has to be in the namespace of Float_t
 template <>
-Toy::TBranch<Float_t> *Toy::TTree::Branch<Float_t>(std::string_view name) {
+std::shared_ptr<Toy::TBranch<Float_t>> Toy::TTreeModel::Branch<Float_t>(std::string_view name) {
    std::cout << "Adding float_t branch" << std::endl;
-   //return fBranches.Add("/" + name.to_string());
-   return new TBranch<Float_t>("/" + name.to_string());
+   return std::make_shared<Toy::TBranch<Float_t>>("/" + name.to_string());
 }
 
 
@@ -148,16 +170,46 @@ Toy::TBranch<Float_t> *Toy::TTree::Branch<Float_t>(std::string_view name) {
 
 
 int main() {
-   using TDirectory = ROOT::Experimental::TDirectory;
+   //using TDirectory = ROOT::Experimental::TDirectory;
+   using TTreeMedium = Toy::TTreeMedium;
+   using TTreeModel = Toy::TTreeModel;
    using TTree = Toy::TTree;
 
    if (!TClassTable::GetDict("Event")) {
       gSystem->Load("./libEvent.so");
    }
 
+   auto tree_model = std::make_shared<TTreeModel>();
+
+   auto event = /* shared pointer to Event */
+      tree_model->Branch<Event>("EventBranch")->MakeSprout(/* constructor arguments for Event */);
+   tree_model->Branch<Point>("oops");  // <-- no reflection info available
+   auto& px = tree_model->Branch<Float_t>("px")->GetSproutRef();
+   px = 0.42;  // <-- can assign later to px without dereferencing
+
+   auto branch_chi2 = tree_model->Branch<Float_t>("chi2")->SetSprout(0.42);
+   branch_chi2->SetSprout(log10(100.0));
+   // branch_chi2->SetSprout("0.0");   <-- Type safe, compile error
+
+   // Advanced: calculate on fill from other values
+   auto branch_is_exotic = tree_model->Branch<Float_t>("is_exotic");
+   branch_is_exotic->Bind(
+     [event = event]() -> Float_t { return (event->fEnergy < 0) ? 0.9 : 0.1; });
+
    // Constructing
-   auto tree_persistent = TTree::Create("MyPersistentTree", TDirectory::Heap());  // <-- shared_ptr
-   auto tree_transient = std::make_unique<TTree>("MyTransientTree");
+   auto tree = TTree::Create("ATree", tree_model, std::make_unique<TTreeMedium>());
+
+   // Scalar filling
+   for (auto i = 0; i < 100; i++) {
+     tree->Fill();
+   }
+
+   // Advanced: vector filling
+   // Bind to array views?  Would lose the shared pointer semantics (array can be removed before fill is called)
+   // Fill({list of array views?})
+
+   //auto tree_persistent = TTree::Create("MyPersistentTree", TDirectory::Heap());  // <-- shared_ptr
+   //auto tree_transient = std::make_unique<TTree>("MyTransientTree");  // Perhaps not that relevant
    // Is TTree::CreateFromFolder needed/used?
 
    // Interface for writing into a tree, rationale:
@@ -167,7 +219,7 @@ int main() {
    //    - Allow to bind/write
    //      * lvalues (reference)
    //      * Values and literals (rvalue)
-   //      * Callables
+   //      * Callables (thread-safety)
    //
    // Q05: Can we bind variables in such a way that we know they are not
    //      invalid when Fill() is called?  Is there a reason for not using shared pointers?
@@ -180,27 +232,26 @@ int main() {
    // Q10: Can we provide type-safe filling in experiment frameworks?  Is the current type system good enough for it?
    // Q11: Do we need to construct TTree with a TFile to make sure auto-saving works?
    // Q12: Are we happy with the naming Tree, Branch, Basket, etc.?  Should we use Row, Column, DataSet, etc.?
+   // Q13: Are templated functions preventing good Python bindings?
 
-   auto tree = std::move(tree_transient);
+   // Vectorized: array_view
+   // Separate Reader/Writer classes?
+   // Fill({"mu", mu},
+   //      {"e", e})
+   // Folders anbieten für verschiedene Module, die unabhängig füllen
+   // Dynamische tree Komposition fürs lesen
+   // Trenne lesen und schreiben interface, unterschiedliches mem management
 
-   auto event = /* shared pointer to Event */
-      tree->Branch<Event>("EventBranch")->MakeSprout(/* constructor arguments for Event */);
-   // We probably also want to be able to acquire an existing shared pointer
+   // Abstrahiere TFile zum rausschreiben
 
-   tree->Branch<Point>("oops");  // <-- no reflection info available
+   // MT: Objekte kopieren und dann serialiesern?
+   // Nach Fill ist serialisierung fertig, eventuell parallele serialisierung
 
-   auto& px = tree->Branch<Float_t>("px")->GetSproutRef();
-   px = 0.42;  // <-- can assign to px without dereferencing
+   // Tree consturctor nimmt TreeModel (array von branches)
 
-   auto branch_chi2 = tree->Branch<Float_t>("chi2")->SetSprout(1.2);
-   branch_chi2->SetSprout(log10(100.0));
-   // branch_chi2->SetSprout("0.0");   <-- Compile error
-   branch_chi2->Bind([]() -> Float_t { return 42.0; });
+   // File Chains: iterierung über mehrere dateien?  über mehrere cluster?
+   // IO Layer zwischen tree und file
 
-   // Scalar filling
-   for (auto i = 0; i < 100; i++) {
-     tree->Fill();  // <-- implicit tree->Fill(TTree:kVecMax)
-   }
 
    // Vector filling
    /*for (auto i = 0; i < 10; i++) {
@@ -229,14 +280,13 @@ int main() {
    //   - Leaves
 
    // Iterate through events
-   auto view_px = tree->GetView<int>("px");
+   /*uto view_px = tree->GetView<int>("px");
+     // Gib shared pointer raus
    for (auto entry : tree) {
      std::cout << view_px() << std::endl;
-   }
+   }*/
 
    // Iterate through branches
-
-   tree->Print();
 
    return 0;
 }
