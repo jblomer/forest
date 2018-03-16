@@ -2,7 +2,9 @@
  * Playground for possible TTree/TBranch interfaces.
  */
 
+#include <array>
 #include <cmath>
+#include <experimental/filesystem>
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -39,6 +41,9 @@ namespace Toy {
 //   - can we recover partial file data if writing fails?
 //   - besides random access by event entry, possibility for secondary index desirable (timestamp)
 
+class TDynamicEntry {
+};
+
 template <typename T>
 class TBranch {
    std::string fName;
@@ -54,7 +59,11 @@ public:
      return fSprout;
    }
 
-   T& GetSproutRef() {
+   std::shared_ptr<T> GetTip() {
+     return fSprout;
+   }
+
+   T& GetTipRef() {
      if (!fSprout) fSprout = std::make_shared<T>();
      return *fSprout;
    }
@@ -96,10 +105,31 @@ public:
       //return fBranches.Add("/" + name.to_string());
       return std::make_shared<TBranch<T>>("/" + name.to_string());
    }
+
+   template <typename T, typename... ArgsT>
+   std::shared_ptr<TBranch<T>> MakeBranch(std::string_view name, ArgsT&&... args) {
+      auto branch = Branch<T>(name);
+      branch->MakeSprout(std::forward<ArgsT>(args)...);
+      return branch;
+   }
+
+   std::shared_ptr<TBranch<TDynamicEntry>> MakeDynamicBranch(std::string_view name, std::string_view type) {
+     auto branch = Branch<TDynamicEntry>(name);
+     return branch;
+   }
 };
 
 
 class TTreeMedium {
+public:
+   static std::unique_ptr<TTreeMedium> MakeFileSink(const std::experimental::filesystem::path &path) {
+      return std::make_unique<TTreeMedium>();
+   }
+
+   /* array_view of path */
+   static std::unique_ptr<TTreeMedium> MakeFileSource(const std::vector<std::experimental::filesystem::path> &chain) {
+      return std::make_unique<TTreeMedium>();
+   }
 };
 
 
@@ -121,34 +151,36 @@ public:
    {
    }
 
+   TTree(std::string_view name, std::unique_ptr<TTreeMedium> &&medium)
+     : fName(name), fMedium(std::move(medium))
+   {
+   }
+
    ~TTree() {
    }
 
-   // Tamplates instead of "BranchFloat" because that allows us to add a user
-   // provided event class branch with the same syntax
-   template <typename T>
-   TBranch<T> *Branch(std::string_view name) {
-      TClass *type = TClass::GetClass(typeid(T));
-      if (!type) {
-         std::cout << "OOPS, unknown type" << std::endl;
-         return NULL;
-      }
-      std::cout << "Building branches from class " << type->GetName() << std::endl;
-      // Here we actually figured out the members of the Event class
-      //fBranches.Add("/" + name.to_string() + "/fEnergy");
-      //return fBranches.Add("/" + name.to_string());
-      return new TBranch<T>("/" + name.to_string());
-   }
-
-   /*(const TBranchCollection &GetBranches() {
-      return fBranches;
-   }*/
-
    void Fill(UShort_t N = kMaxVectorSize) { }
 
-   static std::shared_ptr<TTree> Create(std::string_view name,
-                                        std::shared_ptr<TTreeModel> model,
-                                        std::unique_ptr<TTreeMedium> &&medium)
+   static std::shared_ptr<TTree> Make(std::string_view name,
+                                      std::shared_ptr<TTreeModel> model,
+                                      std::unique_ptr<TTreeMedium> &&medium)
+   {
+      auto t = std::make_shared<TTree>(name, model, std::move(medium));
+      //where.Add(name, t);
+      return t;
+   }
+
+   static std::shared_ptr<TTree> Open(std::string_view name,
+                                      std::unique_ptr<TTreeMedium> &&medium)
+   {
+      auto t = std::make_shared<TTree>(name, std::move(medium));
+      //where.Add(name, t);
+      return t;
+   }
+
+   static std::shared_ptr<TTree> Open(std::string_view name,
+                                      std::shared_ptr<TTreeModel> model,
+                                      std::unique_ptr<TTreeMedium> &&medium)
    {
       auto t = std::make_shared<TTree>(name, model, std::move(medium));
       //where.Add(name, t);
@@ -182,35 +214,42 @@ int main() {
    auto tree_model = std::make_shared<TTreeModel>();
 
    auto event = /* shared pointer to Event */
-      tree_model->Branch<Event>("EventBranch")->MakeSprout(/* constructor arguments for Event */);
-   tree_model->Branch<Point>("oops");  // <-- no reflection info available
-   auto& px = tree_model->Branch<Float_t>("px")->GetSproutRef();
+      tree_model->MakeBranch<Event>("my_event" /*, { constructor arguments for Event }*/)->GetTip();
+   auto& px = tree_model->MakeBranch<Float_t>("px")->GetTipRef();
    px = 0.42;  // <-- can assign later to px without dereferencing
 
-   auto branch_chi2 = tree_model->Branch<Float_t>("chi2")->SetSprout(0.42);
-   branch_chi2->SetSprout(log10(100.0));
-   // branch_chi2->SetSprout("0.0");   <-- Type safe, compile error
+   tree_model->MakeBranch<Float_t>("chi2", log10(100.0));  // initialized with constant value
 
-   // Advanced: calculate on fill from other values
-   auto branch_is_exotic = tree_model->Branch<Float_t>("is_exotic");
-   branch_is_exotic->Bind(
+   // tree_model->MakeBranch<Float_t>("oops", "0.0");  // type-safe, compile error
+
+   // calculate on fill from other values
+   tree_model->MakeBranch<Float_t>("is_exotic")->Bind(
      [event = event]() -> Float_t { return (event->fEnergy < 0) ? 0.9 : 0.1; });
 
-   // Constructing
-   auto tree = TTree::Create("ATree", tree_model, std::make_unique<TTreeMedium>());
+   // Support decoupled writer modules that don't have the types available at compile time
+   auto branch_dynamic = tree_model->MakeDynamicBranch("custom", "TUserClass");
+   // Can then be bound to a pointer + size
+
+   // Constructing as a writable tree
+   auto tree = TTree::Make("my_tree", tree_model, TTreeMedium::MakeFileSink("/a/b/c"));
+   // Possible to use other sinks, e.g. TTreeMedium::CreateCephSink
+   // We can reuse the tree model but not the tree medium
 
    // Scalar filling
    for (auto i = 0; i < 100; i++) {
+     // Tips of branches must not be touched during Fill()
      tree->Fill();
+     // Serialization done
+
+     // For few branches and single Fill() call, one could also think of an explicit
+     // tree->Fill({"mu", mu}, {"e", e});
+
+     // Allow user to flush the TreeMedium if wanted
    }
 
    // Advanced: vector filling
    // Bind to array views?  Would lose the shared pointer semantics (array can be removed before fill is called)
    // Fill({list of array views?})
-
-   //auto tree_persistent = TTree::Create("MyPersistentTree", TDirectory::Heap());  // <-- shared_ptr
-   //auto tree_transient = std::make_unique<TTree>("MyTransientTree");  // Perhaps not that relevant
-   // Is TTree::CreateFromFolder needed/used?
 
    // Interface for writing into a tree, rationale:
    //    - Separate branch creation from SetBranchAddress
@@ -252,24 +291,6 @@ int main() {
    // File Chains: iterierung über mehrere dateien?  über mehrere cluster?
    // IO Layer zwischen tree und file
 
-
-   // Vector filling
-   /*for (auto i = 0; i < 10; i++) {
-     tree_transient->Fill(10);  // <-- Fails at runtime because there is only a scalar chi2
-   }
-   std::vector<Float_t> chi2_v = {0.0, 0.1, 0.2, 0.3};
-   branch_px->Bind(chi2_v.data(), chi2_v.size());
-   for (auto i = 0; i < 10; i++) {
-      tree_transient->Fill(10);  // <-- Fails at runtime because there is only a scalar chi2
-   }*/
-
-   // Vector filling interface
-
-
-   // Iterate over available branches in the tree
-   // Q04: Should we be able to iterate over branches of a particular nesting
-   // level only?
-
    /*for (auto branch : tree_transient->GetBranches()) {
       std::cout << "Listing branch " << branch->GetName() << std::endl;
    }*/
@@ -287,6 +308,35 @@ int main() {
    }*/
 
    // Iterate through branches
+
+   // TreeMedium provides file chaining functionality
+   tree = TTree::Open("my_tree", tree_model, TTreeMedium::MakeFileSource({"/tree1", "/tree2"}));
+
+   for (e : TTree::MakeIterator(tree, kIterEntries)) {
+     // Write into storage location given by tree model
+     std::cout << px << std::endl;
+     std::cout << event->fEnergy << std::endl
+   }
+
+   // Hierarchical iteration
+   for (cluster : TTree::MakeIterator(tree, kIterClusters)) {
+     for (entries : TTree::MakeIterator(c, kIterEntries)) {
+     }
+   }
+
+   // MakeIterator could possibly create more sophisticated ranges
+
+   // Open without model, allow for lazy views
+   tree = TTree::Open("my_tree", TTreeMedium::MakeFileSource({"/tree1", "/tree2"}));
+
+   auto view_px = tree->GetView<int>("px");
+   auto view_chi2 = tree->GetView<int>("chi2");
+
+   for (e : TTree::MakeIterator(tree, kIterEntries)) {
+     if (view_px() > 1.0) {
+       std::cout << view_chi2() << std::endl;
+     }
+   }
 
    return 0;
 }

@@ -1,8 +1,8 @@
-CXXFLAGS_CUSTOM = -Wall -pthread -g -O2
+CXXFLAGS_CUSTOM = -Wall -pthread -g -O2 
 CXXFLAGS_ROOT = $(shell root-config --cflags)
 LDFLAGS_ROOT = $(shell root-config --libs)
 CXXFLAGS = $(CXXFLAGS_CUSTOM) $(CXXFLAGS_ROOT)
-LDFLAGS = $(LDFLAGS_CUSTOM) $(LDFLAGS_ROOT)
+LDFLAGS = $(LDFLAGS_CUSTOM) $(LDFLAGS_ROOT) -lstdc++fs
 
 all: libEvent.so toybranch
 

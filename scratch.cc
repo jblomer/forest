@@ -51,6 +51,14 @@ struct Event {
 
 
 
+class Hadron;
+class Jet {
+   std::vector<Hadron> hadrons;
+};
+class Event {
+   std::vector<Jet> jets;
+};
+
 /*** FROM ROOT Course */
 struct Header;
 struct Track {
@@ -93,10 +101,12 @@ struct Record {
 
 
 // ID
-// @TAGS
+// @TAGS [index branch]
 // TAGS
-// @JETS
+// @JETS [index branch]
 // JETS.PY
+// @/JETS/HADRONS [index branch]
+// @/JETS/HADRONS/ID
 
 BASKET
   py_1  (Ev 1)
