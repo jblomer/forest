@@ -1,10 +1,10 @@
-CXXFLAGS_CUSTOM = -Wall -pthread -g -O2 
+CXXFLAGS_CUSTOM = -Wall -pthread -g -O2
 CXXFLAGS_ROOT = $(shell root-config --cflags)
 LDFLAGS_ROOT = $(shell root-config --libs)
 CXXFLAGS = $(CXXFLAGS_CUSTOM) $(CXXFLAGS_ROOT)
 LDFLAGS = $(LDFLAGS_CUSTOM) $(LDFLAGS_ROOT) -lstdc++fs
 
-all: libEvent.so toybranch
+all: libEvent.so compress # toybranch
 
 .PHONY = clean
 
@@ -15,6 +15,9 @@ libEvent.so: event.cxx
 	g++ -shared -fPIC -o$@ $(CXXFLAGS) $< $(LDFLAGS)
 
 toybranch: toybranch.cc libEvent.so
+	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
+
+compress: compress.cc
 	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
 clean:

@@ -226,6 +226,10 @@ int main() {
    tree_model->MakeBranch<Float_t>("is_exotic")->Bind(
      [event = event]() -> Float_t { return (event->fEnergy < 0) ? 0.9 : 0.1; });
 
+   // Capture shared pointer
+   auto calibration = std::make_shared<TCalibration>();
+   tree_model->MakeBranch<TCalibration>("calibration")->Bind(calibration);
+
    // Support decoupled writer modules that don't have the types available at compile time
    auto branch_dynamic = tree_model->MakeDynamicBranch("custom", "TUserClass");
    // Can then be bound to a pointer + size
