@@ -4,7 +4,9 @@ LDFLAGS_ROOT = $(shell root-config --libs)
 CXXFLAGS = $(CXXFLAGS_CUSTOM) $(CXXFLAGS_ROOT)
 LDFLAGS = $(LDFLAGS_CUSTOM) $(LDFLAGS_ROOT) -lstdc++fs
 
-all: libEvent.so compress # toybranch
+UNITS = TTreeMedium.o
+
+all: libEvent.so compress toybranch
 
 .PHONY = clean
 
@@ -14,11 +16,15 @@ event.cxx: event.h event_linkdef.h
 libEvent.so: event.cxx
 	g++ -shared -fPIC -o$@ $(CXXFLAGS) $< $(LDFLAGS)
 
-toybranch: toybranch.cc libEvent.so
-	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
+%.o: %.cxx %.hxx
+	g++ -c $(CXXFLAGS) $< $(LDFLAGS)
+
+toybranch: toybranch.cc libEvent.so $(UNITS)
+	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS) $(UNITS)
 
 compress: compress.cc
 	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
 clean:
-	rm -f event.cxx libEvent.so toybranch
+	rm -f event.cxx libEvent.so toybranch \
+	  $(UNITS)

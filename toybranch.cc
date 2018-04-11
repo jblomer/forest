@@ -22,6 +22,8 @@
 
 #include "event.h"
 
+#include "TTreeMedium.hxx"
+
 
 struct Point {
    double x;
@@ -120,19 +122,6 @@ public:
 };
 
 
-class TTreeMedium {
-public:
-   static std::unique_ptr<TTreeMedium> MakeFileSink(const std::experimental::filesystem::path &path) {
-      return std::make_unique<TTreeMedium>();
-   }
-
-   /* array_view of path */
-   static std::unique_ptr<TTreeMedium> MakeFileSource(const std::vector<std::experimental::filesystem::path> &chain) {
-      return std::make_unique<TTreeMedium>();
-   }
-};
-
-
 class TTree {
    using TDirectory = ROOT::Experimental::TDirectory;
 
@@ -203,9 +192,9 @@ std::shared_ptr<Toy::TBranch<Float_t>> Toy::TTreeModel::Branch<Float_t>(std::str
 
 int main() {
    //using TDirectory = ROOT::Experimental::TDirectory;
-   using TTreeMedium = Toy::TTreeMedium;
+   //using TTreeMedium = Toy::TTreeMedium;
    using TTreeModel = Toy::TTreeModel;
-   using TTree = Toy::TTree;
+   //using TTree = Toy::TTree;
 
    if (!TClassTable::GetDict("Event")) {
       gSystem->Load("./libEvent.so");
@@ -227,8 +216,8 @@ int main() {
      [event = event]() -> Float_t { return (event->fEnergy < 0) ? 0.9 : 0.1; });
 
    // Capture shared pointer
-   auto calibration = std::make_shared<TCalibration>();
-   tree_model->MakeBranch<TCalibration>("calibration")->Bind(calibration);
+   /*auto calibration = std::make_shared<TCalibration>();
+   tree_model->MakeBranch<TCalibration>("calibration")->Bind(calibration);*
 
    // Support decoupled writer modules that don't have the types available at compile time
    auto branch_dynamic = tree_model->MakeDynamicBranch("custom", "TUserClass");
@@ -295,9 +284,9 @@ int main() {
    // File Chains: iterierung über mehrere dateien?  über mehrere cluster?
    // IO Layer zwischen tree und file
 
-   /*for (auto branch : tree_transient->GetBranches()) {
-      std::cout << "Listing branch " << branch->GetName() << std::endl;
-   }*/
+   //for (auto branch : tree_transient->GetBranches()) {
+   //   std::cout << "Listing branch " << branch->GetName() << std::endl;
+   //}
 
    // Other iterators
    //   - Clusters
@@ -305,11 +294,11 @@ int main() {
    //   - Leaves
 
    // Iterate through events
-   /*uto view_px = tree->GetView<int>("px");
-     // Gib shared pointer raus
-   for (auto entry : tree) {
-     std::cout << view_px() << std::endl;
-   }*/
+   //auto view_px = tree->GetView<int>("px");
+   //  // Gib shared pointer raus
+   //for (auto entry : tree) {
+   //  std::cout << view_px() << std::endl;
+   //}
 
    // Iterate through branches
 
@@ -340,7 +329,7 @@ int main() {
      if (view_px() > 1.0) {
        std::cout << view_chi2() << std::endl;
      }
-   }
+   }*/
 
    return 0;
 }
