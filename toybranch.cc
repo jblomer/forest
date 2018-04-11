@@ -202,18 +202,26 @@ int main() {
 
    auto tree_model = std::make_shared<TTreeModel>();
 
-   auto event = /* shared pointer to Event */
-      tree_model->MakeBranch<Event>("my_event" /*, { constructor arguments for Event }*/)->GetTip();
-   auto& px = tree_model->MakeBranch<Float_t>("px")->GetTipRef();
-   px = 0.42;  // <-- can assign later to px without dereferencing
+   // TODO: make branch of simple type
+   // make sub branch
+   // make collection branch
 
-   tree_model->MakeBranch<Float_t>("chi2", log10(100.0));  // initialized with constant value
 
-   // tree_model->MakeBranch<Float_t>("oops", "0.0");  // type-safe, compile error
+   //auto px = tree_model->Fork<Float_t>("px");  /* == MakeBranch<Float_t>("px")
+   //auto px = tree_model->MakeBranch<Float_t>("px")->GetLeaf();
 
-   // calculate on fill from other values
-   tree_model->MakeBranch<Float_t>("is_exotic")->Bind(
-     [event = event]() -> Float_t { return (event->fEnergy < 0) ? 0.9 : 0.1; });
+   //auto event = /* shared pointer to Event */
+   //   tree_model->MakeBranch<Event>("my_event" /*, { constructor arguments for Event }*/)->GetTip();
+   //auto& px = tree_model->MakeBranch<Float_t>("px")->GetTipRef();
+   //px = 0.42;  // <-- can assign later to px without dereferencing
+//
+   //tree_model->MakeBranch<Float_t>("chi2", log10(100.0));  // initialized with constant value
+//
+   //// tree_model->MakeBranch<Float_t>("oops", "0.0");  // type-safe, compile error
+//
+   //// calculate on fill from other values
+   //tree_model->MakeBranch<Float_t>("is_exotic")->Bind(
+   //  [event = event]() -> Float_t { return (event->fEnergy < 0) ? 0.9 : 0.1; });
 
    // Capture shared pointer
    /*auto calibration = std::make_shared<TCalibration>();

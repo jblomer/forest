@@ -1,3 +1,6 @@
+#ifndef TTREEMEDIUM_H_
+#define TTREEMEDIUM_H_
+
 #include <experimental/filesystem>
 #include <memory>
 
@@ -12,3 +15,5 @@ public:
 };
 
 }
+
+#endif  // TTREEMEDIUM_H_

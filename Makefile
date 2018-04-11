@@ -4,7 +4,10 @@ LDFLAGS_ROOT = $(shell root-config --libs)
 CXXFLAGS = $(CXXFLAGS_CUSTOM) $(CXXFLAGS_ROOT)
 LDFLAGS = $(LDFLAGS_CUSTOM) $(LDFLAGS_ROOT) -lstdc++fs
 
-UNITS = TTreeMedium.o
+UNITS = TTreeMedium.o \
+  TTreeModel.o \
+  TTreeEntry.o \
+	TBranch.o
 
 all: libEvent.so compress toybranch
 

@@ -1,4 +1,4 @@
-#include "TTreeMedium.h"
+#include "TTreeMedium.hxx"
 
 namespace Toy {
 
