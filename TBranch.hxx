@@ -8,26 +8,29 @@
 
 namespace Toy {
 
-template <typename T>
+enum class TBranchType {
+   kTypeFloat,
+   kTypeInt,
+   kTypeBlob,
+};
+
+/**
+ * Static, type system of the tree
+ */
 class TBranch {
    std::string fName;
-   std::shared_ptr<T> fSprout;
+   TBranchType fType;
 
 public:
-   explicit TBranch(std::string_view name) : fName(name) { }
+   TBranch(std::string_view name, TBranchType type)
+     : fName(name), fType(type) { }
    std::string GetName() { return fName; }
 
-   template <typename... ArgsT>
-   std::shared_ptr<T> MakeSprout(ArgsT&&... args) {
-     fSprout = std::make_shared<T>(std::forward<ArgsT>(args)...);
-     return fSprout;
-   }
-
-   std::shared_ptr<T> GetSprout() {
-     return fSprout;
-   }
+   template <typename T>
+   static TBranchType MapType();
 };
 
 }  // namespace Toy
+
 
 #endif  // TBRANCH_H_

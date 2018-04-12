@@ -22,6 +22,7 @@
 
 #include "event.h"
 
+#include "TTreeModel.hxx"
 #include "TTreeMedium.hxx"
 
 
@@ -34,7 +35,7 @@ struct Point {
 /**
  * In the Toy namespace, we create wrappers around the v6 classes.
  */
-namespace Toy {
+/*namespace Toy {
 
 
 // Implementation notes
@@ -105,7 +106,7 @@ public:
       // Here we actually figured out the members of the Event class
       //fBranches.Add("/" + name.to_string() + "/fEnergy");
       //return fBranches.Add("/" + name.to_string());
-      return std::make_shared<TBranch<T>>("/" + name.to_string());
+      return std::make_shared<TBranch<T>>("/" + std::string(name.data(), name.size()));
    }
 
    template <typename T, typename... ArgsT>
@@ -183,8 +184,8 @@ public:
 template <>
 std::shared_ptr<Toy::TBranch<Float_t>> Toy::TTreeModel::Branch<Float_t>(std::string_view name) {
    std::cout << "Adding float_t branch" << std::endl;
-   return std::make_shared<Toy::TBranch<Float_t>>("/" + name.to_string());
-}
+   return std::make_shared<Toy::TBranch<Float_t>>("/" + std::string(name.data(), name.size()));
+}*/
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -201,6 +202,9 @@ int main() {
    }
 
    auto tree_model = std::make_shared<TTreeModel>();
+
+   auto px = tree_model->Branch<Float_t>("px", 0.0);  /* shared pointer to Float_t */
+
 
    // TODO: make branch of simple type
    // make sub branch
