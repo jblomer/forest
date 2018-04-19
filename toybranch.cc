@@ -22,8 +22,9 @@
 
 #include "event.h"
 
-#include "TTreeModel.hxx"
+#include "TTree.hxx"
 #include "TTreeMedium.hxx"
+#include "TTreeModel.hxx"
 
 
 struct Point {
@@ -195,7 +196,7 @@ int main() {
    //using TDirectory = ROOT::Experimental::TDirectory;
    //using TTreeMedium = Toy::TTreeMedium;
    using TTreeModel = Toy::TTreeModel;
-   //using TTree = Toy::TTree;
+   using TTree = Toy::TTree;
 
    if (!TClassTable::GetDict("Event")) {
       gSystem->Load("./libEvent.so");
@@ -205,6 +206,8 @@ int main() {
 
    auto px = tree_model->Branch<Float_t>("px", 0.0);  /* shared pointer to Float_t */
 
+   // Implicit call to tree_model->Freeze();
+   TTree tree(tree_model);
 
    // TODO: make branch of simple type
    // make sub branch

@@ -12,11 +12,12 @@
 namespace Toy {
 
 class TTreeModel {
+   bool fFrozen;
    std::vector<std::unique_ptr<TBranch>> fBranches;
    TTreeEntry fDefaultEntry;
 
 public:
-   TTreeModel() : fDefaultEntry(this) { }
+   TTreeModel() : fFrozen(false), fDefaultEntry(this) { }
 
    /**
     * Convenience wrapper around MakeBranch->GetSprout
@@ -30,9 +31,12 @@ public:
    // TODO: Error handling in ROOT?
    template <typename T>
    void MakeBranch(std::string_view name) {
+     // assert !frozen
      TBranchType branch_type = TBranch::MapType<T>();
      fBranches.push_back(std::make_unique<TBranch>(name, branch_type));
    }
+
+   void Freeze() { fFrozen = true; }
 };
 
 }  // namespace Toy

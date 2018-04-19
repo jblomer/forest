@@ -8,7 +8,8 @@ UNITS = TTreeMedium.o \
   TTreeModel.o \
   TTreeEntry.o \
 	TBranch.o \
-	TSprout.o
+	TSprout.o \
+	TTree.o
 
 all: libEvent.so compress toybranch
 
