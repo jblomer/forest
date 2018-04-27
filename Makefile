@@ -5,11 +5,12 @@ CXXFLAGS = $(CXXFLAGS_CUSTOM) $(CXXFLAGS_ROOT)
 LDFLAGS = $(LDFLAGS_CUSTOM) $(LDFLAGS_ROOT) -lstdc++fs
 
 UNITS = TTreeMedium.o \
-  TTreeModel.o \
-  TTreeEntry.o \
+  RTreeModel.o \
+  RTreeEntry.o \
 	TBranch.o \
+	RBranchModel.o \
 	RLeaf.o \
-	TTree.o
+	RTree.o
 
 all: libEvent.so compress toybranch streamer
 

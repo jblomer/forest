@@ -1,5 +1,5 @@
-#ifndef TTREEENTRY_H_
-#define TTREEENTRY_H_
+#ifndef RTREEENTRY_H_
+#define RTREEENTRY_H_
 
 #include <memory>
 #include <vector>
@@ -9,17 +9,17 @@
 
 namespace Toy {
 
-class TTreeModel;
+class RTreeModel;
 
 /**
  * Collection of Sprouts: how guarantuee consistency with treemodel?
  */
-class TTreeEntry {
-   TTreeModel *fModel;
+class RTreeEntry {
+   RTreeModel *fModel;
    std::vector<std::unique_ptr<RLeafBase>> fLeafs;
 
 public:
-   TTreeEntry(TTreeModel *model) : fModel(model) { }
+   RTreeEntry(RTreeModel *model) : fModel(model) { }
 
    template <typename T, typename... ArgsT>
    std::shared_ptr<T> AddLeaf(ArgsT&&... args) {

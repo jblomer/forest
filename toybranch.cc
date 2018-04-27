@@ -22,9 +22,9 @@
 
 #include "event.h"
 
-#include "TTree.hxx"
+#include "RTree.hxx"
 #include "TTreeMedium.hxx"
-#include "TTreeModel.hxx"
+#include "RTreeModel.hxx"
 
 
 struct Point {
@@ -195,14 +195,14 @@ std::shared_ptr<Toy::TBranch<Float_t>> Toy::TTreeModel::Branch<Float_t>(std::str
 int main() {
    //using TDirectory = ROOT::Experimental::TDirectory;
    //using TTreeMedium = Toy::TTreeMedium;
-   using TTreeModel = Toy::TTreeModel;
-   using TTree = Toy::TTree;
+   using RTreeModel = Toy::RTreeModel;
+   using RTree = Toy::RTree;
 
    if (!TClassTable::GetDict("Event")) {
       gSystem->Load("./libEvent.so");
    }
 
-   auto tree_model = std::make_shared<TTreeModel>();
+   auto tree_model = std::make_shared<RTreeModel>();
    auto px = tree_model->Branch<Float_t>("px", 0.0);  /* shared pointer to Float_t */
 
    // Implicit call to tree_model->Freeze();
