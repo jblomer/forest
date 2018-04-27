@@ -1,6 +1,7 @@
 #ifndef RBRANCHMODEL_H_
 #define RBRANCHMODEL_H_
 
+#include <cstddef>
 #include <string>
 #include <string_view>
 
@@ -26,6 +27,8 @@ public:
    RBranchModel(std::string_view name, RBranchType type)
      : fName(name), fType(type) { }
    std::string GetName() { return fName; }
+
+   std::size_t GetElementSize();
 
    template <typename T>
    static RBranchType MapType();

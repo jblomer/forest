@@ -198,9 +198,9 @@ int main() {
    using RTreeModel = Toy::RTreeModel;
    using RTree = Toy::RTree;
 
-   if (!TClassTable::GetDict("Event")) {
+   /*if (!TClassTable::GetDict("Event")) {
       gSystem->Load("./libEvent.so");
-   }
+   }*/
 
    auto tree_model = std::make_shared<RTreeModel>();
    auto px = tree_model->Branch<Float_t>("px", 0.0);  /* shared pointer to Float_t */

@@ -4,10 +4,11 @@ LDFLAGS_ROOT = $(shell root-config --libs)
 CXXFLAGS = $(CXXFLAGS_CUSTOM) $(CXXFLAGS_ROOT)
 LDFLAGS = $(LDFLAGS_CUSTOM) $(LDFLAGS_ROOT) -lstdc++fs
 
-UNITS = TTreeMedium.o \
+UNITS = RBasket.o \
+  TTreeMedium.o \
   RTreeModel.o \
   RTreeEntry.o \
-	TBranch.o \
+	RBranch.o \
 	RBranchModel.o \
 	RLeaf.o \
 	RTree.o
