@@ -20,12 +20,12 @@ public:
    TTreeModel() : fFrozen(false), fDefaultEntry(this) { }
 
    /**
-    * Convenience wrapper around MakeBranch->GetSprout
+    * Convenience wrapper
     */
    template <typename T, typename... ArgsT>
    std::shared_ptr<T> Branch(std::string_view name, ArgsT&&... args) {
      MakeBranch<T>(name);
-     return fDefaultEntry.MakeSprout<T>(std::forward<ArgsT>(args)...);
+     return fDefaultEntry.AddLeaf<T>(std::forward<ArgsT>(args)...);
    }
 
    // TODO: Error handling in ROOT?

@@ -5,7 +5,7 @@
 #include <vector>
 #include <utility>
 
-#include "TSprout.hxx"
+#include "RLeaf.hxx"
 
 namespace Toy {
 
@@ -16,16 +16,16 @@ class TTreeModel;
  */
 class TTreeEntry {
    TTreeModel *fModel;
-   std::vector<std::unique_ptr<TSproutBase>> fSprouts;
+   std::vector<std::unique_ptr<RLeafBase>> fLeafs;
 
 public:
    TTreeEntry(TTreeModel *model) : fModel(model) { }
 
    template <typename T, typename... ArgsT>
-   std::shared_ptr<T> MakeSprout(ArgsT&&... args) {
-     auto sprout = std::make_unique<TSprout<T>>(std::forward<ArgsT>(args)...);
-     auto value_ptr = sprout->Get();
-     fSprouts.emplace_back(std::move(sprout));
+   std::shared_ptr<T> AddLeaf(ArgsT&&... args) {
+     auto leaf = std::make_unique<RLeaf<T>>(std::forward<ArgsT>(args)...);
+     auto value_ptr = leaf->Get();
+     fLeafs.emplace_back(std::move(leaf));
      return value_ptr;
    }
 };

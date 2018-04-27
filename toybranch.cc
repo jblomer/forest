@@ -203,11 +203,12 @@ int main() {
    }
 
    auto tree_model = std::make_shared<TTreeModel>();
-
    auto px = tree_model->Branch<Float_t>("px", 0.0);  /* shared pointer to Float_t */
 
    // Implicit call to tree_model->Freeze();
-   TTree tree(tree_model);
+   //TTree tree(tree_model, std::make_unique<TreeSinkRaw>(""));
+
+   //tree.Fill();
 
    // TODO: make branch of simple type
    // make sub branch

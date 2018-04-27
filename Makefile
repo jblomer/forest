@@ -8,18 +8,18 @@ UNITS = TTreeMedium.o \
   TTreeModel.o \
   TTreeEntry.o \
 	TBranch.o \
-	TSprout.o \
+	RLeaf.o \
 	TTree.o
 
-all: libEvent.so compress toybranch
+all: libEvent.so compress toybranch streamer
 
 .PHONY = clean
 
 event.cxx: event.h event_linkdef.h
 	rootcling -f $@ event.h event_linkdef.h
 
-libEvent.so: event.cxx
-	g++ -shared -fPIC -o$@ $(CXXFLAGS) $< $(LDFLAGS)
+libEvent.so: event.cxx event.cc
+	g++ -shared -fPIC -o$@ $(CXXFLAGS) $< event.cc $(LDFLAGS)
 
 %.o: %.cxx %.hxx
 	g++ -c $(CXXFLAGS) $< $(LDFLAGS)
@@ -29,6 +29,9 @@ toybranch: toybranch.cc libEvent.so $(UNITS)
 
 compress: compress.cc
 	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
+
+streamer: streamer.cxx event.cxx
+	g++ $(CXXFLAGS) -o $@ $< event.cxx $(LDFLAGS)
 
 clean:
 	rm -f event.cxx libEvent.so toybranch \

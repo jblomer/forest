@@ -6,12 +6,31 @@
 
 namespace Toy {
 
-class TTreeMedium {
+class TTreeModel;
+
+class RTreeRawSink;
+
+class RTreeSink {
+protected:
+   virtual bool Create(TTreeModel *model) = 0;
+
 public:
-   static std::unique_ptr<TTreeMedium> MakeFileSink(
+   static std::unique_ptr<RTreeRawSink> MakeRawSink(
      const std::experimental::filesystem::path &path);
 
-   // TODO: constructor for chain of files
+   virtual ~RTreeSink() { }
+};
+
+
+class RTreeRawSink : public RTreeSink {
+protected:
+   RTreeRawSink(
+     const TTreeModel *model,
+     const std::experimental::filesystem::path &path);
+
+
+public:
+
 };
 
 }
