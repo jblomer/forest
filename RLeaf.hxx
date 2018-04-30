@@ -3,8 +3,12 @@
 
 #include <cassert>
 #include <cstddef>
+#include <cstring>
 #include <memory>
+#include <string>
 #include <utility>
+
+#include "RBranchModel.hxx"
 
 namespace Toy {
 
@@ -15,29 +19,34 @@ protected:
    bool fIsMovable;
    void *fRawContent;
 
-   bool fIsFixedSized;
+   bool fIsFixedSize;
    unsigned fSize;
 
-   virtual void DoSerialize() { assert(false); }
+   Toy::RBranchType fBranchType;
+
+   virtual void DoSerialize(void *destination) { assert(false); }
    virtual std::size_t DoGetSize() { assert(false); }
 public:
    RLeafBase()
      : fIsMovable(false)
      , fRawContent(nullptr)
-     , fIsFixedSized(false)
-     , fSize(0) { }
+     , fIsFixedSize(false)
+     , fSize(0)
+     , fBranchType(RBranchType::kBlob) { }
    virtual ~RLeafBase() { }
 
-   void Serialize() {
+   RBranchType GetBranchType() { return fBranchType; }
+
+   void Serialize(void *destination) {
      if (!fIsMovable) {
-       DoSerialize();
+       DoSerialize(destination);
        return;
      }
-     // Memory copy
+     std::memcpy(destination, fRawContent, fSize);
    }
 
    std::size_t GetSize() {
-     if (!fIsFixedSized) {
+     if (!fIsFixedSize) {
         return DoGetSize();
      }
      return fSize;
@@ -49,12 +58,21 @@ template <typename T>
 class RLeaf : public RLeafBase {
    std::shared_ptr<T> fValue;
 
+   void Initialize();
+
 public:
    template<typename... ArgsT>
    RLeaf(ArgsT&&... args)
-     : fValue(std::make_shared<T>(std::forward<ArgsT>(args)...)) { }
+     : fValue(std::make_shared<T>(std::forward<ArgsT>(args)...))
+   {
+     Initialize();
+     fBranchType = MapType();
+   }
 
    std::shared_ptr<T> Get() { return fValue; }
+
+   static RBranchType MapType();
+   static std::string GetMemoryType();
 };
 
 }  // namespace Toy

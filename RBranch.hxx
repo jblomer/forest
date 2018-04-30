@@ -24,9 +24,9 @@ public:
      , fBasketHead(fModel.GetElementSize() * fClusterSize)
    { }
 
-   RBranchModel GetModel() { return fModel; }
-
-   void *Reserve(std::size_t nbyte) const { return fBasketHead.Reserve(nbyte); }
+   void *Reserve(unsigned nbyte) const {
+     return fBasketHead.Reserve(nbyte);
+   }
 };
 
 }  // namespace Toy

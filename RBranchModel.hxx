@@ -29,9 +29,6 @@ public:
    std::string GetName() { return fName; }
 
    std::size_t GetElementSize();
-
-   template <typename T>
-   static RBranchType MapType();
 };  // RBranchModel
 
 }  // namespace Toy

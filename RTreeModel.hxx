@@ -1,6 +1,7 @@
 #ifndef RTREEMODEL_H_
 #define RTREEMODEL_H_
 
+#include <cassert>
 #include <memory>
 #include <string_view>
 #include <vector>
@@ -14,6 +15,8 @@
 namespace Toy {
 
 class RTreeModel {
+   friend class RTree;
+
    using ModelId = unsigned;
    using BranchModelContainer = std::vector<RBranchModel>;
 
@@ -38,8 +41,9 @@ public:
    // TODO: Error handling in ROOT?
    template <typename T>
    void MakeBranch(std::string_view name) {
-     // assert !frozen
-     RBranchType branch_type = RBranchModel::MapType<T>();
+     assert(!IsFrozen());
+
+     RBranchType branch_type = RLeaf<T>::MapType();
      fBranches.emplace_back(RBranchModel(name, branch_type));
    }
 

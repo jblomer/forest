@@ -5,14 +5,14 @@
 #include <vector>
 
 #include "RBranch.hxx"
+#include "RTreeModel.hxx"
 
 namespace Toy {
 
 class RTreeEntry;
-class RTreeModel;
 
 class RTree {
-   using BranchCollection = std::vector<RBranch>;
+   using BranchCollection = std::vector<std::unique_ptr<RBranch>>;
 
    std::shared_ptr<RTreeModel> fModel;
    BranchCollection fBranches;
@@ -24,7 +24,8 @@ public:
 
    unsigned GetNentries() { return fNentries; }
 
-   void Fill(RTreeEntry *entry = NULL);
+   void Fill() { Fill(&(fModel->fDefaultEntry)); }
+   void Fill(RTreeEntry *entry);
 };
 
 }  // namespace Toy

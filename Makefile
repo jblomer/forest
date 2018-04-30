@@ -1,8 +1,9 @@
-CXXFLAGS_CUSTOM = -Wall -pthread -g -O3
+CXXFLAGS_CUSTOM = -Wall -pthread -g -O3 -std=c++1z
 CXXFLAGS_ROOT = $(shell root-config --cflags)
-LDFLAGS_ROOT = $(shell root-config --libs)
 CXXFLAGS = $(CXXFLAGS_CUSTOM) $(CXXFLAGS_ROOT)
-LDFLAGS = $(LDFLAGS_CUSTOM) $(LDFLAGS_ROOT) -lstdc++fs
+LDFLAGS_ROOT = $(shell root-config --libs)
+LDFLAGS_CUSTOM = -lstdc++fs
+LDFLAGS = $(LDFLAGS_ROOT) $(LDFLAGS_CUSTOM)
 
 UNITS = RBasket.o \
   TTreeMedium.o \
@@ -24,10 +25,10 @@ libEvent.so: event.cxx event.cc
 	g++ -shared -fPIC -o$@ $(CXXFLAGS) $< event.cc $(LDFLAGS)
 
 %.o: %.cxx %.hxx
-	g++ -c $(CXXFLAGS) $< $(LDFLAGS)
+	g++ -c $(CXXFLAGS_CUSTOM) $< $(LDFLAGS_CUSTOM)
 
-toybranch: toybranch.cc libEvent.so $(UNITS)
-	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS) $(UNITS)
+toybranch: toybranch.cc $(UNITS)
+	g++ $(CXXFLAGS_CUSTOM) -o $@ $< $(LDFLAGS_CUSTOM) $(UNITS)
 
 compress: compress.cc
 	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)

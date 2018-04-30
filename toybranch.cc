@@ -13,14 +13,14 @@
 #include <typeinfo>
 #include <vector>
 
-#include "ROOT/TDirectory.hxx"
+/*#include "ROOT/TDirectory.hxx"
 #include "TClass.h"
 #include "TClassTable.h"
 #include "TROOT.h"
 #include "TSystem.h"
 #include "TTree.h"
 
-#include "event.h"
+#include "event.h"*/
 
 #include "RTree.hxx"
 #include "TTreeMedium.hxx"
@@ -203,7 +203,14 @@ int main() {
    }*/
 
    auto tree_model = std::make_shared<RTreeModel>();
-   auto px = tree_model->Branch<Float_t>("px", 0.0);  /* shared pointer to Float_t */
+   auto px = tree_model->Branch<float>("px", 0.0);  /* shared pointer to Float_t */
+
+   RTree tree(tree_model);
+
+   for (unsigned i = 0; i < 150000; ++i)
+     tree.Fill();
+
+   //auto py = tree_model->Branch<int>("py", 0);
 
    // Implicit call to tree_model->Freeze();
    //TTree tree(tree_model, std::make_unique<TreeSinkRaw>(""));
