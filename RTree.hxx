@@ -2,6 +2,9 @@
 #define RTREE_H_
 
 #include <memory>
+#include <vector>
+
+#include "RBranch.hxx"
 
 namespace Toy {
 
@@ -9,7 +12,10 @@ class RTreeEntry;
 class RTreeModel;
 
 class RTree {
+   using BranchCollection = std::vector<RBranch>;
+
    std::shared_ptr<RTreeModel> fModel;
+   BranchCollection fBranches;
 
    unsigned fNentries;
 

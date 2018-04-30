@@ -1,4 +1,4 @@
-CXXFLAGS_CUSTOM = -Wall -pthread -g -O2
+CXXFLAGS_CUSTOM = -Wall -pthread -g -O3
 CXXFLAGS_ROOT = $(shell root-config --cflags)
 LDFLAGS_ROOT = $(shell root-config --libs)
 CXXFLAGS = $(CXXFLAGS_CUSTOM) $(CXXFLAGS_ROOT)

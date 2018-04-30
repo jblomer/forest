@@ -15,11 +15,12 @@ namespace Toy {
 
 class RTreeModel {
    using ModelId = unsigned;
+   using BranchModelContainer = std::vector<RBranchModel>;
 
    static std::atomic<ModelId> gModelId;
 
    ModelId fModelId;
-   std::vector<std::unique_ptr<RBranchModel>> fBranches;
+   BranchModelContainer fBranches;
    RTreeEntry fDefaultEntry;
 
 public:
@@ -39,13 +40,16 @@ public:
    void MakeBranch(std::string_view name) {
      // assert !frozen
      RBranchType branch_type = RBranchModel::MapType<T>();
-     fBranches.push_back(std::make_unique<RBranchModel>(name, branch_type));
+     fBranches.emplace_back(RBranchModel(name, branch_type));
    }
 
    // Model can be cloned and as long as it stays frozen the model id
    // is the same
    void Freeze() { if (fModelId == 0) fModelId = ++gModelId; }
    bool IsFrozen() { return fModelId > 0; }
+   ModelId GetModelId() { return fModelId; }
+
+   BranchModelContainer &GetBranchModelsRef() { return fBranches; }
 };
 
 }  // namespace Toy

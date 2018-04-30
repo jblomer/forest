@@ -15,8 +15,16 @@ class RTreeModel;
  * Collection of Sprouts: how guarantuee consistency with treemodel?
  */
 class RTreeEntry {
+   friend class RTree;
+
+   using LeafCollection = std::vector<std::unique_ptr<RLeafBase>>;
+
    RTreeModel *fModel;
-   std::vector<std::unique_ptr<RLeafBase>> fLeafs;
+   LeafCollection fLeafs;
+
+   bool HasCompatibleModelId(RTreeModel *model);
+
+   LeafCollection& GetLeafsRef() { return fLeafs; }
 
 public:
    RTreeEntry(RTreeModel *model) : fModel(model) { }
@@ -27,6 +35,10 @@ public:
      auto value_ptr = leaf->Get();
      fLeafs.emplace_back(std::move(leaf));
      return value_ptr;
+   }
+
+   bool IsCompatibleWith(RTreeModel *model) {
+     return (model == fModel) || HasCompatibleModelId(model);
    }
 };
 

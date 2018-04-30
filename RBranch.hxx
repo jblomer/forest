@@ -1,6 +1,8 @@
 #ifndef RBRANCH_H_
 #define RBRANCH_H_
 
+#include <cstddef>
+
 #include "RBasket.hxx"
 #include "RBranchModel.hxx"
 
@@ -23,6 +25,8 @@ public:
    { }
 
    RBranchModel GetModel() { return fModel; }
+
+   void *Reserve(std::size_t nbyte) const { return fBasketHead.Reserve(nbyte); }
 };
 
 }  // namespace Toy

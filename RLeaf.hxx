@@ -2,6 +2,7 @@
 #define RLEAF_H_
 
 #include <cassert>
+#include <cstddef>
 #include <memory>
 #include <utility>
 
@@ -11,21 +12,35 @@ class RLeafBase {
 protected:
    // We can indicate that on disk format == in memory format
    // Improve
-   bool fMovable;
+   bool fIsMovable;
    void *fRawContent;
+
+   bool fIsFixedSized;
    unsigned fSize;
 
    virtual void DoSerialize() { assert(false); }
+   virtual std::size_t DoGetSize() { assert(false); }
 public:
-   RLeafBase() : fMovable(false), fRawContent(nullptr), fSize(0) { }
+   RLeafBase()
+     : fIsMovable(false)
+     , fRawContent(nullptr)
+     , fIsFixedSized(false)
+     , fSize(0) { }
    virtual ~RLeafBase() { }
 
    void Serialize() {
-     if (/* EXPECT_TRUE */ fMovable) {
-
-     } else {
-        DoSerialize();
+     if (!fIsMovable) {
+       DoSerialize();
+       return;
      }
+     // Memory copy
+   }
+
+   std::size_t GetSize() {
+     if (!fIsFixedSized) {
+        return DoGetSize();
+     }
+     return fSize;
    }
 };
 

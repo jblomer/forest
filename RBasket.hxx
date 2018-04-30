@@ -1,37 +1,41 @@
 #ifndef RBASKET_H_
 #define RBASKET_H_
 
+#include <atomic>
 #include <cassert>
 #include <cstddef>
 #include <cstdlib>
+#include <shared_mutex>
 
 namespace Toy {
 
 class RBasket {
-   std::size_t fCapacity;
-   std::size_t fSize;
    unsigned char *fBuffer;
+   std::size_t fCapacity;
+   mutable std::atomic<std::size_t> fSize;
+   mutable std::shared_mutex fLock;
 
 public:
    RBasket(std::size_t capacity);
    // TODO: copy, move
    ~RBasket();
 
-   std::size_t GetCapacity() { return fCapacity; }
-   std::size_t GetSize() { return fSize; }
-   void *GetBuffer() { return fBuffer; }
+   std::size_t GetCapacity() const { return fCapacity; }
+   std::size_t GetSize() const { return fSize; }
 
-   void *Reserve(std::size_t nbyte) {
-      while (fSize + nbyte > fCapacity) {
-        fBuffer = static_cast<unsigned char *>(
-          std::realloc(fBuffer, 2 * fCapacity));
-        assert(fBuffer);
-        fCapacity *= 2;
+   void *Reserve(std::size_t nbyte) const {
+      fLock.lock_shared();
+      size_t pos = fSize.fetch_add(nbyte);
+
+      if (pos + nbyte > fCapacity) {
+        fLock.unlock_shared();
+        return nullptr;
       }
-      void *ptr = fBuffer + fSize;
-      fSize += nbyte;
-      return ptr;
+
+      return fBuffer + pos;
    }
+
+   void Release() const { fLock.unlock_shared(); }
 
    void Reset() { fSize = 0; }
 };  // class RBasket
