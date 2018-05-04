@@ -14,7 +14,7 @@ UNITS = RBasket.o \
 	RLeaf.o \
 	RTree.o
 
-all: libEvent.so compress toybranch streamer
+all: libEvent.so compress toybranch streamer rootcmp protobufcmp
 
 .PHONY = clean
 
@@ -30,6 +30,15 @@ libEvent.so: event.cxx event.cc
 toybranch: toybranch.cc $(UNITS)
 	g++ $(CXXFLAGS_CUSTOM) -o $@ $< $(LDFLAGS_CUSTOM) $(UNITS)
 
+rootcmp: rootcmp.cxx
+	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
+
+protobufcmp.pb.cc: protobufcmp.proto
+	protoc --cpp_out=. protobufcmp.proto
+
+protobufcmp: protobufcmp.cxx protobufcmp.pb.cc
+	g++ $(CXXFLAGS_CUSTOM) -o $@ $< protobufcmp.pb.cc $(LDFLAGS_CUSTOM) -lprotobuf
+
 compress: compress.cc
 	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
@@ -38,4 +47,5 @@ streamer: streamer.cxx event.cxx
 
 clean:
 	rm -f event.cxx libEvent.so toybranch \
-	  $(UNITS)
+	  $(UNITS) \
+		rootcmp protobufcmp protobufcmp.pb.cc protobufcmp.pb.h

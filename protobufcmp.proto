@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+message Event {
+  float h1_px = 1;
+  float h1_py = 2;
+  float h1_pz = 3;
+  float h2_px = 4;
+  float h2_py = 5;
+  float h2_pz = 6;
+  float h3_px = 7;
+  float h3_py = 8;
+  float h3_pz = 9;
+}

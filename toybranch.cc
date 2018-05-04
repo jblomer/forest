@@ -204,12 +204,22 @@ int main() {
    }*/
 
    auto tree_model = std::make_shared<RTreeModel>();
-   auto px = tree_model->Branch<float>("px", 0.0);  /* shared pointer to Float_t */
+
+   auto h1_px = tree_model->Branch<float>("h1_px", 0.0);
+   auto h1_py = tree_model->Branch<float>("h1_py", 1.0);
+   auto h1_pz = tree_model->Branch<float>("h1_pz", 2.0);
+   auto h2_px = tree_model->Branch<float>("h2_px", 3.0);
+   auto h2_py = tree_model->Branch<float>("h2_py", 4.0);
+   auto h2_pz = tree_model->Branch<float>("h2_pz", 5.0);
+   auto h3_px = tree_model->Branch<float>("h3_px", 6.0);
+   auto h3_py = tree_model->Branch<float>("h3_py", 7.0);
+   auto h3_pz = tree_model->Branch<float>("h3_pz", 8.0);
 
    RTree tree(tree_model, RTreeSink::MakeRawSink("/dev/shm/test"));
 
-   for (unsigned i = 0; i < 150000; ++i)
+   for (unsigned i = 0; i < 8000000; ++i) {
      tree.Fill();
+   }
 
    //auto py = tree_model->Branch<int>("py", 0);
 
