@@ -11,9 +11,6 @@ namespace Toy {
 
 class RTreeModel;
 
-/**
- * Collection of Sprouts: how guarantuee consistency with treemodel?
- */
 class RTreeEntry {
    friend class RTree;
 

@@ -34,10 +34,15 @@ public:
 
       return fBuffer + pos;
    }
-
    void Release() const { fLock.unlock_shared(); }
 
-   void Reset() { fSize = 0; }
+   void Freeze() {
+      fLock.lock();
+   }
+   void Reset() {
+     fSize = 0;
+     fLock.unlock();
+   }
 };  // class RBasket
 
 }  // namespace Toy

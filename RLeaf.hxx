@@ -15,7 +15,6 @@ namespace Toy {
 class RLeafBase {
 protected:
    // We can indicate that on disk format == in memory format
-   // Improve
    bool fIsMovable;
    void *fRawContent;
 

@@ -2,6 +2,7 @@
 #define RBRANCH_H_
 
 #include <cstddef>
+#include <memory>
 
 #include "RBasket.hxx"
 #include "RBranchModel.hxx"
@@ -10,22 +11,33 @@ namespace Toy {
 
 class RBranch {
    RBranchModel fModel;
-   unsigned fClusterSize;
-   RBasket fBasketHead;
+   unsigned fNumElements;
+   std::unique_ptr<RBasket> fBasketHead;
 
 public:
-   static const unsigned kDefaultClusterSize = 100;
+   static const unsigned kDefaultNumElements = 100;
 
    RBranch(
      const RBranchModel &model,
-     unsigned cluster_size = kDefaultClusterSize)
+     unsigned num_elements = kDefaultNumElements)
      : fModel(model)
-     , fClusterSize(cluster_size)
-     , fBasketHead(fModel.GetElementSize() * fClusterSize)
+     , fNumElements(num_elements)
+     , fBasketHead(new RBasket(fModel.GetElementSize() * fNumElements))
    { }
 
    void *Reserve(unsigned nbyte) const {
-     return fBasketHead.Reserve(nbyte);
+     return fBasketHead->Reserve(nbyte);
+   }
+
+   void Release() { fBasketHead->Release(); }
+
+   RBasket* SealHead() {
+      fBasketHead->Freeze();
+      return fBasketHead.get();
+   }
+
+   void ResetHead() {
+      fBasketHead->Reset();
    }
 };
 

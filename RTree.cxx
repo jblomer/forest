@@ -4,6 +4,7 @@
 #include <iterator>
 #include <iostream>
 
+#include "RBasket.hxx"
 #include "RTreeEntry.hxx"
 #include "RTreeModel.hxx"
 
@@ -27,7 +28,14 @@ void RTree::Fill(RTreeEntry *entry) {
    for (; iter_leafs != iter_leafs_end; ++iter_leafs, ++iter_branches) {
       size_t nbytes = (*iter_leafs)->GetSize();
       void *dst = (*iter_branches)->Reserve(nbytes);
+      if (dst == nullptr) {
+          RBasket *basket = (*iter_branches)->SealHead();
+          (*iter_branches)->ResetHead();
+          dst = (*iter_branches)->Reserve(nbytes);
+          assert(dst != nullptr);
+      }
       (*iter_leafs)->Serialize(dst);
+      (*iter_branches)->Release();
    }
 
    /*for (auto&& ptr_leaf : entry->GetLeafsRef()) {
