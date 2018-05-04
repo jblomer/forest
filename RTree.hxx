@@ -10,17 +10,20 @@
 namespace Toy {
 
 class RTreeEntry;
+class RTreeSink;
 
 class RTree {
    using BranchCollection = std::vector<std::unique_ptr<RBranch>>;
 
+   std::unique_ptr<RTreeSink> fSink;
    std::shared_ptr<RTreeModel> fModel;
    BranchCollection fBranches;
 
    unsigned fNentries;
 
 public:
-   RTree(std::shared_ptr<RTreeModel> model);
+   RTree(std::shared_ptr<RTreeModel> model,
+         std::unique_ptr<RTreeSink> sink);
 
    unsigned GetNentries() { return fNentries; }
 

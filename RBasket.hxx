@@ -22,6 +22,7 @@ public:
 
    std::size_t GetCapacity() const { return fCapacity; }
    std::size_t GetSize() const { return fSize; }
+   void *GetBuffer() { return fBuffer; }
 
    void *Reserve(std::size_t nbyte) const {
       fLock.lock_shared();

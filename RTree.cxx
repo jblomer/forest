@@ -3,20 +3,29 @@
 #include <cassert>
 #include <iterator>
 #include <iostream>
+#include <utility>
 
 #include "RBasket.hxx"
 #include "RTreeEntry.hxx"
+#include "RTreeMedium.hxx"
 #include "RTreeModel.hxx"
 
 namespace Toy {
 
-RTree::RTree(std::shared_ptr<RTreeModel> model) : fModel(model) {
+RTree::RTree(std::shared_ptr<RTreeModel> model, std::unique_ptr<RTreeSink> sink)
+   : fSink(std::move(sink))
+   , fModel(model)
+{
    fModel->Freeze();
    // Create branches from model
    for (auto branch_model : fModel->GetBranchModelsRef()) {
       fBranches.emplace_back(std::make_unique<RBranch>(branch_model));
    }
+
+   fSink->Attach(this);
+   fSink->OnCreate();
 }
+
 
 void RTree::Fill(RTreeEntry *entry) {
    assert(entry);
@@ -30,6 +39,7 @@ void RTree::Fill(RTreeEntry *entry) {
       void *dst = (*iter_branches)->Reserve(nbytes);
       if (dst == nullptr) {
           RBasket *basket = (*iter_branches)->SealHead();
+          fSink->OnFullBasket(basket);
           (*iter_branches)->ResetHead();
           dst = (*iter_branches)->Reserve(nbytes);
           assert(dst != nullptr);

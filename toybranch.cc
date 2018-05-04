@@ -23,7 +23,7 @@
 #include "event.h"*/
 
 #include "RTree.hxx"
-#include "TTreeMedium.hxx"
+#include "RTreeMedium.hxx"
 #include "RTreeModel.hxx"
 
 
@@ -196,6 +196,7 @@ int main() {
    //using TDirectory = ROOT::Experimental::TDirectory;
    //using TTreeMedium = Toy::TTreeMedium;
    using RTreeModel = Toy::RTreeModel;
+   using RTreeSink = Toy::RTreeSink;
    using RTree = Toy::RTree;
 
    /*if (!TClassTable::GetDict("Event")) {
@@ -205,7 +206,7 @@ int main() {
    auto tree_model = std::make_shared<RTreeModel>();
    auto px = tree_model->Branch<float>("px", 0.0);  /* shared pointer to Float_t */
 
-   RTree tree(tree_model);
+   RTree tree(tree_model, RTreeSink::MakeRawSink("/dev/shm/test"));
 
    for (unsigned i = 0; i < 150000; ++i)
      tree.Fill();

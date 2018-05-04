@@ -6,7 +6,7 @@ LDFLAGS_CUSTOM = -lstdc++fs
 LDFLAGS = $(LDFLAGS_ROOT) $(LDFLAGS_CUSTOM)
 
 UNITS = RBasket.o \
-  TTreeMedium.o \
+  RTreeMedium.o \
   RTreeModel.o \
   RTreeEntry.o \
 	RBranch.o \
