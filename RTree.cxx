@@ -16,24 +16,26 @@ RTree::RTree(std::shared_ptr<RTreeModel> model, std::unique_ptr<RTreeSink> sink)
    : fSink(std::move(sink))
    , fModel(model)
 {
-   fModel->Freeze();
+  fModel->Freeze();
+  fSink->Attach(this);
 
-   // Attach columns to leafs
+  // TODO: iteration
+  for (auto branch : fModel->fRootBranch.fChildren) {
+    fColumns.push_back(branch->GenerateColumns(fSink.get()));
+  }
 
-   fSink->Attach(this);
-   fSink->OnCreate();
+  fSink->OnCreate();
 }
 
 
 void RTree::Fill(RTreeEntry *entry) {
-   assert(entry);
-   assert(entry->IsCompatibleWith(fModel.get()));
+  assert(entry);
+  assert(entry->IsCompatibleWith(fModel.get()));
 
-
-
-   /*for (auto&& ptr_leaf : entry->GetLeafsRef()) {
-     ptr_leaf->GetSize();
-   }*/
+  for (auto&& ptr_leaf : entry->GetLeafsRef()) {
+    ptr_leaf->GetBranch()->Write(ptr_leaf.get());
+    //ptr_leaf->GetSize();
+  }
 
    //for (auto&& branch : fBranches) {
    //  branch->Reserve(5);

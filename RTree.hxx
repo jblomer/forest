@@ -15,7 +15,6 @@ class RTreeSink;
 class RTree {
    std::unique_ptr<RTreeSink> fSink;
    std::shared_ptr<RTreeModel> fModel;
-   RTreeColumnModel fColumnModel;
    RTreeColumnCollection fColumns;
 
    unsigned fNentries;

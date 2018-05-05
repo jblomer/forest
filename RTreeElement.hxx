@@ -61,7 +61,7 @@ class RTreeElement : public RTreeElementBase {
 
 public:
    template<typename... ArgsT>
-   RTreeElement(T *value) : fValue(value) {
+   explicit RTreeElement(T *value) : fValue(value) {
      Initialize();
      fColumnType = MapType();
    }

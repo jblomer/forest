@@ -9,8 +9,7 @@
 
 #include <atomic>
 
-#include "RBranchModel.hxx"
-#include "RTreeColumn.hxx"
+#include "RBranch.hxx"
 #include "RTreeEntry.hxx"
 
 namespace Toy {
@@ -24,8 +23,7 @@ class RTreeModel {
 
    ModelId fModelId;
    RTreeEntry fDefaultEntry;
-   RTreeColumnModel fColumnModel;
-   RBranchModel<RBranchRoot> fBranchModel;
+   RBranch<RBranchRoot> fRootBranch;
 
 public:
    RTreeModel() : fModelId(0), fDefaultEntry(this) { }
@@ -34,11 +32,10 @@ public:
    std::shared_ptr<T> Branch(std::string_view name, ArgsT&&... args) {
      assert(!IsFrozen());
 
-     RBranchModel<T> *branch = new RBranchModel<T>(name);
-     fBranchModel.Attach(branch);
-     fColumnModel.Attach(branch->GenerateColumnModel());
+     RBranch<T> *branch = new RBranch<T>(name);
+     fRootBranch.Attach(branch);
 
-     return fDefaultEntry.AddLeaf<T>(std::forward<ArgsT>(args)...);
+     return fDefaultEntry.AddLeaf<T>(branch, std::forward<ArgsT>(args)...);
    }
 
    // Model can be cloned and as long as it stays frozen the model id

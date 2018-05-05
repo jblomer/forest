@@ -2,6 +2,7 @@
 #define RTREECOLUMN_H_
 
 #include <cstddef>
+#include <iostream>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -31,7 +32,9 @@ public:
      , fSink(sink)
      , fHeadBasket(std::make_unique<RBasket>(
          4 /*TODO*/ * kDefaultNumElements))
-   { }
+   {
+     assert(fSink);
+   }
 
    RTreeColumnType GetColumnType() { return fModel.GetType(); }
 
@@ -48,7 +51,7 @@ public:
    }
 };  // RTreeColumn
 
-using RTreeColumnCollection = std::vector<RTreeColumn>;
+using RTreeColumnCollection = std::vector<RTreeColumn*>;
 
 }  // namespace Toy
 

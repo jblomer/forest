@@ -47,7 +47,8 @@ public:
     , fChildren()
   { }
 
-  RTreeColumnType GetType() { return fType; }
+  RTreeColumnType GetType() const { return fType; }
+  std::string GetName() const { return fName; }
 
   void Attach(RTreeColumnModel *model) {
     model->fParent = this;

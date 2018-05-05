@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <memory>
+#include <utility>
 
 #include "RTreeColumn.hxx"
 #include "RTreeElement.hxx"
@@ -10,46 +11,39 @@
 
 namespace Toy {
 
+class RBranchBase;
+
 class RLeafBase {
-   RTreeColumn* fPrincipalColumn;
-   RTreeElementBase* fPrincipalElement;
-   bool fIsSimple;
-   virtual void DoWrite() { assert(false); }
+  friend class RBranchBase;
+
+  RBranchBase* fBranch;
 
 protected:
-   RLeafBase()
-     : fPrincipalColumn(nullptr)
-     , fPrincipalElement(nullptr)
-     , fIsSimple(true)
-   { }
+   std::unique_ptr<RTreeElementBase> fPrincipalElement;
+   bool fIsSimple;
 
-   void Init(RTreeColumn* principal_column,
-             RTreeElementBase* principal_element) {
-     fPrincipalColumn = principal_column;
-     fPrincipalElement = principal_element;
-     assert(fPrincipalElement->GetColumnType() ==
-            fPrincipalColumn->GetColumnType());
-   }
+   RLeafBase(RBranchBase *branch)
+     : fBranch(branch)
+     , fIsSimple(false)
+   { }
 
 public:
    virtual ~RLeafBase() { }
 
-   void Write() {
-     if (!fIsSimple) {
-       DoWrite();
-       return;
-     }
-     fPrincipalColumn->Append(*fPrincipalElement);
-   }
+   RBranchBase* GetBranch() { return fBranch; }
 };
 
 template <typename T>
 class RLeaf : public RLeafBase {
    std::shared_ptr<T> fValue;
+
+   void Init();
+
 public:
    template <typename... ArgsT>
-   RLeaf(ArgsT&&... args) : RLeafBase() {
+   RLeaf(RBranchBase *branch, ArgsT&&... args) : RLeafBase(branch) {
      fValue = std::make_shared<T>(std::forward<ArgsT>(args)...);
+     Init();
    }
 
    std::shared_ptr<T> Get() { return fValue; }
