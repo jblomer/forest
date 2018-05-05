@@ -10,6 +10,7 @@
 #include <atomic>
 
 #include "RBranchModel.hxx"
+#include "RTreeColumn.hxx"
 #include "RTreeEntry.hxx"
 
 namespace Toy {
@@ -18,33 +19,26 @@ class RTreeModel {
    friend class RTree;
 
    using ModelId = unsigned;
-   using BranchModelContainer = std::vector<RBranchModel>;
 
    static std::atomic<ModelId> gModelId;
 
    ModelId fModelId;
-   BranchModelContainer fBranches;
    RTreeEntry fDefaultEntry;
+   RTreeColumnModel fColumnModel;
+   RBranchModel<RBranchRoot> fBranchModel;
 
 public:
    RTreeModel() : fModelId(0), fDefaultEntry(this) { }
 
-   /**
-    * Convenience wrapper
-    */
    template <typename T, typename... ArgsT>
    std::shared_ptr<T> Branch(std::string_view name, ArgsT&&... args) {
-     MakeBranch<T>(name);
-     return fDefaultEntry.AddLeaf<T>(std::forward<ArgsT>(args)...);
-   }
-
-   // TODO: Error handling in ROOT?
-   template <typename T>
-   void MakeBranch(std::string_view name) {
      assert(!IsFrozen());
 
-     RBranchType branch_type = RLeaf<T>::MapType();
-     fBranches.emplace_back(RBranchModel(name, branch_type));
+     RBranchModel<T> *branch = new RBranchModel<T>(name);
+     fBranchModel.Attach(branch);
+     fColumnModel.Attach(branch->GenerateColumnModel());
+
+     return fDefaultEntry.AddLeaf<T>(std::forward<ArgsT>(args)...);
    }
 
    // Model can be cloned and as long as it stays frozen the model id
@@ -52,8 +46,6 @@ public:
    void Freeze() { if (fModelId == 0) fModelId = ++gModelId; }
    bool IsFrozen() { return fModelId > 0; }
    ModelId GetModelId() { return fModelId; }
-
-   BranchModelContainer &GetBranchModelsRef() { return fBranches; }
 };
 
 }  // namespace Toy

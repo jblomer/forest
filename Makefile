@@ -6,12 +6,12 @@ LDFLAGS_CUSTOM = -lstdc++fs
 LDFLAGS = $(LDFLAGS_ROOT) $(LDFLAGS_CUSTOM)
 
 UNITS = RBasket.o \
+  RLeaf.o \
   RTreeMedium.o \
   RTreeModel.o \
   RTreeEntry.o \
-	RBranch.o \
-	RBranchModel.o \
-	RLeaf.o \
+	RTreeColumn.o \
+	RTreeElement.o \
 	RTree.o
 
 all: libEvent.so compress toybranch streamer rootcmp protobufcmp
@@ -24,7 +24,7 @@ event.cxx: event.h event_linkdef.h
 libEvent.so: event.cxx event.cc
 	g++ -shared -fPIC -o$@ $(CXXFLAGS) $< event.cc $(LDFLAGS)
 
-%.o: %.cxx %.hxx
+%.o: %.cxx $(wildcard *.hxx)
 	g++ -c $(CXXFLAGS_CUSTOM) $< $(LDFLAGS_CUSTOM)
 
 toybranch: toybranch.cc $(UNITS)

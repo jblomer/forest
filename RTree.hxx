@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-#include "RBranch.hxx"
+#include "RTreeColumn.hxx"
 #include "RTreeModel.hxx"
 
 namespace Toy {
@@ -13,11 +13,10 @@ class RTreeEntry;
 class RTreeSink;
 
 class RTree {
-   using BranchCollection = std::vector<std::unique_ptr<RBranch>>;
-
    std::unique_ptr<RTreeSink> fSink;
    std::shared_ptr<RTreeModel> fModel;
-   BranchCollection fBranches;
+   RTreeColumnModel fColumnModel;
+   RTreeColumnCollection fColumns;
 
    unsigned fNentries;
 

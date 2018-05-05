@@ -10,6 +10,7 @@
 namespace Toy {
 
 class RBasket {
+   bool fIsThreadsafe;
    unsigned char *fBuffer;
    std::size_t fCapacity;
    mutable std::atomic<std::size_t> fSize;
@@ -25,24 +26,24 @@ public:
    void *GetBuffer() { return fBuffer; }
 
    void *Reserve(std::size_t nbyte) const {
-      fLock.lock_shared();
+      if (fIsThreadsafe) fLock.lock_shared();
       size_t pos = fSize.fetch_add(nbyte);
 
       if (pos + nbyte > fCapacity) {
-        fLock.unlock_shared();
+        if (fIsThreadsafe) fLock.unlock_shared();
         return nullptr;
       }
 
       return fBuffer + pos;
    }
-   void Release() const { fLock.unlock_shared(); }
+   void Release() const { if (fIsThreadsafe) fLock.unlock_shared(); }
 
    void Freeze() {
-      fLock.lock();
+      if (fIsThreadsafe) fLock.lock();
    }
    void Reset() {
      fSize = 0;
-     fLock.unlock();
+     if (fIsThreadsafe) fLock.unlock();
    }
 };  // class RBasket
 

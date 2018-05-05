@@ -1,36 +1,67 @@
 #ifndef RBRANCHMODEL_H_
 #define RBRANCHMODEL_H_
 
-#include <cstddef>
 #include <string>
 #include <string_view>
+#include <vector>
+
+#include "RTreeColumnModel.hxx"
 
 namespace Toy {
 
-enum class RBranchType {
-  kFloat,
-  kInt,
-  kBlob
-};
+class RBranchModelBase {
+  RBranchModelBase *fParent;
+  std::vector<RBranchModelBase *> fChildren; /* TODO unique_ptr */
+  bool fIsSimple;
 
-class RBranchModel {
+protected:
+   std::string fDescription;
    std::string fName;
-   RBranchType fType;
+
+   explicit RBranchModelBase(std::string_view name)
+     : fParent(nullptr)
+     , fIsSimple(false)
+     , fName(name)
+   { }
 
 public:
-   enum class Type {
-      kFloat,
-      kInt,
-      kBlob
-   };
+   virtual ~RBranchModelBase() { }
 
-   RBranchModel(std::string_view name, RBranchType type)
-     : fName(name), fType(type) { }
-   std::string GetName() { return fName; }
+   void Attach(RBranchModelBase *child) {
+     child->fParent = this;
+     fChildren.push_back(child);
+   }
 
-   std::size_t GetElementSize();
-};  // RBranchModel
+  virtual RTreeColumnModel* GenerateColumnModel() = 0;
+};
 
-}  // namespace Toy
 
-#endif  // RBRANCHMODEL_H_
+class RBranchRoot {};
+
+template <typename T>
+class RBranchModel : public RBranchModelBase {
+};
+
+template <>
+class RBranchModel<RBranchRoot> : public RBranchModelBase {
+public:
+  RBranchModel() : RBranchModelBase("") { }
+  virtual RTreeColumnModel* GenerateColumnModel() override {
+    return nullptr;
+  }
+};
+
+template <>
+class RBranchModel<float> : public RBranchModelBase {
+public:
+  explicit RBranchModel(std::string_view name) : RBranchModelBase(name) { }
+  virtual RTreeColumnModel* GenerateColumnModel() override {
+    RTreeColumnModel *model =
+      new RTreeColumnModel(fName, fDescription, RTreeColumnType::kFloat, false);
+    return model;
+  }
+};
+
+}
+
+#endif

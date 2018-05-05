@@ -4,6 +4,8 @@
 #include <experimental/filesystem>
 #include <memory>
 
+#include "RTreeColumn.hxx"
+
 namespace Toy {
 
 class RBasket;
@@ -21,7 +23,7 @@ public:
    virtual void Attach(RTree *tree) = 0;
 
    virtual void OnCreate() = 0;
-   virtual void OnFullBasket(RBasket *basket) = 0;
+   virtual void OnFullBasket(RBasket *basket, RTreeColumn *column) = 0;
 };
 
 
@@ -39,7 +41,7 @@ public:
    virtual void Attach(RTree *tree) override { fTree = tree; }
 
    virtual void OnCreate() override;
-   virtual void OnFullBasket(RBasket *basket) override;
+   virtual void OnFullBasket(RBasket *basket, RTreeColumn *column) override;
 };
 
 }

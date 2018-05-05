@@ -33,7 +33,7 @@ void RTreeRawSink::OnCreate() {
    write(fd, header.data(), header.size());
 }
 
-void RTreeRawSink::OnFullBasket(RBasket *basket) {
+void RTreeRawSink::OnFullBasket(RBasket *basket, RTreeColumn *column) {
    write(fd, basket->GetBuffer(), basket->GetSize());
 }
 

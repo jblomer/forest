@@ -2,78 +2,60 @@
 #define RLEAF_H_
 
 #include <cassert>
-#include <cstddef>
-#include <cstring>
 #include <memory>
-#include <string>
-#include <utility>
 
-#include "RBranchModel.hxx"
+#include "RTreeColumn.hxx"
+#include "RTreeElement.hxx"
+
 
 namespace Toy {
 
 class RLeafBase {
+   RTreeColumn* fPrincipalColumn;
+   RTreeElementBase* fPrincipalElement;
+   bool fIsSimple;
+   virtual void DoWrite() { assert(false); }
+
 protected:
-   // We can indicate that on disk format == in memory format
-   bool fIsMovable;
-   void *fRawContent;
-
-   bool fIsFixedSize;
-   unsigned fSize;
-
-   Toy::RBranchType fBranchType;
-
-   virtual void DoSerialize(void *destination) { assert(false); }
-   virtual std::size_t DoGetSize() { assert(false); }
-public:
    RLeafBase()
-     : fIsMovable(false)
-     , fRawContent(nullptr)
-     , fIsFixedSize(false)
-     , fSize(0)
-     , fBranchType(RBranchType::kBlob) { }
+     : fPrincipalColumn(nullptr)
+     , fPrincipalElement(nullptr)
+     , fIsSimple(true)
+   { }
+
+   void Init(RTreeColumn* principal_column,
+             RTreeElementBase* principal_element) {
+     fPrincipalColumn = principal_column;
+     fPrincipalElement = principal_element;
+     assert(fPrincipalElement->GetColumnType() ==
+            fPrincipalColumn->GetColumnType());
+   }
+
+public:
    virtual ~RLeafBase() { }
 
-   RBranchType GetBranchType() { return fBranchType; }
-
-   void Serialize(void *destination) {
-     if (!fIsMovable) {
-       DoSerialize(destination);
+   void Write() {
+     if (!fIsSimple) {
+       DoWrite();
        return;
      }
-     std::memcpy(destination, fRawContent, fSize);
-   }
-
-   std::size_t GetSize() {
-     if (!fIsFixedSize) {
-        return DoGetSize();
-     }
-     return fSize;
+     fPrincipalColumn->Append(*fPrincipalElement);
    }
 };
-
 
 template <typename T>
 class RLeaf : public RLeafBase {
    std::shared_ptr<T> fValue;
-
-   void Initialize();
-
 public:
-   template<typename... ArgsT>
-   RLeaf(ArgsT&&... args)
-     : fValue(std::make_shared<T>(std::forward<ArgsT>(args)...))
-   {
-     Initialize();
-     fBranchType = MapType();
+   template <typename... ArgsT>
+   RLeaf(ArgsT&&... args) : RLeafBase() {
+     fValue = std::make_shared<T>(std::forward<ArgsT>(args)...);
    }
 
    std::shared_ptr<T> Get() { return fValue; }
-
-   static RBranchType MapType();
-   static std::string GetMemoryType();
 };
 
 }  // namespace Toy
 
-#endif  // RLEAF_H_
+
+#endif // RLEAF_H_

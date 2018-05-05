@@ -215,7 +215,9 @@ int main() {
    auto h3_py = tree_model->Branch<float>("h3_py", 7.0);
    auto h3_pz = tree_model->Branch<float>("h3_pz", 8.0);
 
-   RTree tree(tree_model, RTreeSink::MakeRawSink("/dev/shm/test"));
+   //auto name = tree_model->Branch<std::vector<float>>("tracks");
+
+   RTree tree(tree_model, RTreeSink::MakeRawSink("/dev/shm/test.toy"));
 
    for (unsigned i = 0; i < 8000000; ++i) {
      tree.Fill();

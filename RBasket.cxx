@@ -2,7 +2,11 @@
 
 namespace Toy {
 
-RBasket::RBasket(std::size_t capacity) : fCapacity(capacity), fSize(0) {
+RBasket::RBasket(std::size_t capacity)
+   : fIsThreadsafe(false)
+   , fCapacity(capacity)
+   , fSize(0)
+{
    assert(fCapacity > 0);
    fBuffer = static_cast<unsigned char *>(std::malloc(fCapacity));
    assert(fBuffer);
