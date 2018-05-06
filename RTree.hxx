@@ -27,6 +27,7 @@ public:
 
    void Fill() { Fill(&(fModel->fDefaultEntry)); }
    void Fill(RTreeEntry *entry);
+   void FillV(RTreeEntry **entry, unsigned size);
 };
 
 }  // namespace Toy

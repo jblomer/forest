@@ -28,6 +28,19 @@ RTree::RTree(std::shared_ptr<RTreeModel> model, std::unique_ptr<RTreeSink> sink)
 }
 
 
+void RTree::FillV(RTreeEntry **entry, unsigned size) {
+  for (unsigned i = 0; i < size; ++i) {
+    assert(entry[i]);
+    assert(entry[i]->IsCompatibleWith(fModel.get()));
+
+    for (auto&& ptr_leaf : entry[i]->GetLeafsRef()) {
+      ptr_leaf->GetBranch()->Write(ptr_leaf.get());
+      //ptr_leaf->GetSize();
+    }
+  }
+}
+
+
 void RTree::Fill(RTreeEntry *entry) {
   assert(entry);
   assert(entry->IsCompatibleWith(fModel.get()));

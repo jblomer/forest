@@ -198,6 +198,7 @@ int main() {
    using RTreeModel = Toy::RTreeModel;
    using RTreeSink = Toy::RTreeSink;
    using RTree = Toy::RTree;
+   using RTreeEntry = Toy::RTreeEntry;
 
    /*if (!TClassTable::GetDict("Event")) {
       gSystem->Load("./libEvent.so");
@@ -215,19 +216,34 @@ int main() {
    auto h3_py = event_model->Branch<float>("h3_py", 7.0);
    auto h3_pz = event_model->Branch<float>("h3_pz", 8.0);
 
+   float unsafe;
+   event_model->BranchDynamic("unsafe", "float", &unsafe);
+
+   auto hit_model = std::make_shared<RTreeModel>();
+   hit_model->Branch<float>("x", 0.0);
+   hit_model->Branch<float>("y", 0.0);
+
    auto track_model = std::make_shared<RTreeModel>();
    track_model->Branch<float>("energy", 0.0);
    //event_model->BranchCollection(track_model, "tracks");
 
    //auto tracks = tree_model->Branch<std::vector<float>>("tracks");
 
-   float unsafe;
-   event_model->BranchDynamic("unsafe", "float", &unsafe);
-
    RTree tree(event_model, RTreeSink::MakeRawSink("/dev/shm/test.toy"));
 
-   for (unsigned i = 0; i < 8000000; ++i) {
-     tree.Fill();
+   std::vector<RTreeEntry*> entries{
+     event_model->GetDefaultEntry(),
+     event_model->GetDefaultEntry(),
+     event_model->GetDefaultEntry(),
+     event_model->GetDefaultEntry(),
+     event_model->GetDefaultEntry(),
+     event_model->GetDefaultEntry(),
+     event_model->GetDefaultEntry(),
+     event_model->GetDefaultEntry()
+   };
+
+   for (unsigned i = 0; i < 1000000; ++i) {
+     tree.FillV(entries.data(), 8);
    }
 
    //auto py = tree_model->Branch<int>("py", 0);

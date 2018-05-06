@@ -57,6 +57,9 @@ public:
    void Freeze() { if (fModelId == 0) fModelId = ++gModelId; }
    bool IsFrozen() { return fModelId > 0; }
    ModelId GetModelId() { return fModelId; }
+
+   // Remove me
+   RTreeEntry* GetDefaultEntry() { return &fDefaultEntry; }
 };
 
 }  // namespace Toy
