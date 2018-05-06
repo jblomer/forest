@@ -203,21 +203,28 @@ int main() {
       gSystem->Load("./libEvent.so");
    }*/
 
-   auto tree_model = std::make_shared<RTreeModel>();
+   auto event_model = std::make_shared<RTreeModel>();
 
-   auto h1_px = tree_model->Branch<float>("h1_px", 0.0);
-   auto h1_py = tree_model->Branch<float>("h1_py", 1.0);
-   auto h1_pz = tree_model->Branch<float>("h1_pz", 2.0);
-   auto h2_px = tree_model->Branch<float>("h2_px", 3.0);
-   auto h2_py = tree_model->Branch<float>("h2_py", 4.0);
-   auto h2_pz = tree_model->Branch<float>("h2_pz", 5.0);
-   auto h3_px = tree_model->Branch<float>("h3_px", 6.0);
-   auto h3_py = tree_model->Branch<float>("h3_py", 7.0);
-   auto h3_pz = tree_model->Branch<float>("h3_pz", 8.0);
+   auto h1_px = event_model->Branch<float>("h1_px", 0.0);
+   auto h1_py = event_model->Branch<float>("h1_py", 1.0);
+   auto h1_pz = event_model->Branch<float>("h1_pz", 2.0);
+   auto h2_px = event_model->Branch<float>("h2_px", 3.0);
+   auto h2_py = event_model->Branch<float>("h2_py", 4.0);
+   auto h2_pz = event_model->Branch<float>("h2_pz", 5.0);
+   auto h3_px = event_model->Branch<float>("h3_px", 6.0);
+   auto h3_py = event_model->Branch<float>("h3_py", 7.0);
+   auto h3_pz = event_model->Branch<float>("h3_pz", 8.0);
 
-   //auto name = tree_model->Branch<std::vector<float>>("tracks");
+   auto track_model = std::make_shared<RTreeModel>();
+   track_model->Branch<float>("energy", 0.0);
+   //event_model->BranchCollection(track_model, "tracks");
 
-   RTree tree(tree_model, RTreeSink::MakeRawSink("/dev/shm/test.toy"));
+   //auto tracks = tree_model->Branch<std::vector<float>>("tracks");
+
+   float unsafe;
+   event_model->BranchDynamic("unsafe", "float", &unsafe);
+
+   RTree tree(event_model, RTreeSink::MakeRawSink("/dev/shm/test.toy"));
 
    for (unsigned i = 0; i < 8000000; ++i) {
      tree.Fill();

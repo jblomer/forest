@@ -33,6 +33,7 @@ public:
    RBranchBase* GetBranch() { return fBranch; }
 };
 
+
 template <typename T>
 class RLeaf : public RLeafBase {
    std::shared_ptr<T> fValue;
@@ -48,6 +49,24 @@ public:
 
    std::shared_ptr<T> Get() { return fValue; }
 };
+
+template <typename T>
+class RLeafCaptured : public RLeafBase {
+   T *fValue;
+
+   void Init();
+
+public:
+   RLeafCaptured(RBranchBase *branch, T *value)
+     : RLeafBase(branch)
+     , fValue(value)
+   {
+     Init();
+   }
+
+   T *Get() { return fValue; }
+};
+
 
 }  // namespace Toy
 

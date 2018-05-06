@@ -34,6 +34,13 @@ public:
      return value_ptr;
    }
 
+   template <typename T, typename... ArgsT>
+   void AddLeafCaptured(ArgsT&&... args) {
+     auto leaf =
+       std::make_unique<RLeafCaptured<T>>(std::forward<ArgsT>(args)...);
+     fLeafs.emplace_back(std::move(leaf));
+   }
+
    bool IsCompatibleWith(RTreeModel *model) {
      return (model == fModel) || HasCompatibleModelId(model);
    }

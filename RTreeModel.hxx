@@ -38,6 +38,20 @@ public:
      return fDefaultEntry.AddLeaf<T>(branch, std::forward<ArgsT>(args)...);
    }
 
+   void BranchDynamic(std::string_view name,
+                      std::string_view type,
+                      void* address)
+   {
+     if (type == "float") {
+       RBranch<float> *branch = new RBranch<float>(name);
+       fRootBranch.Attach(branch);
+       fDefaultEntry.AddLeafCaptured<float>(
+         branch, reinterpret_cast<float *>(address));
+     } else {
+       assert(false);
+     }
+   }
+
    // Model can be cloned and as long as it stays frozen the model id
    // is the same
    void Freeze() { if (fModelId == 0) fModelId = ++gModelId; }

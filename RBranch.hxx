@@ -106,6 +106,18 @@ public:
   }
 };
 
+
+template <>
+class RBranch<std::vector<float>> : public RBranchBase {
+public:
+  explicit RBranch(std::string_view name) : RBranchBase(name) { }
+
+  virtual RTreeColumn* GenerateColumns(RTreeSink *sink) override {
+    assert(false);
+    return nullptr;
+  }
+};
+
 }
 
 #endif
