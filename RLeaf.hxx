@@ -16,17 +16,17 @@ class RBranchBase;
 
 class RLeafBase {
   friend class RBranchBase;
-
-  RBranchBase* fBranch;
+  friend class RLeafCollection;
 
 protected:
-   std::unique_ptr<RTreeElementBase> fPrincipalElement;
-   bool fIsSimple;
+  RBranchBase* fBranch;
+  std::unique_ptr<RTreeElementBase> fPrincipalElement;
+  bool fIsSimple;
 
-   RLeafBase(RBranchBase *branch)
-     : fBranch(branch)
-     , fIsSimple(false)
-   { }
+  RLeafBase(RBranchBase *branch)
+    : fBranch(branch)
+    , fIsSimple(false)
+  { }
 
 public:
    virtual ~RLeafBase() { }
@@ -82,9 +82,7 @@ public:
     , offset(0)
   { }
 
-  void Fill() {
-    offset++;
-  }
+  void Fill();
 };
 
 
