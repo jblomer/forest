@@ -31,7 +31,7 @@ public:
      , fRawContent(nullptr)
      , fIsFixedSize(false)
      , fSize(0)
-     , fColumnType(RTreeColumnType::kBlob) { }
+     , fColumnType(RTreeColumnType::kByte) { }
    virtual ~RTreeElementBase() { }
 
    RTreeColumnType GetColumnType() const { return fColumnType; }

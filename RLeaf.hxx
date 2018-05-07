@@ -50,6 +50,7 @@ public:
    std::shared_ptr<T> Get() { return fValue; }
 };
 
+
 template <typename T>
 class RLeafCaptured : public RLeafBase {
    T *fValue;

@@ -193,16 +193,10 @@ std::shared_ptr<Toy::TBranch<Float_t>> Toy::TTreeModel::Branch<Float_t>(std::str
 
 
 int main() {
-   //using TDirectory = ROOT::Experimental::TDirectory;
-   //using TTreeMedium = Toy::TTreeMedium;
    using RTreeModel = Toy::RTreeModel;
    using RTreeSink = Toy::RTreeSink;
    using RTree = Toy::RTree;
-   using RTreeEntry = Toy::RTreeEntry;
-
-   /*if (!TClassTable::GetDict("Event")) {
-      gSystem->Load("./libEvent.so");
-   }*/
+   //using RTreeEntry = Toy::RTreeEntry;
 
    auto event_model = std::make_shared<RTreeModel>();
 
@@ -220,31 +214,45 @@ int main() {
    event_model->BranchDynamic("unsafe", "float", &unsafe);
 
    auto hit_model = std::make_shared<RTreeModel>();
-   hit_model->Branch<float>("x", 0.0);
-   hit_model->Branch<float>("y", 0.0);
+   auto hit_x = hit_model->Branch<float>("x", 0.0);
+   auto hit_y = hit_model->Branch<float>("y", 0.0);
 
    auto track_model = std::make_shared<RTreeModel>();
-   track_model->Branch<float>("energy", 0.0);
-   //event_model->BranchCollection(track_model, "tracks");
+   auto track_energy = track_model->Branch<float>("energy", 0.0);
+   auto hits = track_model->BranchCollection("hits", hit_model);
+   auto tracks = event_model->BranchCollection("tracks", track_model);
 
    //auto tracks = tree_model->Branch<std::vector<float>>("tracks");
 
    RTree tree(event_model, RTreeSink::MakeRawSink("/dev/shm/test.toy"));
 
-   std::vector<RTreeEntry*> entries{
-     event_model->GetDefaultEntry(),
-     event_model->GetDefaultEntry(),
-     event_model->GetDefaultEntry(),
-     event_model->GetDefaultEntry(),
-     event_model->GetDefaultEntry(),
-     event_model->GetDefaultEntry(),
-     event_model->GetDefaultEntry(),
-     event_model->GetDefaultEntry()
-   };
+  // TODO: value semantics
+  for (unsigned i = 0; i < 8000000; ++i) {
+    for (unsigned t = 0; t < 3; ++t) {
+      for (unsigned h = 0; h < 3; ++h) {
+        *hit_x = 0.0;
+        *hit_y = 0.0;
+        //hits->Fill();
+      }
+      *track_energy = 0.0;
+      //tracks->Fill();
+    }
+    tree.Fill();
+  }
 
-   for (unsigned i = 0; i < 1000000; ++i) {
-     tree.FillV(entries.data(), 8);
-   }
+   //std::vector<RTreeEntry*> entries{
+   //  event_model->GetDefaultEntry(),
+   //  event_model->GetDefaultEntry(),
+   //  event_model->GetDefaultEntry(),
+   //  event_model->GetDefaultEntry(),
+   //  event_model->GetDefaultEntry(),
+   //  event_model->GetDefaultEntry(),
+   //  event_model->GetDefaultEntry(),
+   //  event_model->GetDefaultEntry()
+   //};
+   //for (unsigned i = 0; i < 1000000; ++i) {
+   //  tree.FillV(entries.data(), 8);
+   //}
 
    //auto py = tree_model->Branch<int>("py", 0);
 

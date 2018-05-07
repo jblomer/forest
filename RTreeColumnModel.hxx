@@ -12,9 +12,9 @@ enum class RTreeColumnType {
   kRoot,
   kFloat,
   kInt,
+  kBit,
+  kByte,
   kCollection,
-  kBitvector,
-  kBlob
 };
 
 class RTreeColumnModel {

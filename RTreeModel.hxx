@@ -14,6 +14,8 @@
 
 namespace Toy {
 
+class RLeafNested {};
+
 class RTreeModel {
    friend class RTree;
 
@@ -23,7 +25,7 @@ class RTreeModel {
 
    ModelId fModelId;
    RTreeEntry fDefaultEntry;
-   RBranch<RBranchRoot> fRootBranch;
+   RBranch<RBranchCollectionTag> fRootBranch;
 
 public:
    RTreeModel() : fModelId(0), fDefaultEntry(this) { }
@@ -51,6 +53,23 @@ public:
        assert(false);
      }
    }
+
+  std::shared_ptr<RLeafNested> BranchCollection(
+    std::string_view name,
+    std::shared_ptr<RTreeModel> model)
+  {
+    assert(!model->IsFrozen());
+    for (auto branch : model->fRootBranch) {
+      branch->PrependName(name);
+    }
+    model->fRootBranch.MakeSubBranch(name);
+    model->Freeze();
+
+    fRootBranch.Attach(&model->fRootBranch);
+    // Add collection branch
+    // Add CollectionLeaf and vector sub leafs
+    return nullptr;
+  }
 
    // Model can be cloned and as long as it stays frozen the model id
    // is the same
