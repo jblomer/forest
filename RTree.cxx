@@ -19,14 +19,11 @@ RTree::RTree(std::shared_ptr<RTreeModel> model, std::unique_ptr<RTreeSink> sink)
   fModel->Freeze();
   fSink->Attach(this);
 
-  // TODO: iteration
   for (auto branch : fModel->fRootBranch) {
-    std::cout << branch->GetName() << std::endl;
-    //fColumns.push_back(branch->GenerateColumns(fSink.get()));
+    // Todo: column parent-children relationship
+    fColumns.push_back(branch->GenerateColumns(fSink.get()));
   }
-  std::cout << "OK" << std::endl;
 
-  abort();
   fSink->OnCreate();
 }
 

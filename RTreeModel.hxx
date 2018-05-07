@@ -66,7 +66,6 @@ public:
     model->Freeze();
 
     fRootBranch.Attach(&model->fRootBranch);
-    // Add collection branch
     // Add CollectionLeaf and vector sub leafs
     return nullptr;
   }

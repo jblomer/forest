@@ -9,12 +9,12 @@
 namespace Toy {
 
 enum class RTreeColumnType {
-  kRoot,
+  kUnknown,
   kFloat,
   kInt,
   kBit,
   kByte,
-  kCollection,
+  kOffset,
 };
 
 class RTreeColumnModel {
@@ -29,7 +29,7 @@ public:
   RTreeColumnModel()
     : fName()
     , fBranchProvenance()
-    , fType(RTreeColumnType::kRoot)
+    , fType(RTreeColumnType::kUnknown)
     , fIsSorted(false)
     , fParent(nullptr)
     , fChildren()

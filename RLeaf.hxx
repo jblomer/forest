@@ -4,6 +4,7 @@
 #include <cassert>
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include "RTreeColumn.hxx"
 #include "RTreeElement.hxx"
@@ -66,6 +67,24 @@ public:
    }
 
    T *Get() { return fValue; }
+};
+
+
+class RLeafCollection : public RLeafBase {
+  unsigned offset;
+  std::vector<RLeafBase *> fChildren;
+
+  void Init();
+
+public:
+  RLeafCollection(RBranchBase *branch)
+    : RLeafBase(branch)
+    , offset(0)
+  { }
+
+  void Fill() {
+    offset++;
+  }
 };
 
 

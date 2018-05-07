@@ -111,12 +111,16 @@ public:
   explicit RBranch(std::string_view name) : RBranchBase(name) { }
 
   virtual RTreeColumn* GenerateColumns(RTreeSink *sink) override {
-    return nullptr;
+    fPrincipalColumn = new RTreeColumn(
+      RTreeColumnModel(fName, fDescription, RTreeColumnType::kOffset, false),
+      sink);
+    return fPrincipalColumn;
   }
 
   bool IsRoot() { return fName.empty(); }
   void MakeSubBranch(std::string_view name) { fName = name; }
 };
+
 
 template <>
 class RBranch<float> : public RBranchBase {
