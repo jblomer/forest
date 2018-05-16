@@ -11,12 +11,12 @@
 namespace Toy {
 
 std::unique_ptr<RTreeRawSink> RTreeSink::MakeRawSink(
-  const std::experimental::filesystem::path &path)
+  const std::filesystem::path &path)
 {
    return std::move(std::make_unique<RTreeRawSink>(path));
 }
 
-RTreeRawSink::RTreeRawSink(const std::experimental::filesystem::path &path)
+RTreeRawSink::RTreeRawSink(const std::filesystem::path &path)
   : fTree(nullptr)
   , fPath(path)
   , fd(open(fPath.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0600))

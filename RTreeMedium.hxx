@@ -1,7 +1,7 @@
 #ifndef RTREEMEDIUM_H_
 #define RTREEMEDIUM_H_
 
-#include <experimental/filesystem>
+#include <filesystem>
 #include <memory>
 
 #include "RTreeColumn.hxx"
@@ -16,7 +16,7 @@ class RTreeRawSink;
 class RTreeSink {
 public:
    static std::unique_ptr<RTreeRawSink> MakeRawSink(
-     const std::experimental::filesystem::path &path);
+     const std::filesystem::path &path);
 
    virtual ~RTreeSink() { }
 
@@ -29,13 +29,13 @@ public:
 
 class RTreeRawSink : public RTreeSink {
    RTree *fTree;
-   std::experimental::filesystem::path fPath;
+   std::filesystem::path fPath;
    int fd;
 
    void WriteFooter();
 
 public:
-   RTreeRawSink(const std::experimental::filesystem::path &path);
+   RTreeRawSink(const std::filesystem::path &path);
    virtual ~RTreeRawSink();
 
    virtual void Attach(RTree *tree) override { fTree = tree; }

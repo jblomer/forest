@@ -26,10 +26,10 @@ libEvent.so: event.cxx event.cc
 	g++ -shared -fPIC -o$@ $(CXXFLAGS) $< event.cc $(LDFLAGS)
 
 %.o: %.cxx $(wildcard *.hxx)
-	g++ -c $(CXXFLAGS_CUSTOM) $< $(LDFLAGS_CUSTOM)
+	g++ -c $(CXXFLAGS_CUSTOM) -std=c++2a $< $(LDFLAGS_CUSTOM)
 
 toybranch: toybranch.cc $(UNITS)
-	g++ $(CXXFLAGS_CUSTOM) -o $@ $< $(LDFLAGS_CUSTOM) $(UNITS)
+	g++ $(CXXFLAGS_CUSTOM) -std=c++2a -o $@ $< $(LDFLAGS_CUSTOM) $(UNITS)
 
 rootcmp: rootcmp.cxx
 	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
