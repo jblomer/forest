@@ -49,19 +49,6 @@ void RTree::Fill(RTreeEntry *entry) {
     //ptr_leaf->GetSize();
   }
 
-   //for (auto&& branch : fBranches) {
-   //  branch->Reserve(5);
-   //}
-   /*for (auto&& ptr_leaf : entry->GetLeafsRef()) {
-     ptr_leaf->GetSizeDisk();
-   }*/
-   //for (auto iter = std::begin()) {
-   //}
-
-   // Iterate through entry leafes and serialize into basket buffers of
-   // branches
-
-   // Flush buffers
    // Checkpoint (Mini Footer)
 }
 

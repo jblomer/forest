@@ -232,10 +232,10 @@ int main() {
       for (unsigned h = 0; h < 3; ++h) {
         *hit_x = 0.0;
         *hit_y = 0.0;
-        //hits->Fill();
+        hits->Fill();
       }
       *track_energy = 0.0;
-      //tracks->Fill();
+      tracks->Fill();
     }
     tree.Fill();
   }

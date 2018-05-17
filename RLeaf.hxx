@@ -40,6 +40,8 @@ public:
    RBranchBase* GetBranch() { return fBranch; }
 };
 
+using LeafCollection = std::vector<std::shared_ptr<RLeafBase>>;
+
 
 template <typename T>
 class RLeaf : public RLeafBase {
@@ -78,17 +80,18 @@ public:
 
 class RLeafSubtree : public RLeafBase {
   unsigned fOffset;
-  std::vector<RLeafBase *> fChildren;
+  LeafCollection fChildren;
 
   void Init();
 
 public:
-  RLeafSubtree(RBranchBase *branch)
+  RLeafSubtree(RBranchBase *branch, const LeafCollection &entry)
     : RLeafBase(branch)
     , fOffset(0)
   {
     fPrincipalElement = std::make_unique<RTreeElement<RTreeOffset>>(&fOffset);
     fIsSimple = true;
+    fChildren = entry;
   }
 
   void Fill();

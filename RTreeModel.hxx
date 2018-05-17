@@ -64,8 +64,12 @@ public:
     model->Freeze();
 
     fRootBranch.Attach(&model->fRootBranch);
-    fDefaultEntry.AddLeafSubtree(&model->fRootBranch);
-    return nullptr;
+
+    auto leaf =
+      std::make_shared<RLeafSubtree>(&model->fRootBranch,
+                                     model->fDefaultEntry.fLeafs);
+    fDefaultEntry.AddLeafSubtree(leaf);
+    return leaf;
   }
 
    // Model can be cloned and as long as it stays frozen the model id

@@ -8,7 +8,7 @@ namespace Toy {
 
 void RLeafSubtree::Fill() {
   for (auto child_leaf : fChildren)
-    child_leaf->fBranch->Write(this);
+    child_leaf->fBranch->Write(child_leaf.get());
   fOffset++;
 }
 

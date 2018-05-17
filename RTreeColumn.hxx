@@ -39,6 +39,7 @@ public:
    RTreeColumnType GetColumnType() { return fModel.GetType(); }
 
    void Append(const RTreeElementBase &element) {
+     //std::cout << "appending to " << fModel.GetName() << std::endl;
      assert(element.GetColumnType() == fModel.GetType());
      void *dst = fHeadBasket->Reserve(element.GetSize());
      if (dst == nullptr) {
