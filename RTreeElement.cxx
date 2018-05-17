@@ -24,3 +24,22 @@ template <>
 std::string Toy::RTreeElement<float>::GetMemoryType() {
    return "float";
 }
+
+
+template <>
+Toy::RTreeColumnType Toy::RTreeElement<Toy::RTreeOffset>::MapType() {
+   return Toy::RTreeColumnType::kOffset;
+}
+
+template <>
+void Toy::RTreeElement<Toy::RTreeOffset>::Initialize() {
+   fIsMovable = true;
+   fRawContent = &fValue;
+   fIsFixedSize = true;
+   fSize = sizeof(Toy::RTreeOffset);
+}
+
+template <>
+std::string Toy::RTreeElement<Toy::RTreeOffset>::GetMemoryType() {
+   return "index";
+}

@@ -22,6 +22,7 @@ RTree::RTree(std::shared_ptr<RTreeModel> model, std::unique_ptr<RTreeSink> sink)
   for (auto branch : fModel->fRootBranch) {
     // Todo: column parent-children relationship
     fColumns.push_back(branch->GenerateColumns(fSink.get()));
+    std::cout << branch->GetName() << std::endl;
   }
 
   fSink->OnCreate();
@@ -33,10 +34,7 @@ void RTree::FillV(RTreeEntry **entry, unsigned size) {
     assert(entry[i]);
     assert(entry[i]->IsCompatibleWith(fModel.get()));
 
-    for (auto&& ptr_leaf : entry[i]->GetLeafsRef()) {
-      ptr_leaf->GetBranch()->Write(ptr_leaf.get());
-      //ptr_leaf->GetSize();
-    }
+    Fill(entry[i]);
   }
 }
 
@@ -46,6 +44,7 @@ void RTree::Fill(RTreeEntry *entry) {
   assert(entry->IsCompatibleWith(fModel.get()));
 
   for (auto&& ptr_leaf : entry->GetLeafsRef()) {
+    //std::cout << "Filling " << ptr_leaf->GetBranch()->GetName() << std::endl;
     ptr_leaf->GetBranch()->Write(ptr_leaf.get());
     //ptr_leaf->GetSize();
   }

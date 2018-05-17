@@ -107,8 +107,12 @@ class RBranch : public RBranchBase {
 template <>
 class RBranch<RBranchCollectionTag> : public RBranchBase {
 public:
-  RBranch() : RBranchBase("") { }
-  explicit RBranch(std::string_view name) : RBranchBase(name) { }
+  RBranch() : RBranchBase("") {
+    fIsSimple = true;
+  }
+  explicit RBranch(std::string_view name) : RBranchBase(name) {
+    fIsSimple = true;
+  }
 
   virtual RTreeColumn* GenerateColumns(RTreeSink *sink) override {
     fPrincipalColumn = new RTreeColumn(

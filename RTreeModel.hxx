@@ -14,8 +14,6 @@
 
 namespace Toy {
 
-class RLeafNested {};
-
 class RTreeModel {
    friend class RTree;
 
@@ -54,7 +52,7 @@ public:
      }
    }
 
-  std::shared_ptr<RLeafNested> BranchCollection(
+  std::shared_ptr<RLeafSubtree> BranchCollection(
     std::string_view name,
     std::shared_ptr<RTreeModel> model)
   {
@@ -66,7 +64,7 @@ public:
     model->Freeze();
 
     fRootBranch.Attach(&model->fRootBranch);
-    // Add CollectionLeaf and vector sub leafs
+    fDefaultEntry.AddLeafSubtree(&model->fRootBranch);
     return nullptr;
   }
 

@@ -6,10 +6,10 @@
 
 namespace Toy {
 
-void RLeafCollection::Fill() {
+void RLeafSubtree::Fill() {
   for (auto child_leaf : fChildren)
     child_leaf->fBranch->Write(this);
-  offset++;
+  fOffset++;
 }
 
 }

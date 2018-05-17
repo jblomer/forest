@@ -1,3 +1,9 @@
+/**
+ * The "leaf" represents that transient storage of simple of complex
+ * C++ values that are supposed to be serialized on Fill or that just
+ * have been deserialized.
+ */
+
 #ifndef RLEAF_H_
 #define RLEAF_H_
 
@@ -16,7 +22,7 @@ class RBranchBase;
 
 class RLeafBase {
   friend class RBranchBase;
-  friend class RLeafCollection;
+  friend class RLeafSubtree;
 
 protected:
   RBranchBase* fBranch;
@@ -70,17 +76,20 @@ public:
 };
 
 
-class RLeafCollection : public RLeafBase {
-  unsigned offset;
+class RLeafSubtree : public RLeafBase {
+  unsigned fOffset;
   std::vector<RLeafBase *> fChildren;
 
   void Init();
 
 public:
-  RLeafCollection(RBranchBase *branch)
+  RLeafSubtree(RBranchBase *branch)
     : RLeafBase(branch)
-    , offset(0)
-  { }
+    , fOffset(0)
+  {
+    fPrincipalElement = std::make_unique<RTreeElement<RTreeOffset>>(&fOffset);
+    fIsSimple = true;
+  }
 
   void Fill();
 };

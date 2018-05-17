@@ -41,6 +41,11 @@ public:
      fLeafs.emplace_back(std::move(leaf));
    }
 
+   void AddLeafSubtree(RBranchBase *branch) {
+     auto leaf = std::make_unique<RLeafSubtree>(branch);
+     fLeafs.emplace_back(std::move(leaf));
+   }
+
    bool IsCompatibleWith(RTreeModel *model) {
      return (model == fModel) || HasCompatibleModelId(model);
    }

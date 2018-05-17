@@ -53,6 +53,9 @@ public:
 };
 
 
+using RTreeOffset = unsigned;
+
+
 template <typename T>
 class RTreeElement : public RTreeElementBase {
    T* fValue;
