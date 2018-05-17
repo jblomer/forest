@@ -1,5 +1,15 @@
 syntax = "proto3";
 
+message Hit {
+  float x = 1;
+  float y = 2;
+}
+
+message Track {
+  float energy = 1;
+  repeated Hit hits = 2;
+}
+
 message Event {
   float h1_px = 1;
   float h1_py = 2;
@@ -10,4 +20,6 @@ message Event {
   float h3_px = 7;
   float h3_py = 8;
   float h3_pz = 9;
+  float unsafe = 10;
+  repeated Track tracks = 11;
 }

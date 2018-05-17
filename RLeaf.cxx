@@ -12,6 +12,12 @@ void RLeafSubtree::Fill() {
   fOffset++;
 }
 
+void RLeafSubtree::FillV(RLeafBase **leafs, unsigned size) {
+  for (unsigned i = 0; i < size; ++i)
+    leafs[i]->fBranch->Write(leafs[i]);
+  fOffset += size;
+}
+
 }
 
 template <>

@@ -26,6 +26,16 @@ int main() {
   event.set_h3_px(6.0);
   event.set_h3_py(7.0);
   event.set_h3_pz(8.0);
+  event.set_unsafe(9.0);
+  for (unsigned t = 0; t < 3; ++t) {
+    Track *track = event.add_tracks();
+    track->set_energy(10.);
+    for (unsigned h = 0; h < 3; ++h) {
+      Hit *hit = track->add_hits();
+      hit->set_x(11.);
+      hit->set_y(12.);
+    }
+  }
 
   for (unsigned i = 0; i < 8000000; ++i) {
     ostream->WriteLittleEndian32(event.ByteSize());

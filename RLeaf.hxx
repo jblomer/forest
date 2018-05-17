@@ -95,6 +95,7 @@ public:
   }
 
   void Fill();
+  void FillV(RLeafBase **leafs, unsigned size);
 };
 
 
