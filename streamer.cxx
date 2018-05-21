@@ -7,10 +7,10 @@
 
 int main() {
   TFile *f = new TFile("streamer.root", "RECREATE");
-  Event *event = new Event();
+  //Event *event = new Event();
   //event->SetName("name");
   //event->SetTitle("title");
-  event->Write();
+  //event->Write();
 
   f->Close();
 
