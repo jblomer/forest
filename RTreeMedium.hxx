@@ -17,6 +17,7 @@ class RBasket;
 class RTree;
 class RTreeModel;
 class RTreeRawSink;
+class RTreeRawSource;
 
 class RTreeSink {
 public:
@@ -67,6 +68,32 @@ public:
    virtual void OnCreate() override;
    virtual void OnAddColumn(RTreeColumn *column) override;
    virtual void OnFullBasket(RBasket *basket, RTreeColumn *column) override;
+};
+
+
+class RTreeSource {
+public:
+   static std::unique_ptr<RTreeRawSource> MakeRawSource(
+     const std::filesystem::path &path);
+
+   virtual ~RTreeSource() { }
+
+  virtual void Attach(RTree *tree) = 0;
+};
+
+class RTreeRawSource : public RTreeSource {
+  std::filesystem::path fPath;
+   RTree *fTree;
+   int fd;
+
+public:
+  RTreeRawSource(const std::filesystem::path &path)
+    : fPath(path)
+    , fTree(nullptr)
+    , fd(-1) {}
+  ~RTreeRawSource();
+
+   virtual void Attach(RTree *tree) override;
 };
 
 }

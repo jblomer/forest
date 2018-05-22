@@ -10,10 +10,11 @@
 namespace Toy {
 
 class RTreeEntry;
-class RTreeSink;
+class RTreeSource;
 
 class RTree {
    std::unique_ptr<RTreeSink> fSink;
+   std::unique_ptr<RTreeSource> fSource;
    std::shared_ptr<RTreeModel> fModel;
    RTreeColumnCollection fColumns;
 
@@ -22,6 +23,8 @@ class RTree {
 public:
    RTree(std::shared_ptr<RTreeModel> model,
          std::unique_ptr<RTreeSink> sink);
+  RTree(std::shared_ptr<RTreeModel> model,
+        std::unique_ptr<RTreeSource> source);
   ~RTree();
 
    unsigned GetNentries() { return fNentries; }

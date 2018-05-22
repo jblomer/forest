@@ -29,6 +29,26 @@ RTree::RTree(std::shared_ptr<RTreeModel> model, std::unique_ptr<RTreeSink> sink)
 }
 
 
+RTree::RTree(
+  std::shared_ptr<RTreeModel> model,
+  std::unique_ptr<RTreeSource> source)
+  : fSource(std::move(source))
+  , fModel(model)
+{
+  fModel->Freeze();
+  std::cout << "CREATING TREE FOR READING" << std::endl;
+  fSource->Attach(this);
+
+  /*for (auto branch : fModel->fRootBranch) {
+    // Todo: column parent-children relationship
+    fColumns.push_back(branch->GenerateColumns(fSink.get()));
+    std::cout << branch->GetName() << std::endl;
+  }
+
+  fSink->OnCreate();*/
+}
+
+
 RTree::~RTree() {
 }
 

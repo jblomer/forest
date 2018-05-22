@@ -1,6 +1,7 @@
 #include "RTreeMedium.hxx"
 
 #include <fcntl.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #include <algorithm>
@@ -115,5 +116,30 @@ void RTreeRawSink::WriteMiniFooter() {
     iter_col.second->fBasketHeads.clear();
   }
 }
+
+
+//------------------------------------------------------------------------------
+
+
+std::unique_ptr<RTreeRawSource> RTreeSource::MakeRawSource(
+  const std::filesystem::path &path)
+{
+   return std::move(std::make_unique<RTreeRawSource>(path));
+}
+
+void RTreeRawSource::Attach(RTree *tree) {
+  fTree = tree;
+  fd = open(fPath.c_str(), O_RDONLY);
+  struct stat info;
+  int retval = fstat(fd, &info);
+  assert(retval == 0);
+  size_t file_size = info.st_size;
+
+}
+
+RTreeRawSource::~RTreeRawSource() {
+  close(fd);
+}
+
 
 }

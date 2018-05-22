@@ -9,13 +9,13 @@
 #include "event.h"
 
 int main() {
-  if (!TClassTable::GetDict("Event")) {
-    gSystem->Load("./libEvent.so");
-  }
-
   TFile *file = new TFile("/dev/shm/test.root", "RECREATE");
   file->SetCompressionSettings(0);
   TTree *tree = new TTree("DecayTree", "");
+
+  /*if (!TClassTable::GetDict("Event")) {
+    gSystem->Load("./libEvent.so");
+  }
 
   Event event;
   event.h1_px = 0.0;
@@ -41,9 +41,9 @@ int main() {
     event.tracks.push_back(track);
   }
 
-  tree->Branch("events", &event);
+  tree->Branch("events", &event);*/
 
-  /*float h1_px = 0.0;
+  float h1_px = 0.0;
   float h1_py = 1.0;
   float h1_pz = 2.0;
   float h2_px = 3.0;
@@ -63,12 +63,6 @@ int main() {
   tree->Branch("h3_py", &h3_py, "h3_py");
   tree->Branch("h3_pz", &h3_pz, "h3_pz");
   tree->Branch("unsafe", &unsafe, "unsafe");
-
-  std::vector<float> track_energy;
-  tree->Branch("track_energy", &track_energy);
-  for (unsigned i = 0; i < 3; ++i) {
-    track_energy.push_back(10.0);
-  }*/
 
   for (unsigned i = 0; i < 8000000; ++i) {
     tree->Fill();

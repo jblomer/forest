@@ -195,6 +195,7 @@ std::shared_ptr<Toy::TBranch<Float_t>> Toy::TTreeModel::Branch<Float_t>(std::str
 int main() {
    using RTreeModel = Toy::RTreeModel;
    using RTreeSink = Toy::RTreeSink;
+   using RTreeSource = Toy::RTreeSource;
    using RTree = Toy::RTree;
    //using RTreeEntry = Toy::RTreeEntry;
 
@@ -213,31 +214,40 @@ int main() {
    float unsafe;
    event_model->BranchDynamic("unsafe", "float", &unsafe);
 
-   auto hit_model = std::make_shared<RTreeModel>();
+   /*auto hit_model = std::make_shared<RTreeModel>();
    auto hit_x = hit_model->Branch<float>("x", 0.0);
    auto hit_y = hit_model->Branch<float>("y", 0.0);
 
    auto track_model = std::make_shared<RTreeModel>();
    auto track_energy = track_model->Branch<float>("energy", 0.0);
    auto hits = track_model->BranchCollection("hits", hit_model);
-   auto tracks = event_model->BranchCollection("tracks", track_model);
+   auto tracks = event_model->BranchCollection("tracks", track_model);*/
 
    //auto tracks = tree_model->Branch<std::vector<float>>("tracks");
 
-   RTree tree(event_model, RTreeSink::MakeRawSink("/dev/shm/test.toy"));
+  {
+    RTree tree(event_model, RTreeSink::MakeRawSink("/dev/shm/test.toy"));
 
-  // TODO: value semantics
-  for (unsigned i = 0; i < 8000000; ++i) {
-    for (unsigned t = 0; t < 3; ++t) {
-      for (unsigned h = 0; h < 3; ++h) {
-        *hit_x = 0.0;
-        *hit_y = 0.0;
-        hits->Fill();
-      }
-      *track_energy = 0.0;
-      tracks->Fill();
+    // TODO: value semantics
+    for (unsigned i = 0; i < 8000000; ++i) {
+      /*for (unsigned t = 0; t < 3; ++t) {
+        for (unsigned h = 0; h < 3; ++h) {
+          *hit_x = 0.0;
+          *hit_y = 0.0;
+          hits->Fill();
+        }
+        *track_energy = 0.0;
+        tracks->Fill();
+      }*/
+      tree.Fill();
     }
-    tree.Fill();
+  } // Writing
+
+  std::cout << "Tree written, now reading it back" << std::endl;
+
+  {
+    RTree tree(event_model, RTreeSource::MakeRawSource("/dev/shm/test.toy"));
+
   }
 
    //std::vector<RTreeEntry*> entries{
