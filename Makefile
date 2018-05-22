@@ -32,6 +32,7 @@ toybranch: toybranch.cc $(UNITS)
 	g++ $(CXXFLAGS_CUSTOM) -std=c++2a -o $@ $< $(LDFLAGS_CUSTOM) $(UNITS)
 
 rootcmp: rootcmp.cxx
+	echo "*** USING: $$ROOTSYS ***"
 	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
 protobufcmp.pb.cc: protobufcmp.proto

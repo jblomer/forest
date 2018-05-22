@@ -86,6 +86,8 @@ class RTreeRawSource : public RTreeSource {
    RTree *fTree;
    int fd;
 
+  void Read(void *buf, std::size_t size);
+
 public:
   RTreeRawSource(const std::filesystem::path &path)
     : fPath(path)

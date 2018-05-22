@@ -88,7 +88,8 @@ void RTreeRawSink::WriteFooter() {
     uint32_t nbaskets = iter_col.second->fBasketHeads.size();
     Write(&nbaskets, sizeof(nbaskets));
     if (nbaskets > 0)
-      Write(iter_col.second->fBasketHeads.data(), nbaskets);
+      Write(iter_col.second->fBasketHeads.data(),
+            nbaskets * sizeof(std::pair<uint64_t, uint64_t>));
     iter_col.second->fBasketHeads.clear();
   }
   Write(&footer_pos, sizeof(footer_pos));
@@ -112,7 +113,8 @@ void RTreeRawSink::WriteMiniFooter() {
     uint32_t nbaskets = iter_col.second->fBasketHeads.size();
     Write(&nbaskets, sizeof(nbaskets));
     if (nbaskets > 0)
-      Write(iter_col.second->fBasketHeads.data(), nbaskets);
+      Write(iter_col.second->fBasketHeads.data(),
+            nbaskets * sizeof(std::pair<uint64_t, uint64_t>));
     iter_col.second->fBasketHeads.clear();
   }
 }
@@ -124,17 +126,39 @@ void RTreeRawSink::WriteMiniFooter() {
 std::unique_ptr<RTreeRawSource> RTreeSource::MakeRawSource(
   const std::filesystem::path &path)
 {
-   return std::move(std::make_unique<RTreeRawSource>(path));
+  return std::move(std::make_unique<RTreeRawSource>(path));
+}
+
+void RTreeRawSource::Read(void *buf, size_t size) {
+  ssize_t retval = read(fd, buf, size);
+  assert(retval >= 0);
+  assert(size_t(retval) == size);
 }
 
 void RTreeRawSource::Attach(RTree *tree) {
   fTree = tree;
   fd = open(fPath.c_str(), O_RDONLY);
-  struct stat info;
-  int retval = fstat(fd, &info);
-  assert(retval == 0);
-  size_t file_size = info.st_size;
+  size_t footer_pos;
+  lseek(fd, -sizeof(footer_pos), SEEK_END);
+  std::size_t eof_pos = lseek(fd, 0, SEEK_CUR);
+  Read(&footer_pos, sizeof(footer_pos));
+  std::cout << "Found footer pos at " << footer_pos
+    << ", eof pos at " << eof_pos << std::endl;
 
+  lseek(fd, footer_pos, SEEK_SET);
+  std::size_t cur_pos = footer_pos;
+  while (cur_pos < eof_pos) {
+    std::uint32_t id;
+    Read(&id, sizeof(id));  cur_pos += sizeof(id);
+    std::uint32_t nbaskets;
+    Read(&nbaskets, sizeof(nbaskets));  cur_pos += sizeof(nbaskets);
+    for (unsigned i = 0; i < nbaskets; ++i) {
+      std::pair<std::uint64_t, std::uint64_t> index_entry;
+      Read(&index_entry, sizeof(index_entry));  cur_pos += sizeof(index_entry);
+    }
+    std::cout << "Read index of branch " << id <<
+      " with " << nbaskets << " baskets" << std::endl;
+  }
 }
 
 RTreeRawSource::~RTreeRawSource() {
