@@ -28,32 +28,32 @@ public:
    virtual void Attach(RTree *tree) = 0;
 
    virtual void OnCreate() = 0;
+   virtual void OnAddColumn(RTreeColumn *column) = 0;
    virtual void OnFullBasket(RBasket *basket, RTreeColumn *column) = 0;
 };
 
 
 class RTreeRawSink : public RTreeSink {
-  static constexpr std::size_t kEpochSize = 1024*1024*10;
+  static constexpr std::size_t kEpochSize = 1024 * 1024 * 10;
 
   using BasketHeads = std::vector<std::pair<uint64_t, uint64_t>>;
 
-  struct RColumnHandle {
-    RColumnHandle(std::uint32_t id, BasketHeads* heads)
+  struct RColumnIndex {
+    RColumnIndex(std::uint32_t id)
       : fId(id)
-      , fBasketHeads(heads)
     { }
     std::uint32_t fId;
-    // TODO: make me unique
-    std::shared_ptr<BasketHeads> fBasketHeads;
+    BasketHeads fBasketHeads;
   };
 
   RTree *fTree;
   std::filesystem::path fPath;
   int fd;
   std::size_t fFilePos;
-  std::unordered_map<void *, RColumnHandle> fGlobalIndex;
-  std::unordered_map<void *, RColumnHandle> fEpochIndex;
+  std::unordered_map<RTreeColumn*, std::unique_ptr<RColumnIndex>> fGlobalIndex;
+  std::unordered_map<RTreeColumn*, std::unique_ptr<RColumnIndex>> fEpochIndex;
 
+  void Write(void *buf, std::size_t size);
   void WriteFooter();
   void WriteMiniFooter();
   void WritePadding(std::size_t padding);
@@ -65,6 +65,7 @@ public:
    virtual void Attach(RTree *tree) override { fTree = tree; }
 
    virtual void OnCreate() override;
+   virtual void OnAddColumn(RTreeColumn *column) override;
    virtual void OnFullBasket(RBasket *basket, RTreeColumn *column) override;
 };
 

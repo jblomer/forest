@@ -27,15 +27,9 @@ class RTreeColumn {
 public:
    static const unsigned kDefaultNumElements = 10000;
 
-   RTreeColumn(const RTreeColumnModel &model, RTreeSink *sink)
-     : fModel(model)
-     , fSink(sink)
-     , fHeadBasket(std::make_unique<RBasket>(
-         4 /*TODO*/ * kDefaultNumElements))
-   {
-     assert(fSink);
-   }
+   RTreeColumn(const RTreeColumnModel &model, RTreeSink *sink);
 
+   RTreeColumnModel GetModel() { return fModel; }
    RTreeColumnType GetColumnType() { return fModel.GetType(); }
 
    void Append(const RTreeElementBase &element) {

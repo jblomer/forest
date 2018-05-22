@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <string>
 #include <utility>
 
@@ -32,8 +33,24 @@ RTreeRawSink::~RTreeRawSink() {
 
 void RTreeRawSink::OnCreate() {
   fFilePos = 0;
-  //std::string header = "ROOT v7 Tree";
-  //write(fd, header.data(), header.size());
+  std::cout << "WRITING HEADER" << std::endl;
+  std::uint32_t num_cols = fGlobalIndex.size();
+  Write(&num_cols, sizeof(num_cols));
+  for (auto& iter_col : fGlobalIndex) {
+    Write(&(iter_col.second->fId), sizeof(iter_col.second->fId));
+    RTreeColumnType type = iter_col.first->GetModel().GetType();
+    Write(&type, sizeof(type));
+    std::string name = iter_col.first->GetModel().GetName();
+    std::uint32_t name_len = name.length();
+    Write(&name_len, sizeof(name_len));
+    Write(name.data(), name.length());
+  }
+}
+
+void RTreeRawSink::OnAddColumn(RTreeColumn *column) {
+  std::uint32_t id = fGlobalIndex.size();
+  fGlobalIndex[column] = std::make_unique<RColumnIndex>(id);
+  fEpochIndex[column] = std::make_unique<RColumnIndex>(id);
 }
 
 void RTreeRawSink::OnFullBasket(RBasket *basket, RTreeColumn *column) {
@@ -45,24 +62,35 @@ void RTreeRawSink::OnFullBasket(RBasket *basket, RTreeColumn *column) {
     WriteMiniFooter();
   }
 
-  BasketHeads* basket_heads;
-  auto iter_handle = fEpochIndex.find(column);
-  if (iter_handle == fEpochIndex.end()) {
-    RColumnHandle handle(fEpochIndex.size(), new BasketHeads());
-    basket_heads = handle.fBasketHeads.get();
-    fEpochIndex.insert(std::pair<void *, RColumnHandle>(column, handle));
-  } else {
-    basket_heads = iter_handle->second.fBasketHeads.get();
-  }
+  std::pair<uint64_t, uint64_t> entry(0, fFilePos);
+  auto iter_global_index = fGlobalIndex.find(column);
+  auto iter_epoch_index = fEpochIndex.find(column);
+  iter_global_index->second->fBasketHeads.push_back(entry);
+  iter_epoch_index->second->fBasketHeads.push_back(entry);
 
-  basket_heads->push_back(std::make_pair(0, fFilePos));
   write(fd, basket->GetBuffer(), size);
   fFilePos += size;
 }
 
+void RTreeRawSink::Write(void *buf, std::size_t size) {
+  ssize_t retval = write(fd, buf, size);
+  assert(retval >= 0);
+  assert(size_t(retval) == size);
+  fFilePos += size;
+}
+
 void RTreeRawSink::WriteFooter() {
-  std::string footer = "\n";
-  write(fd, footer.data(), footer.size());
+  std::cout << "WRITING FOOTER" << std::endl;
+  size_t footer_pos = fFilePos;
+  for (auto& iter_col : fGlobalIndex) {
+    Write(&(iter_col.second->fId), sizeof(iter_col.second->fId));
+    uint32_t nbaskets = iter_col.second->fBasketHeads.size();
+    Write(&nbaskets, sizeof(nbaskets));
+    if (nbaskets > 0)
+      Write(iter_col.second->fBasketHeads.data(), nbaskets);
+    iter_col.second->fBasketHeads.clear();
+  }
+  Write(&footer_pos, sizeof(footer_pos));
 }
 
 void RTreeRawSink::WritePadding(std::size_t padding) {
@@ -77,15 +105,15 @@ void RTreeRawSink::WritePadding(std::size_t padding) {
 }
 
 void RTreeRawSink::WriteMiniFooter() {
-  std::size_t size = sizeof(std::uint32_t);
-  for (auto iter_col_handle : fEpochIndex) {
-    size += 2 * sizeof(std::uint32_t) +
-      iter_col_handle.second.fBasketHeads->size() * 2 * sizeof(std::uint64_t);
+  std::cout << "Write Mini Footer at " << fFilePos << std::endl;
+  for (auto& iter_col : fEpochIndex) {
+    Write(&(iter_col.second->fId), sizeof(iter_col.second->fId));
+    uint32_t nbaskets = iter_col.second->fBasketHeads.size();
+    Write(&nbaskets, sizeof(nbaskets));
+    if (nbaskets > 0)
+      Write(iter_col.second->fBasketHeads.data(), nbaskets);
+    iter_col.second->fBasketHeads.clear();
   }
-  std::cout << "Write Mini Footer at " << fFilePos <<
-      " size " << size << " kB" << std::endl;
-  WritePadding(size);
-  fEpochIndex.clear();
 }
 
 }

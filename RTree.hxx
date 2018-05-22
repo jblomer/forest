@@ -22,6 +22,7 @@ class RTree {
 public:
    RTree(std::shared_ptr<RTreeModel> model,
          std::unique_ptr<RTreeSink> sink);
+  ~RTree();
 
    unsigned GetNentries() { return fNentries; }
 

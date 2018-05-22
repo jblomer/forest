@@ -29,6 +29,10 @@ RTree::RTree(std::shared_ptr<RTreeModel> model, std::unique_ptr<RTreeSink> sink)
 }
 
 
+RTree::~RTree() {
+}
+
+
 void RTree::FillV(RTreeEntry **entry, unsigned size) {
   for (unsigned i = 0; i < size; ++i) {
     assert(entry[i]);
