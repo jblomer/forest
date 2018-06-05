@@ -1,6 +1,7 @@
 #ifndef RTREECOLUMNTYPE_H_
 #define RTREECOLUMNTYPE_H_
 
+#include <iostream>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -57,5 +58,7 @@ public:
 };
 
 }
+
+std::ostream& operator<<(std::ostream& out, const Toy::RTreeColumnType value);
 
 #endif // RTREECOLUMNTYPE_H_

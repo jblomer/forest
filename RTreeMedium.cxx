@@ -138,6 +138,26 @@ void RTreeRawSource::Read(void *buf, size_t size) {
 void RTreeRawSource::Attach(RTree *tree) {
   fTree = tree;
   fd = open(fPath.c_str(), O_RDONLY);
+
+  std::uint32_t num_cols;
+  Read(&num_cols, sizeof(num_cols));
+  std::cout << "Found " << num_cols << " columns" << std::endl;
+  for (unsigned i = 0; i < num_cols; ++i) {
+    uint32_t id;
+    Read(&id, sizeof(id));
+    RTreeColumnType type;
+    Read(&type, sizeof(type));
+    uint32_t name_len;
+    Read(&name_len, sizeof(name_len));
+    char *name_raw = new char[name_len];
+    Read(name_raw, name_len);
+    std::string name(name_raw, name_len);
+    delete[] name_raw;
+
+    std::cout << "Column " << name << ", id " << id << ", type "
+              << int(type) << std::endl;
+  }
+
   size_t footer_pos;
   lseek(fd, -sizeof(footer_pos), SEEK_END);
   std::size_t eof_pos = lseek(fd, 0, SEEK_CUR);

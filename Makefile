@@ -9,13 +9,14 @@ UNITS = RBasket.o \
   RLeaf.o \
 	RBranch.o \
   RTreeMedium.o \
-  RTreeModel.o \
+  RTreeColumnModel.o \
+	RTreeModel.o \
   RTreeEntry.o \
 	RTreeColumn.o \
 	RTreeElement.o \
 	RTree.o
 
-all: libEvent.so compress toybranch streamer rootcmp protobufcmp
+all: libEvent.so compress toybranch streamer rootcmp protobufcmp fillbench
 
 .PHONY = clean
 
@@ -32,6 +33,10 @@ toybranch: toybranch.cc $(UNITS)
 	g++ $(CXXFLAGS_CUSTOM) -std=c++2a -o $@ $< $(LDFLAGS_CUSTOM) $(UNITS)
 
 rootcmp: rootcmp.cxx
+	echo "*** USING: $$ROOTSYS ***"
+	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
+
+fillbench: fillbench.cxx
 	echo "*** USING: $$ROOTSYS ***"
 	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
