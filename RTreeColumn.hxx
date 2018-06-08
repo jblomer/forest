@@ -21,6 +21,7 @@ class RTreeColumn {
    RTreeColumnModel fModel;
    RTreeSink* fSink;
    std::unique_ptr<RBasket> fHeadBasket;
+   std::uint64_t fMaxElement;
 
    void ShipHeadBasket();
 
@@ -42,6 +43,7 @@ public:
        assert(dst != nullptr);
      }
      element.Serialize(dst);
+     fMaxElement++;
      fHeadBasket->Release();
    }
 };  // RTreeColumn

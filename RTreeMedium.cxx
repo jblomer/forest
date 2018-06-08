@@ -63,7 +63,7 @@ void RTreeRawSink::OnFullBasket(RBasket *basket, RTreeColumn *column) {
     WriteMiniFooter();
   }
 
-  std::pair<uint64_t, uint64_t> entry(0, fFilePos);
+  std::pair<uint64_t, uint64_t> entry(basket->GetRangeStart(), fFilePos);
   auto iter_global_index = fGlobalIndex.find(column);
   auto iter_epoch_index = fEpochIndex.find(column);
   iter_global_index->second->fBasketHeads.push_back(entry);
@@ -156,6 +156,7 @@ void RTreeRawSource::Attach(RTree *tree) {
 
     std::cout << "Column " << name << ", id " << id << ", type "
               << int(type) << std::endl;
+    fIndex.push_back(Index());
   }
 
   size_t footer_pos;
@@ -172,10 +173,14 @@ void RTreeRawSource::Attach(RTree *tree) {
     Read(&id, sizeof(id));  cur_pos += sizeof(id);
     std::uint32_t nbaskets;
     Read(&nbaskets, sizeof(nbaskets));  cur_pos += sizeof(nbaskets);
+    Index col_index;
     for (unsigned i = 0; i < nbaskets; ++i) {
       std::pair<std::uint64_t, std::uint64_t> index_entry;
       Read(&index_entry, sizeof(index_entry));  cur_pos += sizeof(index_entry);
+      //std::cout << "  READ " << index_entry.first << "/" << index_entry.second << std::endl;
+      col_index[index_entry.first] = index_entry.second;
     }
+    fIndex[id] = col_index;
     std::cout << "Read index of branch " << id <<
       " with " << nbaskets << " baskets" << std::endl;
   }

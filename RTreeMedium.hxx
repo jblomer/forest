@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
+#include <map>
 #include <memory>
 #include <unordered_map>
 #include <utility>
@@ -82,9 +83,12 @@ public:
 };
 
 class RTreeRawSource : public RTreeSource {
+  using Index = std::map<std::uint64_t, std::uint64_t>;
+
   std::filesystem::path fPath;
-   RTree *fTree;
-   int fd;
+  RTree *fTree;
+  int fd;
+  std::vector<Index> fIndex;
 
   void Read(void *buf, std::size_t size);
 
