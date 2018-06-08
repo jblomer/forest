@@ -56,7 +56,7 @@ class RTreeRawSink : public RTreeSink {
   std::unordered_map<RTreeColumn*, std::unique_ptr<RColumnIndex>> fEpochIndex;
 
   void Write(void *buf, std::size_t size);
-  void WriteFooter();
+  void WriteFooter(std::uint64_t nentries);
   void WriteMiniFooter();
   void WritePadding(std::size_t padding);
 
@@ -80,6 +80,7 @@ public:
    virtual ~RTreeSource() { }
 
   virtual void Attach(RTree *tree) = 0;
+  virtual std::uint64_t GetNentries() = 0;
 };
 
 class RTreeRawSource : public RTreeSource {
@@ -88,6 +89,7 @@ class RTreeRawSource : public RTreeSource {
   std::filesystem::path fPath;
   RTree *fTree;
   int fd;
+  std::uint64_t fNentries;
   std::vector<Index> fIndex;
 
   void Read(void *buf, std::size_t size);
@@ -96,10 +98,15 @@ public:
   RTreeRawSource(const std::filesystem::path &path)
     : fPath(path)
     , fTree(nullptr)
-    , fd(-1) {}
+    , fd(-1)
+    , fNentries(0)
+  { }
   ~RTreeRawSource();
 
    virtual void Attach(RTree *tree) override;
+   virtual std::uint64_t GetNentries() override {
+     return fNentries;
+   }
 };
 
 }

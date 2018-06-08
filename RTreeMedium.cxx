@@ -11,6 +11,7 @@
 #include <utility>
 
 #include "RBasket.hxx"
+#include "RTree.hxx"
 
 namespace Toy {
 
@@ -27,7 +28,7 @@ RTreeRawSink::RTreeRawSink(const std::filesystem::path &path)
 { }
 
 RTreeRawSink::~RTreeRawSink() {
-   WriteFooter();
+   WriteFooter(fTree->GetNentries());
    close(fd);
 }
 
@@ -80,9 +81,10 @@ void RTreeRawSink::Write(void *buf, std::size_t size) {
   fFilePos += size;
 }
 
-void RTreeRawSink::WriteFooter() {
+void RTreeRawSink::WriteFooter(std::uint64_t nentries) {
   std::cout << "WRITING FOOTER" << std::endl;
   size_t footer_pos = fFilePos;
+  Write(&nentries, sizeof(nentries));
   for (auto& iter_col : fGlobalIndex) {
     Write(&(iter_col.second->fId), sizeof(iter_col.second->fId));
     uint32_t nbaskets = iter_col.second->fBasketHeads.size();
@@ -167,7 +169,9 @@ void RTreeRawSource::Attach(RTree *tree) {
     << ", eof pos at " << eof_pos << std::endl;
 
   lseek(fd, footer_pos, SEEK_SET);
-  std::size_t cur_pos = footer_pos;
+  Read(&fNentries, sizeof(fNentries));
+  std::cout << "Found #" << fNentries << " entries in file" << std::endl;
+  std::size_t cur_pos = footer_pos + sizeof(fNentries);
   while (cur_pos < eof_pos) {
     std::uint32_t id;
     Read(&id, sizeof(id));  cur_pos += sizeof(id);
@@ -181,7 +185,7 @@ void RTreeRawSource::Attach(RTree *tree) {
       col_index[index_entry.first] = index_entry.second;
     }
     fIndex[id] = col_index;
-    std::cout << "Read index of branch " << id <<
+    std::cout << "Read index of column " << id <<
       " with " << nbaskets << " baskets" << std::endl;
   }
 }

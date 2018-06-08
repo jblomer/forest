@@ -15,6 +15,7 @@ namespace Toy {
 RTree::RTree(std::shared_ptr<RTreeModel> model, std::unique_ptr<RTreeSink> sink)
    : fSink(std::move(sink))
    , fModel(model)
+   , fNentries(0)
 {
   fModel->Freeze();
   fSink->Attach(this);
@@ -38,14 +39,7 @@ RTree::RTree(
   fModel->Freeze();
   std::cout << "CREATING TREE FOR READING" << std::endl;
   fSource->Attach(this);
-
-  /*for (auto branch : fModel->fRootBranch) {
-    // Todo: column parent-children relationship
-    fColumns.push_back(branch->GenerateColumns(fSink.get()));
-    std::cout << branch->GetName() << std::endl;
-  }
-
-  fSink->OnCreate();*/
+  fNentries = fSource->GetNentries();
 }
 
 
@@ -60,6 +54,7 @@ void RTree::FillV(RTreeEntry **entry, unsigned size) {
 
     Fill(entry[i]);
   }
+  fNentries += size;
 }
 
 
@@ -72,7 +67,7 @@ void RTree::Fill(RTreeEntry *entry) {
     ptr_leaf->GetBranch()->Write(ptr_leaf.get());
     //ptr_leaf->GetSize();
   }
-
+  fNentries++;
    // Checkpoint (Mini Footer)
 }
 
