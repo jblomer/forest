@@ -55,7 +55,7 @@ public:
         fElementSize = sizeof(float);
         break;
       case RTreeColumnType::kOffset:
-        fElementSize = sizeof(unsigned);
+        fElementSize = sizeof(std::uint64_t);
         break;
       default:
         fElementSize = 0;

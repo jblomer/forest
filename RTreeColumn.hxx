@@ -13,6 +13,9 @@
 #include "RTreeColumnModel.hxx"
 #include "RTreeElement.hxx"
 
+#define likely(x)      __builtin_expect(!!(x), 1)
+#define unlikely(x)    __builtin_expect(!!(x), 0)
+
 namespace Toy {
 
 class RTreeSource;
@@ -63,7 +66,7 @@ public:
    }
 
 
-   void Read(const std::int64_t num, RTreeElementBase *element) {
+   void Read(const std::int64_t num, RTreeElementBase *__restrict__ element) {
      if ((num < fCurrentSliceStart) || (num > fCurrentSliceEnd)) {
        MapSlice(num);
        //std::cout << "Mapped slice [" << fCurrentSliceStart << "-"
@@ -73,6 +76,22 @@ public:
      void *buf = reinterpret_cast<unsigned char *>(fCurrentSlice->GetBuffer())
                  + (num - fCurrentSliceStart) * element->GetSize();
      element->Deserialize(buf);
+   }
+
+
+   void ReadV(std::int64_t start, std::uint64_t num, void *dst)
+   {
+     if ((start < fCurrentSliceStart) || (start > fCurrentSliceEnd)) {
+       MapSlice(start);
+       //std::cout << "Mapped slice [" << fCurrentSliceStart << "-"
+       //          << fCurrentSliceEnd << "] for element " << num
+       //          << std::endl;
+     }
+     void *buf = reinterpret_cast<unsigned char *>(fCurrentSlice->GetBuffer())
+                 + (start - fCurrentSliceStart) * fModel.GetElementSize();
+     // TODO: what about RTreeElement?
+     if (likely(fModel.GetType() == RTreeColumnType::kFloat))
+       memcpy(dst, buf, num * fModel.GetElementSize());
    }
 };  // RTreeColumn
 

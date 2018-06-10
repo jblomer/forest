@@ -46,9 +46,9 @@ int main() {
     event.tracks.push_back(track);
   }
 
-  //tree->Branch("events", "Event", &event);
-  float myfloat = 1.0;
-  tree->Branch("h1_py", &myfloat, "h1_py/F");
+  tree->Branch("events", "Event", &event);
+  /*float myfloat = 1.0;
+  tree->Branch("h1_py", &myfloat, "h1_py/F");*/
 
   for (unsigned i = 0; i < 8000000; ++i) {
     tree->Fill();
@@ -72,7 +72,7 @@ int main() {
   roFile.GetObject("DecayTree", roTree);
   Event *roEvent = new Event(); //object must be created before
                                //setting the branch address
-  float h1_py;
+  /*float h1_py;
   auto branch = roTree->GetBranch("h1_py");
   roTree->SetBranchAddress("h1_py", &h1_py, &branch);
   auto nevent = roTree->GetEntries();
@@ -88,7 +88,7 @@ int main() {
   milliseconds =
     std::chrono::duration_cast<std::chrono::milliseconds>(diff);
   std::cout << "reading took " << milliseconds.count()
-            << " milliseconds (sum " << sum << ")" << std::endl;
+            << " milliseconds (sum " << sum << ")" << std::endl;*/
 
   return 0;
 }

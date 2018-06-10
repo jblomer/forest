@@ -4,6 +4,7 @@
 #include <memory>
 #include <string_view>
 #include <utility>
+#include <vector>
 
 #include "RBranch.hxx"
 #include "REntryPointer.hxx"
@@ -15,24 +16,24 @@ template <typename T>
 class RTreeView {
 private:
   std::unique_ptr<RBranch<T>> fBranch;
-  REntryPointer fLastFetchedEntry;
   RLeaf<T> fLeaf;
 
 public:
   RTreeView(RBranch<T> *branch)
     : fBranch(branch)
-    , fLastFetchedEntry(REntryPointer::kInvalidEntry)
     , fLeaf(fBranch.get())
   { }
 
   T operator ()(const REntryPointer &p) {
-    if (p != fLastFetchedEntry) {
-      fBranch->Read(p.fEntryNumber, &fLeaf);
-      fLastFetchedEntry = p;
-    }
+    fBranch->Read(p.fEntryNumber, &fLeaf);
     return *fLeaf.Get();
   }
+
+  void ReadBulk(std::uint64_t start, std::uint64_t num, T *buf) {
+    fBranch->ReadV(start, num, buf);
+  }
 };
+
 
 }  // namespace Toy
 

@@ -264,15 +264,33 @@ int main() {
     auto view_h1_py = tree.GetView<float>("h1_py");
 
     // The non-lazy option: the iteration fills automatically an REntry
-    for (auto e : tree.GetEntryRange(RRangeType::kLazy)) {
+    /*for (auto e : tree.GetEntryRange(RRangeType::kLazy)) {
       float v_h1_py = view_h1_py(e);
       sum += v_h1_py;
-
       if ((e.fEntryNumber % 1000000) == 0) {
         std::cout << "entry " << e.fEntryNumber
                   << " value " << v_h1_py << std::endl;
       }
-    }
+    }*/
+
+    // The bulk read option
+    /*unsigned N = tree.GetNentries();
+    std::cout << "Tree has " << N << " entries" << std::endl;
+    constexpr unsigned bulksize = 10;
+    unsigned limit = N/bulksize;
+    float cache[bulksize];
+    for (unsigned i = 0; i < limit; ++i) {
+      view_h1_py.ReadBulk(i * bulksize, bulksize, cache);
+
+      for (unsigned j = 0; j < bulksize; ++j) {
+        sum += cache[j];
+      }
+
+      if ((i % (1000000/bulksize)) == 0) {
+        std::cout << "entry " << i * bulksize
+                  << " value " << cache[0] << std::endl;
+      }
+    }*/
   }
   end_time = stopwatch.now();
   diff = end_time - start_time;

@@ -39,6 +39,7 @@ protected:
 
    virtual void DoAppend(RLeafBase *leaf) { assert(false); }
    virtual void DoRead(std::uint64_t num, RLeafBase *leaf) { assert(false); }
+   //virtual void DoReadV(std::uint64_t num, RLeafBase *leaf) { assert(false); }
 
 public:
   struct IteratorState {
@@ -93,7 +94,7 @@ public:
   virtual RTreeColumn* GenerateColumns(RTreeSource *source, RTreeSink *sink)
     = 0;
 
-  void Append(RLeafBase *leaf) {
+  void Append(RLeafBase *__restrict__ leaf) {
     if (unlikely(!fIsSimple)) {
       DoAppend(leaf);
       return;
@@ -101,12 +102,18 @@ public:
     fPrincipalColumn->Append(*(leaf->fPrincipalElement));
   }
 
-  void Read(std::uint64_t num, RLeafBase *leaf) {
+  void Read(std::uint64_t num, RLeafBase *__restrict__ leaf) {
     if (!fIsSimple) {
       DoRead(num, leaf);
       return;
     }
     fPrincipalColumn->Read(num, leaf->fPrincipalElement.get());
+  }
+
+  void ReadV(std::uint64_t start, std::uint64_t num, void *dst)
+  {
+    assert(fIsSimple);
+    fPrincipalColumn->ReadV(start, num, dst);
   }
 
   //void
