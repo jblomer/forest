@@ -43,8 +43,10 @@ class RTreeRawSink : public RTreeSink {
   struct RColumnIndex {
     RColumnIndex(std::uint32_t id)
       : fId(id)
+      , fNumElements(0)
     { }
     std::uint32_t fId;
+    std::uint64_t fNumElements;
     BasketHeads fBasketHeads;
   };
 
@@ -77,22 +79,34 @@ public:
    static std::unique_ptr<RTreeRawSource> MakeRawSource(
      const std::filesystem::path &path);
 
-   virtual ~RTreeSource() { }
+  virtual ~RTreeSource() { }
 
   virtual void Attach(RTree *tree) = 0;
+  virtual void OnAddColumn(RTreeColumn *column) = 0;
+  virtual void OnMapSlice(
+    RTreeColumn *column, std::uint64_t num, RBasket *basket) = 0;
   virtual std::uint64_t GetNentries() = 0;
 };
 
 class RTreeRawSource : public RTreeSource {
-  using Index = std::map<std::uint64_t, std::uint64_t>;
+  using Index = std::vector<std::pair<std::uint64_t, std::uint64_t>>;
+  using ColumnIds = std::unordered_map<std::string, std::uint32_t>;
+  using ColumnElementSizes = std::unordered_map<std::uint32_t, std::size_t>;
+  using ColumnElements = std::unordered_map<std::uint32_t, std::uint64_t>;
+  using LiveColumns = std::unordered_map<RTreeColumn*, std::uint32_t>;
 
   std::filesystem::path fPath;
   RTree *fTree;
   int fd;
   std::uint64_t fNentries;
-  std::vector<Index> fIndex;
+  std::vector<std::unique_ptr<Index>> fIndex;
+  ColumnIds fColumnIds;
+  ColumnElementSizes fColumnElementSizes;
+  ColumnElements fColumnElements;
+  LiveColumns fLiveColumns;
 
   void Read(void *buf, std::size_t size);
+  void Seek(std::size_t size);
 
 public:
   RTreeRawSource(const std::filesystem::path &path)
@@ -104,6 +118,9 @@ public:
   ~RTreeRawSource();
 
    virtual void Attach(RTree *tree) override;
+   virtual void OnAddColumn(RTreeColumn *column) override;
+   virtual void OnMapSlice(
+    RTreeColumn *column, std::uint64_t num, RBasket *basket) override;
    virtual std::uint64_t GetNentries() override {
      return fNentries;
    }

@@ -6,11 +6,16 @@
 #include <utility>
 
 #include "RBasket.hxx"
+#include "REntryRange.hxx"
 #include "RTreeEntry.hxx"
 #include "RTreeMedium.hxx"
 #include "RTreeModel.hxx"
 
 namespace Toy {
+
+REntryRange RTree::GetEntryRange(RRangeType type, RTreeEntry *entry) {
+  return REntryRange(this);
+}
 
 RTree::RTree(std::shared_ptr<RTreeModel> model, std::unique_ptr<RTreeSink> sink)
    : fSink(std::move(sink))
@@ -22,7 +27,7 @@ RTree::RTree(std::shared_ptr<RTreeModel> model, std::unique_ptr<RTreeSink> sink)
 
   for (auto branch : fModel->fRootBranch) {
     // Todo: column parent-children relationship
-    fColumns.push_back(branch->GenerateColumns(fSink.get()));
+    fColumns.push_back(branch->GenerateColumns(nullptr, fSink.get()));
     std::cout << branch->GetName() << std::endl;
   }
 
@@ -44,6 +49,9 @@ RTree::RTree(
 
 
 RTree::~RTree() {
+  //std::cout << "FLUSHING ALL COLUMNS" << std::endl;
+  for (auto column : fColumns)
+    column->Flush();
 }
 
 
@@ -64,7 +72,7 @@ void RTree::Fill(RTreeEntry *entry) {
 
   for (auto&& ptr_leaf : entry->GetLeafsRef()) {
     //std::cout << "Filling " << ptr_leaf->GetBranch()->GetName() << std::endl;
-    ptr_leaf->GetBranch()->Write(ptr_leaf.get());
+    ptr_leaf->GetBranch()->Append(ptr_leaf.get());
     //ptr_leaf->GetSize();
   }
   fNentries++;

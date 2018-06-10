@@ -6,6 +6,7 @@ LDFLAGS_CUSTOM = -lstdc++fs
 LDFLAGS = $(LDFLAGS_ROOT) $(LDFLAGS_CUSTOM)
 
 UNITS = RBasket.o \
+  REntryRange.o \
   RLeaf.o \
 	RBranch.o \
   RTreeMedium.o \
@@ -14,7 +15,8 @@ UNITS = RBasket.o \
   RTreeEntry.o \
 	RTreeColumn.o \
 	RTreeElement.o \
-	RTree.o
+	RTree.o \
+	RTreeView.o
 
 all: libEvent.so compress toybranch streamer rootcmp protobufcmp fillbench
 

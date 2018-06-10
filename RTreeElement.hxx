@@ -17,19 +17,16 @@ protected:
    // We can indicate that on disk format == in memory format
    bool fIsMovable;
    void *fRawContent;
-
-   bool fIsFixedSize;
    unsigned fSize;
 
    RTreeColumnType fColumnType;
 
    virtual void DoSerialize(void *destination) const { assert(false); }
-   virtual std::size_t DoGetSize() const { assert(false); }
+   virtual void DoDeserialize(void *source) const { assert(false); }
 public:
    RTreeElementBase()
      : fIsMovable(false)
      , fRawContent(nullptr)
-     , fIsFixedSize(false)
      , fSize(0)
      , fColumnType(RTreeColumnType::kByte) { }
    virtual ~RTreeElementBase() { }
@@ -44,10 +41,15 @@ public:
      std::memcpy(destination, fRawContent, fSize);
    }
 
-   std::size_t GetSize() const {
-     if (!fIsFixedSize) {
-        return DoGetSize();
+   void Deserialize(void *source) {
+     if (!fIsMovable) {
+       DoDeserialize(source);
+       return;
      }
+     std::memcpy(fRawContent, source, fSize);
+   }
+
+   std::size_t GetSize() const {
      return fSize;
    }
 };

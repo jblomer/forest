@@ -5,6 +5,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdlib>
+#include <iostream>
 #include <shared_mutex>
 
 namespace Toy {
@@ -32,6 +33,7 @@ public:
       size_t pos = fSize.fetch_add(nbyte);
 
       if (pos + nbyte > fCapacity) {
+        fSize -= nbyte;
         if (fIsThreadsafe) fLock.unlock_shared();
         return nullptr;
       }

@@ -16,7 +16,6 @@ template <>
 void Toy::RTreeElement<float>::Initialize() {
    fIsMovable = true;
    fRawContent = &fValue;
-   fIsFixedSize = true;
    fSize = sizeof(float);
 }
 
@@ -35,7 +34,6 @@ template <>
 void Toy::RTreeElement<Toy::RTreeOffset>::Initialize() {
    fIsMovable = true;
    fRawContent = &fValue;
-   fIsFixedSize = true;
    fSize = sizeof(Toy::RTreeOffset);
 }
 

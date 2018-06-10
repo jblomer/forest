@@ -22,6 +22,7 @@
 
 #include "event.h"*/
 
+#include "REntryRange.hxx"
 #include "RTree.hxx"
 #include "RTreeMedium.hxx"
 #include "RTreeModel.hxx"
@@ -193,6 +194,7 @@ std::shared_ptr<Toy::TBranch<Float_t>> Toy::TTreeModel::Branch<Float_t>(std::str
 
 
 int main() {
+   using RRangeType = Toy::RRangeType;
    using RTreeModel = Toy::RTreeModel;
    using RTreeSink = Toy::RTreeSink;
    using RTreeSource = Toy::RTreeSource;
@@ -249,12 +251,15 @@ int main() {
     // event_model unused so far
     RTree tree(event_model, RTreeSource::MakeRawSource("/dev/shm/test.toy"));
 
-    auto entries = tree.GetEntryCollection();
-    //auto view_h1_px = entries.GetView("h1_px");
+    auto view_h1_px = tree.GetView<float>("h1_px");
 
-    for (auto e : entries) {
+    // The non-lazy option: the iteration fills automatically an REntry
+    for (auto e : tree.GetEntryRange(RRangeType::kLazy)) {
+      float v_h1_px = view_h1_px(e);
+
       if ((e.fEntryNumber % 100000) == 0) {
-        std::cout << "entry " << e.fEntryNumber << std::endl;
+        std::cout << "entry " << e.fEntryNumber
+                  << " value " << v_h1_px << std::endl;
       }
     }
   }

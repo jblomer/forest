@@ -34,7 +34,8 @@ protected:
      , fPrincipalColumn(nullptr)
    { }
 
-   virtual void DoWrite(RLeafBase *leaf) { assert(false); }
+   virtual void DoAppend(RLeafBase *leaf) { assert(false); }
+   virtual void DoRead(std::uint64_t num, RLeafBase *leaf) { assert(false); }
 
 public:
   struct IteratorState {
@@ -86,15 +87,26 @@ public:
     fChildren.push_back(child);
   }
 
-  virtual RTreeColumn* GenerateColumns(RTreeSink *sink) = 0;
+  virtual RTreeColumn* GenerateColumns(RTreeSource *source, RTreeSink *sink)
+    = 0;
 
-  void Write(RLeafBase *leaf) {
+  void Append(RLeafBase *leaf) {
     if (!fIsSimple) {
-      DoWrite(leaf);
+      DoAppend(leaf);
       return;
     }
     fPrincipalColumn->Append(*(leaf->fPrincipalElement));
   }
+
+  void Read(std::uint64_t num, RLeafBase *leaf) {
+    if (!fIsSimple) {
+      DoRead(num, leaf);
+      return;
+    }
+    fPrincipalColumn->Read(num, leaf->fPrincipalElement.get());
+  }
+
+  //void
 };
 
 
@@ -114,10 +126,12 @@ public:
     fIsSimple = true;
   }
 
-  virtual RTreeColumn* GenerateColumns(RTreeSink *sink) override {
+  virtual RTreeColumn* GenerateColumns(RTreeSource *source, RTreeSink *sink)
+    override
+  {
     fPrincipalColumn = new RTreeColumn(
       RTreeColumnModel(fName, fDescription, RTreeColumnType::kOffset, false),
-      sink);
+      source, sink);
     return fPrincipalColumn;
   }
 
@@ -133,10 +147,12 @@ public:
     fIsSimple = true;
   }
 
-  virtual RTreeColumn* GenerateColumns(RTreeSink *sink) override {
+  virtual RTreeColumn* GenerateColumns(RTreeSource *source, RTreeSink *sink)
+    override
+  {
     fPrincipalColumn = new RTreeColumn(
       RTreeColumnModel(fName, fDescription, RTreeColumnType::kFloat, false),
-      sink);
+      source, sink);
     return fPrincipalColumn;
   }
 };

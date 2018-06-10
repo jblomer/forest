@@ -25,6 +25,7 @@ class RTreeColumnModel {
   bool fIsSorted;
   RTreeColumnModel* fParent;
   std::vector<RTreeColumnModel* /*TODO: uniqueptr*/> fChildren;
+  std::size_t fElementSize;
 
 public:
   RTreeColumnModel()
@@ -34,7 +35,9 @@ public:
     , fIsSorted(false)
     , fParent(nullptr)
     , fChildren()
-  { }
+    , fElementSize(0)
+  {
+  }
 
   RTreeColumnModel(std::string_view name,
                    std::string_view provenance,
@@ -46,10 +49,22 @@ public:
     , fIsSorted(is_sorted)
     , fParent(nullptr)
     , fChildren()
-  { }
+  {
+    switch (fType) {
+      case RTreeColumnType::kFloat:
+        fElementSize = sizeof(float);
+        break;
+      case RTreeColumnType::kOffset:
+        fElementSize = sizeof(unsigned);
+        break;
+      default:
+        fElementSize = 0;
+    }
+  }
 
   RTreeColumnType GetType() const { return fType; }
   std::string GetName() const { return fName; }
+  std::size_t GetElementSize() const { return fElementSize; }
 
   void Attach(RTreeColumnModel *model) {
     model->fParent = this;
