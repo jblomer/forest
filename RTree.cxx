@@ -67,8 +67,8 @@ void RTree::FillV(RTreeEntry **entry, unsigned size) {
 
 
 void RTree::Fill(RTreeEntry *entry) {
-  assert(entry);
-  assert(entry->IsCompatibleWith(fModel.get()));
+  //assert(entry);
+  //assert(entry->IsCompatibleWith(fModel.get()));
 
   for (auto&& ptr_leaf : entry->GetLeafsRef()) {
     //std::cout << "Filling " << ptr_leaf->GetBranch()->GetName() << std::endl;
@@ -76,7 +76,6 @@ void RTree::Fill(RTreeEntry *entry) {
     //ptr_leaf->GetSize();
   }
   fNentries++;
-   // Checkpoint (Mini Footer)
 }
 
 }  // namespace Toy

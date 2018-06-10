@@ -191,8 +191,8 @@ void RTreeRawSource::OnMapSlice(
   //std::cout << "Basket has size " << basket_size << " and " <<
   //             elements_in_basket << " elements" << std::endl;
 
-  std::cout << "Mapping slice for element number " << num
-            << " for column id " << column_id << std::endl;
+  //std::cout << "Mapping slice for element number " << num
+  //          << " for column id " << column_id << std::endl;
 
   basket->Reset(first_in_basket);
   assert(basket->GetCapacity() >= basket_size);

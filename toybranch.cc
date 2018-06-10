@@ -3,6 +3,7 @@
  */
 
 #include <array>
+#include <chrono>
 #include <cmath>
 #include <experimental/filesystem>
 #include <functional>
@@ -194,6 +195,8 @@ std::shared_ptr<Toy::TBranch<Float_t>> Toy::TTreeModel::Branch<Float_t>(std::str
 
 
 int main() {
+   std::chrono::high_resolution_clock stopwatch;
+   auto start_time = stopwatch.now();
    using RRangeType = Toy::RRangeType;
    using RTreeModel = Toy::RTreeModel;
    using RTreeSink = Toy::RTreeSink;
@@ -245,24 +248,38 @@ int main() {
     }
   } // Writing
 
-  std::cout << "Tree written, now reading it back" << std::endl;
+  auto end_time = stopwatch.now();
+  auto diff = end_time - start_time;
+  auto milliseconds =
+    std::chrono::duration_cast<std::chrono::milliseconds>(diff);
+  std::cout << "Tree written, now reading it back, tool "
+            << milliseconds.count() << " milliseconds" << std::endl;
 
+  float sum = 0.0;
+  start_time = stopwatch.now();
   {
     // event_model unused so far
     RTree tree(event_model, RTreeSource::MakeRawSource("/dev/shm/test.toy"));
 
-    auto view_h1_px = tree.GetView<float>("h1_px");
+    auto view_h1_py = tree.GetView<float>("h1_py");
 
     // The non-lazy option: the iteration fills automatically an REntry
     for (auto e : tree.GetEntryRange(RRangeType::kLazy)) {
-      float v_h1_px = view_h1_px(e);
+      float v_h1_py = view_h1_py(e);
+      sum += v_h1_py;
 
-      if ((e.fEntryNumber % 100000) == 0) {
+      if ((e.fEntryNumber % 1000000) == 0) {
         std::cout << "entry " << e.fEntryNumber
-                  << " value " << v_h1_px << std::endl;
+                  << " value " << v_h1_py << std::endl;
       }
     }
   }
+  end_time = stopwatch.now();
+  diff = end_time - start_time;
+  milliseconds =
+    std::chrono::duration_cast<std::chrono::milliseconds>(diff);
+  std::cout << "reading took " << milliseconds.count()
+            << " milliseconds (sum " << sum << ")" << std::endl;
 
    //std::vector<RTreeEntry*> entries{
    //  event_model->GetDefaultEntry(),

@@ -44,7 +44,7 @@ public:
    void Append(const RTreeElementBase &element) {
      //std::cout << "appending to " << fModel.GetName()
      //          << "(max: " << fMaxElement << ")" << std::endl;
-     assert(element.GetColumnType() == fModel.GetType());
+     //assert(element.GetColumnType() == fModel.GetType());
      void *dst = fHeadBasket->Reserve(element.GetSize());
      if (dst == nullptr) {
        ShipHeadBasket();
@@ -66,9 +66,9 @@ public:
    void Read(const std::int64_t num, RTreeElementBase *element) {
      if ((num < fCurrentSliceStart) || (num > fCurrentSliceEnd)) {
        MapSlice(num);
-       std::cout << "Mapped slice [" << fCurrentSliceStart << "-"
-                 << fCurrentSliceEnd << "] for element " << num
-                 << std::endl;
+       //std::cout << "Mapped slice [" << fCurrentSliceStart << "-"
+       //          << fCurrentSliceEnd << "] for element " << num
+       //          << std::endl;
      }
      void *buf = reinterpret_cast<unsigned char *>(fCurrentSlice->GetBuffer())
                  + (num - fCurrentSliceStart) * element->GetSize();

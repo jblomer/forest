@@ -38,6 +38,7 @@ public:
        DoSerialize(destination);
        return;
      }
+     //printf("WRITE VALUE %f\n", *((float *)fRawContent));
      std::memcpy(destination, fRawContent, fSize);
    }
 
@@ -52,6 +53,8 @@ public:
    std::size_t GetSize() const {
      return fSize;
    }
+
+   void* GetRawContent() { return fRawContent; }
 };
 
 

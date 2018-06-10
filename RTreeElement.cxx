@@ -15,7 +15,7 @@ Toy::RTreeColumnType Toy::RTreeElement<float>::MapType() {
 template <>
 void Toy::RTreeElement<float>::Initialize() {
    fIsMovable = true;
-   fRawContent = &fValue;
+   fRawContent = fValue;
    fSize = sizeof(float);
 }
 

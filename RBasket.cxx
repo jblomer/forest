@@ -3,8 +3,7 @@
 namespace Toy {
 
 RBasket::RBasket(std::size_t capacity, std::uint64_t range_start)
-   : fIsThreadsafe(false)
-   , fCapacity(capacity)
+   : fCapacity(capacity)
    , fSize(0)
    , fRangeStart(range_start)
 {

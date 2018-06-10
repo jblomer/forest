@@ -14,6 +14,9 @@
 #include "RTreeMedium.hxx"
 #include "RLeaf.hxx"
 
+#define likely(x)      __builtin_expect(!!(x), 1)
+#define unlikely(x)    __builtin_expect(!!(x), 0)
+
 namespace Toy {
 
 class RBranchBase {
@@ -91,7 +94,7 @@ public:
     = 0;
 
   void Append(RLeafBase *leaf) {
-    if (!fIsSimple) {
+    if (unlikely(!fIsSimple)) {
       DoAppend(leaf);
       return;
     }
