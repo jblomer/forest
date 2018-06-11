@@ -67,28 +67,34 @@ int main() {
   float sum = 0.0;
 
   start_time = stopwatch.now();
-  TFile roFile("/dev/shm/test.root");
-  TTree* roTree = nullptr;
-  roFile.GetObject("DecayTree", roTree);
-  Event *roEvent = new Event(); //object must be created before
-                               //setting the branch address
-  /*float h1_py;
-  auto branch = roTree->GetBranch("h1_py");
-  roTree->SetBranchAddress("h1_py", &h1_py, &branch);
-  auto nevent = roTree->GetEntries();
+  TFile file_read("/dev/shm/test.root");
+  TTree* tree_read = nullptr;
+  file_read.GetObject("DecayTree", tree_read);
+  Event *event_read = new Event(); //object must be created before
+                                   //setting the branch address
+
+  tree_read->SetBranchAddress("events", &event_read);
+  //tree_read->SetBranchStatus("*", 0);
+  //tree_read->SetBranchStatus("h1_py", 1);
+
+  TBranch* br_h1_py = tree_read->GetBranch("h1_py");
+
+  auto nevent = tree_read->GetEntries();
   std::cout << "found " << nevent << " events" << std::endl;
-  for (Int_t i=0;i<nevent;i++) {
-    branch->GetEntry(i);
+  for (Int_t i = 0; i < nevent; i++) {
+    //tree_read->GetEntry(i);
+    br_h1_py->GetEntry(i);
     if (i % 1000000 == 0)
-      std::cout << "event " << i << " value " << h1_py << std::endl;
-    sum += h1_py;
+      std::cout << "event " << i << " value " << event_read->h1_py
+                << std::endl;
+    sum += event_read->h1_py;
   }
   end_time = stopwatch.now();
   diff = end_time - start_time;
   milliseconds =
     std::chrono::duration_cast<std::chrono::milliseconds>(diff);
   std::cout << "reading took " << milliseconds.count()
-            << " milliseconds (sum " << sum << ")" << std::endl;*/
+            << " milliseconds (sum " << sum << ")" << std::endl;
 
   return 0;
 }

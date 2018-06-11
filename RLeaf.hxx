@@ -79,7 +79,7 @@ public:
 
 
 class RLeafSubtree : public RLeafBase {
-  unsigned fOffset;
+  std::uint64_t fOffset;
   LeafCollection fChildren;
 
   void Init();

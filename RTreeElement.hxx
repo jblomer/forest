@@ -58,7 +58,7 @@ public:
 };
 
 
-using RTreeOffset = unsigned;
+using RTreeOffset = std::uint64_t;
 
 
 template <typename T>
