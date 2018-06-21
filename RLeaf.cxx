@@ -18,6 +18,10 @@ void RLeafSubtree::FillV(RLeafBase **leafs, unsigned size) {
   fOffset += size;
 }
 
+
+/*template <>
+void Toy::RLeaf<RBranch>
+*/
 }
 
 template <>

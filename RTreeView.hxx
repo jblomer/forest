@@ -35,6 +35,13 @@ public:
 };
 
 
+class RTreeViewCollection : public RTreeView<RBranchCollectionTag> {
+public:
+  RTreeViewCollection(RBranch<RBranchCollectionTag> *b) :
+    RTreeView<RBranchCollectionTag>(b) { }
+};
+
+
 }  // namespace Toy
 
 #endif

@@ -48,6 +48,12 @@ public:
     return RTreeView<T>(branch);
   }
 
+  RTreeViewCollection GetViewCollection(std::string_view name) {
+    auto branch = new RBranch<RBranchCollectionTag>(name);
+    branch->GenerateColumns(fSource.get(), nullptr);
+    return RTreeViewCollection(branch);
+  }
+
   void Fill() { Fill(&(fModel->fDefaultEntry)); }
   void Fill(RTreeEntry *entry);
   void FillV(RTreeEntry **entry, unsigned size);

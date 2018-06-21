@@ -78,15 +78,17 @@ int main() {
   //tree_read->SetBranchStatus("h1_py", 1);
 
   TBranch* br_h1_py = tree_read->GetBranch("h1_py");
+  TBranch* br_energy = tree_read->GetBranch("tracks.energy");
 
   auto nevent = tree_read->GetEntries();
   std::cout << "found " << nevent << " events" << std::endl;
   for (Int_t i = 0; i < nevent; i++) {
     //tree_read->GetEntry(i);
     br_h1_py->GetEntry(i);
+    br_energy->GetEntry(i);
     if (i % 1000000 == 0)
       std::cout << "event " << i << " value " << event_read->h1_py
-                << std::endl;
+                << " (" << event_read->tracks.size() << ")" << std::endl;
     sum += event_read->h1_py;
   }
   end_time = stopwatch.now();

@@ -262,16 +262,17 @@ int main() {
     RTree tree(event_model, RTreeSource::MakeRawSource("/dev/shm/test.toy"));
 
     auto view_h1_py = tree.GetView<float>("h1_py");
+    auto view_tracks = tree.GetViewCollection("tracks");
 
     // The non-lazy option: the iteration fills automatically an REntry
-    /*for (auto e : tree.GetEntryRange(RRangeType::kLazy)) {
+    for (auto e : tree.GetEntryRange(RRangeType::kLazy)) {
       float v_h1_py = view_h1_py(e);
       sum += v_h1_py;
       if ((e.fEntryNumber % 1000000) == 0) {
         std::cout << "entry " << e.fEntryNumber
                   << " value " << v_h1_py << std::endl;
       }
-    }*/
+    }
 
     // The bulk read option
     /*unsigned N = tree.GetNentries();
