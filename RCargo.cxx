@@ -1,4 +1,4 @@
-#include "RLeaf.hxx"
+#include "RCargo.hxx"
 
 #include <vector>
 
@@ -6,15 +6,15 @@
 
 namespace Toy {
 
-void RLeafSubtree::Fill() {
-  for (auto child_leaf : fChildren)
-    child_leaf->fBranch->Append(child_leaf.get());
+void RCargoSubtree::Fill() {
+  for (auto child_cargo : fChildren)
+    child_cargo->fBranch->Append(child_cargo.get());
   fOffset++;
 }
 
-void RLeafSubtree::FillV(RLeafBase **leafs, unsigned size) {
+void RCargoSubtree::FillV(RCargoBase **cargo, unsigned size) {
   for (unsigned i = 0; i < size; ++i)
-    leafs[i]->fBranch->Append(leafs[i]);
+    cargo[i]->fBranch->Append(cargo[i]);
   fOffset += size;
 }
 
@@ -25,13 +25,13 @@ void Toy::RLeaf<RBranch>
 }
 
 template <>
-void Toy::RLeaf<float>::Init() {
+void Toy::RCargo<float>::Init() {
   fPrincipalElement = std::make_unique<Toy::RTreeElement<float>>(fValue.get());
   fIsSimple = true;
 }
 
 template <>
-void Toy::RLeafCaptured<float>::Init() {
+void Toy::RCargoCaptured<float>::Init() {
   fPrincipalElement = std::make_unique<Toy::RTreeElement<float>>(fValue);
   fIsSimple = true;
 }

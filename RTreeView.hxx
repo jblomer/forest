@@ -8,7 +8,7 @@
 
 #include "RBranch.hxx"
 #include "REntryPointer.hxx"
-#include "RLeaf.hxx"
+#include "RCargo.hxx"
 
 namespace Toy {
 
@@ -16,17 +16,17 @@ template <typename T>
 class RTreeView {
 private:
   std::unique_ptr<RBranch<T>> fBranch;
-  RLeaf<T> fLeaf;
+  RCargo<T> fCargo;
 
 public:
   RTreeView(RBranch<T> *branch)
     : fBranch(branch)
-    , fLeaf(fBranch.get())
+    , fCargo(fBranch.get())
   { }
 
   T operator ()(const REntryPointer &p) {
-    fBranch->Read(p.fEntryNumber, &fLeaf);
-    return *fLeaf.Get();
+    fBranch->Read(p.fEntryNumber, &fCargo);
+    return *fCargo.Get();
   }
 
   void ReadBulk(std::uint64_t start, std::uint64_t num, T *buf) {

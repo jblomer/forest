@@ -70,9 +70,9 @@ void RTree::Fill(RTreeEntry *entry) {
   //assert(entry);
   //assert(entry->IsCompatibleWith(fModel.get()));
 
-  for (auto&& ptr_leaf : entry->GetLeafsRef()) {
+  for (auto&& ptr_cargo : entry->GetCargoRefs()) {
     //std::cout << "Filling " << ptr_leaf->GetBranch()->GetName() << std::endl;
-    ptr_leaf->GetBranch()->Append(ptr_leaf.get());
+    ptr_cargo->GetBranch()->Append(ptr_cargo.get());
     //ptr_leaf->GetSize();
   }
   fNentries++;

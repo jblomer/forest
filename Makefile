@@ -8,7 +8,7 @@ LDFLAGS = $(LDFLAGS_ROOT) $(LDFLAGS_CUSTOM)
 
 UNITS = RBasket.o \
   REntryRange.o \
-  RLeaf.o \
+  RCargo.o \
 	RBranch.o \
   RTreeMedium.o \
   RTreeColumnModel.o \

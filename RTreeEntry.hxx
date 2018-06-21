@@ -5,7 +5,7 @@
 #include <vector>
 #include <utility>
 
-#include "RLeaf.hxx"
+#include "RCargo.hxx"
 
 namespace Toy {
 
@@ -16,32 +16,32 @@ class RTreeEntry {
    friend class RTreeModel;
 
    RTreeModel *fModel;
-   LeafCollection fLeafs;
+   CargoCollection fCargo;
 
    bool HasCompatibleModelId(RTreeModel *model);
 
-   LeafCollection& GetLeafsRef() { return fLeafs; }
+   CargoCollection& GetCargoRefs() { return fCargo; }
 
 public:
    RTreeEntry(RTreeModel *model) : fModel(model) { }
 
    template <typename T, typename... ArgsT>
-   std::shared_ptr<T> AddLeaf(ArgsT&&... args) {
-     auto leaf = std::make_shared<RLeaf<T>>(std::forward<ArgsT>(args)...);
-     auto value_ptr = leaf->Get();
-     fLeafs.emplace_back(std::move(leaf));
+   std::shared_ptr<T> AddCargo(ArgsT&&... args) {
+     auto cargo = std::make_shared<RCargo<T>>(std::forward<ArgsT>(args)...);
+     auto value_ptr = cargo->Get();
+     fCargo.emplace_back(std::move(cargo));
      return value_ptr;
    }
 
    template <typename T, typename... ArgsT>
-   void AddLeafCaptured(ArgsT&&... args) {
-     auto leaf =
-       std::make_shared<RLeafCaptured<T>>(std::forward<ArgsT>(args)...);
-     fLeafs.emplace_back(std::move(leaf));
+   void AddCargoCaptured(ArgsT&&... args) {
+     auto cargo =
+       std::make_shared<RCargoCaptured<T>>(std::forward<ArgsT>(args)...);
+     fCargo.emplace_back(std::move(cargo));
    }
 
-   void AddLeafSubtree(std::shared_ptr<RLeafSubtree> leaf) {
-     fLeafs.emplace_back(leaf);
+   void AddCargoSubtree(std::shared_ptr<RCargoSubtree> cargo) {
+     fCargo.emplace_back(cargo);
    }
 
    bool IsCompatibleWith(RTreeModel *model) {

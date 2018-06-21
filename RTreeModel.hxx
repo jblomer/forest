@@ -35,7 +35,7 @@ public:
      RBranch<T> *branch = new RBranch<T>(name);
      fRootBranch.Attach(branch);
 
-     return fDefaultEntry.AddLeaf<T>(branch, std::forward<ArgsT>(args)...);
+     return fDefaultEntry.AddCargo<T>(branch, std::forward<ArgsT>(args)...);
    }
 
    void BranchDynamic(std::string_view name,
@@ -45,14 +45,14 @@ public:
      if (type == "float") {
        RBranch<float> *branch = new RBranch<float>(name);
        fRootBranch.Attach(branch);
-       fDefaultEntry.AddLeafCaptured<float>(
+       fDefaultEntry.AddCargoCaptured<float>(
          branch, reinterpret_cast<float *>(address));
      } else {
        assert(false);
      }
    }
 
-  std::shared_ptr<RLeafSubtree> BranchCollection(
+  std::shared_ptr<RCargoSubtree> BranchCollection(
     std::string_view name,
     std::shared_ptr<RTreeModel> model)
   {
@@ -65,11 +65,11 @@ public:
 
     fRootBranch.Attach(&model->fRootBranch);
 
-    auto leaf =
-      std::make_shared<RLeafSubtree>(&model->fRootBranch,
-                                     model->fDefaultEntry.fLeafs);
-    fDefaultEntry.AddLeafSubtree(leaf);
-    return leaf;
+    auto cargo =
+      std::make_shared<RCargoSubtree>(&model->fRootBranch,
+                                     model->fDefaultEntry.fCargo);
+    fDefaultEntry.AddCargoSubtree(cargo);
+    return cargo;
   }
 
    // Model can be cloned and as long as it stays frozen the model id

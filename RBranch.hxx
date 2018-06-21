@@ -12,7 +12,7 @@
 
 #include "RTreeColumn.hxx"
 #include "RTreeMedium.hxx"
-#include "RLeaf.hxx"
+#include "RCargo.hxx"
 
 #define likely(x)      __builtin_expect(!!(x), 1)
 #define unlikely(x)    __builtin_expect(!!(x), 0)
@@ -37,8 +37,8 @@ protected:
      , fPrincipalColumn(nullptr)
    { }
 
-   virtual void DoAppend(RLeafBase *leaf) { assert(false); }
-   virtual void DoRead(std::uint64_t num, RLeafBase *leaf) { assert(false); }
+   virtual void DoAppend(RCargoBase *leaf) { assert(false); }
+   virtual void DoRead(std::uint64_t num, RCargoBase *cargo) { assert(false); }
    //virtual void DoReadV(std::uint64_t num, RLeafBase *leaf) { assert(false); }
 
 public:
@@ -94,20 +94,20 @@ public:
   virtual RTreeColumn* GenerateColumns(RTreeSource *source, RTreeSink *sink)
     = 0;
 
-  void Append(RLeafBase *__restrict__ leaf) {
+  void Append(RCargoBase *__restrict__ cargo) {
     if (unlikely(!fIsSimple)) {
-      DoAppend(leaf);
+      DoAppend(cargo);
       return;
     }
-    fPrincipalColumn->Append(*(leaf->fPrincipalElement));
+    fPrincipalColumn->Append(*(cargo->fPrincipalElement));
   }
 
-  void Read(std::uint64_t num, RLeafBase *__restrict__ leaf) {
+  void Read(std::uint64_t num, RCargoBase *__restrict__ cargo) {
     if (!fIsSimple) {
-      DoRead(num, leaf);
+      DoRead(num, cargo);
       return;
     }
-    fPrincipalColumn->Read(num, leaf->fPrincipalElement.get());
+    fPrincipalColumn->Read(num, cargo->fPrincipalElement.get());
   }
 
   void ReadV(std::uint64_t start, std::uint64_t num, void *dst)
