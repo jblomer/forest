@@ -172,6 +172,8 @@ void RTreeRawSource::OnMapSlice(
   if (iter == fLiveColumns.end())
     throw "not found";
   std::uint32_t column_id = iter->second;
+  //std::cout << "OnMapSlice column " << column_id
+  //  << " #" << num << std::endl;
 
   // TODO: binary search
   std::uint64_t file_pos = 0;
@@ -199,7 +201,7 @@ void RTreeRawSource::OnMapSlice(
 
   //std::cout << "Basket has size " << basket_size << " and " <<
   //             elements_in_basket << " elements" << std::endl;
-
+//
   //std::cout << "Mapping slice for element number " << num
   //          << " for column id " << column_id << std::endl;
 

@@ -35,6 +35,38 @@ public:
 };
 
 
+template <>
+class RTreeView<RTreeOffset> {
+private:
+  std::unique_ptr<RBranch<RTreeOffset>> fBranch;
+  // For offset columns, read both the index and the one before to
+  // get the size TODO
+  RTreeOffset fOffsetPair[2];
+  RCargo<RTreeOffset> fCargo;
+
+public:
+  RTreeView(RBranch<RTreeOffset> *branch)
+    : fBranch(branch)
+    , fCargo(fBranch.get())
+  { }
+
+  RTreeOffset operator ()(const REntryPointer &p) {
+    if (p.fEntryNumber == 0) {
+      fBranch->Read(p.fEntryNumber, &fCargo);
+      return *fCargo.Get();
+    }
+    fBranch->Read(p.fEntryNumber - 1, &fCargo);
+    RTreeOffset lower = *fCargo.Get();
+    fBranch->Read(p.fEntryNumber, &fCargo);
+    return *fCargo.Get() - lower;
+  }
+
+  void ReadBulk(std::uint64_t start, std::uint64_t num, RTreeOffset *buf) {
+    fBranch->ReadV(start, num, buf);
+  }
+};
+
+
 class RTreeViewCollection : public RTreeView<RTreeOffset> {
 public:
   RTreeViewCollection(RBranch<RTreeOffset> *b) :

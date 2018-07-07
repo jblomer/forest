@@ -234,7 +234,7 @@ int main() {
     RTree tree(event_model, RTreeSink::MakeRawSink("/dev/shm/test.toy"));
 
     // TODO: value semantics
-    for (unsigned i = 0; i < 80000; ++i) {
+    for (unsigned i = 0; i < 8000000; ++i) {
       for (unsigned t = 0; t < 3; ++t) {
         for (unsigned h = 0; h < 3; ++h) {
           *hit_x = 4.2;
@@ -267,11 +267,12 @@ int main() {
     // The non-lazy option: the iteration fills automatically an REntry
     for (auto e : tree.GetEntryRange(RRangeType::kLazy)) {
       float v_h1_py = view_h1_py(e);
+      unsigned ntracks = view_tracks(e);
       sum += v_h1_py;
-      if ((e.fEntryNumber % 10000) == 0) {
+      if ((e.fEntryNumber % 1000000) == 0) {
         std::cout << "entry " << e.fEntryNumber
                   << " value " << v_h1_py
-                  << ", offset column " << view_tracks(e) << std::endl;
+                  << ", number of tracks " << ntracks << std::endl;
       }
     }
 
