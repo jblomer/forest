@@ -234,14 +234,14 @@ int main() {
     RTree tree(event_model, RTreeSink::MakeRawSink("/dev/shm/test.toy"));
 
     // TODO: value semantics
-    for (unsigned i = 0; i < 8000000; ++i) {
+    for (unsigned i = 0; i < 80000; ++i) {
       for (unsigned t = 0; t < 3; ++t) {
         for (unsigned h = 0; h < 3; ++h) {
-          *hit_x = 0.0;
-          *hit_y = 0.0;
+          *hit_x = 4.2;
+          *hit_y = 8.4;
           hits->Fill();
         }
-        *track_energy = 0.0;
+        *track_energy = 1.2;
         tracks->Fill();
       }
       tree.Fill();
@@ -268,9 +268,10 @@ int main() {
     for (auto e : tree.GetEntryRange(RRangeType::kLazy)) {
       float v_h1_py = view_h1_py(e);
       sum += v_h1_py;
-      if ((e.fEntryNumber % 1000000) == 0) {
+      if ((e.fEntryNumber % 10000) == 0) {
         std::cout << "entry " << e.fEntryNumber
-                  << " value " << v_h1_py << std::endl;
+                  << " value " << v_h1_py
+                  << ", offset column " << view_tracks(e) << std::endl;
       }
     }
 

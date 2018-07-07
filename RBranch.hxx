@@ -99,6 +99,8 @@ public:
       DoAppend(cargo);
       return;
     }
+    //std::cout << "Append branch " << fName << " with element "
+    //          << cargo->fPrincipalElement->GetRawContent() << std::endl;
     fPrincipalColumn->Append(*(cargo->fPrincipalElement));
   }
 

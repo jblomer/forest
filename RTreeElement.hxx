@@ -38,7 +38,10 @@ public:
        DoSerialize(destination);
        return;
      }
-     //printf("WRITE VALUE %f\n", *((float *)fRawContent));
+     //if (fColumnType == RTreeColumnType::kFloat)
+     //  printf("WRITE VALUE %f\n", *((float *)fRawContent));
+     //else
+     //  printf("WRITE VALUE %lu\n", *((std::uint64_t *)fRawContent));
      std::memcpy(destination, fRawContent, fSize);
    }
 

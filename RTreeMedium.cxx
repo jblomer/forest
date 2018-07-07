@@ -77,6 +77,15 @@ void RTreeRawSink::OnFullBasket(RBasket *basket, RTreeColumn *column) {
   iter_epoch_index->second->fNumElements += num_elements;
   //std::cout << "adding " << num_elements << " elements"
   //          << ", basket size " << size << std::endl;
+  //if (column->GetColumnType() == RTreeColumnType::kOffset) {
+  //  std::cout << "OFFSET BASKET " << column->GetName()
+  //    << "  1st element " << *(uint64_t *)(basket->GetBuffer())
+  //    << std::endl;
+  //} else {
+  //  std::cout << "FLOAT BASKET " << column->GetName()
+  //     << "  1st element " << *(float *)(basket->GetBuffer())
+  //     << std::endl;
+  //}
 
   write(fd, basket->GetBuffer(), size);
   fFilePos += size;

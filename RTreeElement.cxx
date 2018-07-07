@@ -33,7 +33,7 @@ Toy::RTreeColumnType Toy::RTreeElement<Toy::RTreeOffset>::MapType() {
 template <>
 void Toy::RTreeElement<Toy::RTreeOffset>::Initialize() {
    fIsMovable = true;
-   fRawContent = &fValue;
+   fRawContent = fValue;
    fSize = sizeof(Toy::RTreeOffset);
 }
 

@@ -10,6 +10,8 @@ void RCargoSubtree::Fill() {
   for (auto child_cargo : fChildren)
     child_cargo->fBranch->Append(child_cargo.get());
   fOffset++;
+  //std::cout << "Filling " << fBranch->GetName() << " with " << fOffset
+  //  << std::endl;
 }
 
 void RCargoSubtree::FillV(RCargoBase **cargo, unsigned size) {

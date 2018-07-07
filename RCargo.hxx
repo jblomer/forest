@@ -89,6 +89,7 @@ public:
     : RCargoBase(branch)
     , fOffset(0)
   {
+    //std::cout << "Making principal element from " << &fOffset << std::endl;
     fPrincipalElement = std::make_unique<RTreeElement<RTreeOffset>>(&fOffset);
     fIsSimple = true;
     fChildren = entry;

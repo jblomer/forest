@@ -43,6 +43,7 @@ public:
 
    RTreeColumnModel GetModel() { return fModel; }
    RTreeColumnType GetColumnType() { return fModel.GetType(); }
+   std::string GetName() { return fModel.GetName(); }
 
    void Append(const RTreeElementBase &element) {
      //std::cout << "appending to " << fModel.GetName()

@@ -71,9 +71,8 @@ void RTree::Fill(RTreeEntry *entry) {
   //assert(entry->IsCompatibleWith(fModel.get()));
 
   for (auto&& ptr_cargo : entry->GetCargoRefs()) {
-    //std::cout << "Filling " << ptr_leaf->GetBranch()->GetName() << std::endl;
+    //std::cout << "Filling " << ptr_cargo->GetBranch()->GetName() << std::endl;
     ptr_cargo->GetBranch()->Append(ptr_cargo.get());
-    //ptr_leaf->GetSize();
   }
   fNentries++;
 }
