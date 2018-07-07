@@ -35,10 +35,10 @@ public:
 };
 
 
-class RTreeViewCollection : public RTreeView<RBranchCollectionTag> {
+class RTreeViewCollection : public RTreeView<RTreeOffset> {
 public:
-  RTreeViewCollection(RBranch<RBranchCollectionTag> *b) :
-    RTreeView<RBranchCollectionTag>(b) { }
+  RTreeViewCollection(RBranch<RTreeOffset> *b) :
+    RTreeView<RTreeOffset>(b) { }
 };
 
 

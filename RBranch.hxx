@@ -167,6 +167,23 @@ public:
   }
 };
 
+template <>
+class RBranch<RTreeOffset> : public RBranchBase {
+public:
+  explicit RBranch(std::string_view name) : RBranchBase(name) {
+    fIsSimple = true;
+  }
+
+  virtual RTreeColumn* GenerateColumns(RTreeSource *source, RTreeSink *sink)
+    override
+  {
+    fPrincipalColumn = new RTreeColumn(
+      RTreeColumnModel(fName, fDescription, RTreeColumnType::kOffset, false),
+      source, sink);
+    return fPrincipalColumn;
+  }
+};
+
 }
 
 #endif

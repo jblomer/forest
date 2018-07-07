@@ -18,10 +18,13 @@ void RCargoSubtree::FillV(RCargoBase **cargo, unsigned size) {
   fOffset += size;
 }
 
+template <>
+void Toy::RCargo<RTreeOffset>::Init() {
+  fPrincipalElement =
+    std::make_unique<Toy::RTreeElement<RTreeOffset>>(fValue.get());
+  fIsSimple = true;
+}
 
-/*template <>
-void Toy::RLeaf<RBranch>
-*/
 }
 
 template <>
