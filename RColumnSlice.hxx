@@ -1,5 +1,5 @@
-#ifndef RBASKET_H_
-#define RBASKET_H_
+#ifndef RCOLUMN_SLICE_H_
+#define RCOLUMN_SLICE_H_
 
 #include <atomic>
 #include <cassert>
@@ -10,16 +10,16 @@
 
 namespace Toy {
 
-class RBasket {
+class RColumnSlice {
    unsigned char *fBuffer;
    std::size_t fCapacity;
    std::size_t fSize;
    std::uint64_t fRangeStart;
 
 public:
-   RBasket(std::size_t capacity, std::uint64_t range_start);
+   RColumnSlice(std::size_t capacity, std::uint64_t range_start);
    // TODO: copy, move
-   ~RBasket();
+   ~RColumnSlice();
 
    std::size_t GetCapacity() const { return fCapacity; }
    std::size_t GetSize() const { return fSize; }
@@ -44,8 +44,8 @@ public:
      fSize = 0;
      fRangeStart = range_start;
    }
-};  // class RBasket
+};  // class RColumnSlice
 
 }  // namespace Toy
 
-#endif  // RBASKET_H_
+#endif  // RCOLUMN_SLICE_H_

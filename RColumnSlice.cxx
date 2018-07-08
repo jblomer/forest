@@ -1,8 +1,8 @@
-#include "RBasket.hxx"
+#include "RColumnSlice.hxx"
 
 namespace Toy {
 
-RBasket::RBasket(std::size_t capacity, std::uint64_t range_start)
+RColumnSlice::RColumnSlice(std::size_t capacity, std::uint64_t range_start)
    : fCapacity(capacity)
    , fSize(0)
    , fRangeStart(range_start)
@@ -12,7 +12,7 @@ RBasket::RBasket(std::size_t capacity, std::uint64_t range_start)
    assert(fBuffer);
 }
 
-RBasket::~RBasket() {
+RColumnSlice::~RColumnSlice() {
    std::free(fBuffer);
 }
 

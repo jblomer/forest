@@ -14,7 +14,7 @@ RTreeColumn::RTreeColumn(
   : fModel(model)
   , fSource(source)
   , fSink(sink)
-  , fHeadBasket(nullptr)
+  , fHeadSlice(nullptr)
   , fMaxElement(0)
   , fCurrentSlice(nullptr)
   , fCurrentSliceStart(-1)
@@ -22,22 +22,22 @@ RTreeColumn::RTreeColumn(
 {
   if (fSink) {
     fSink->OnAddColumn(this);
-    fHeadBasket =
-      std::make_unique<RBasket>(4 /*TODO*/ * kDefaultNumElements, 0);
+    fHeadSlice =
+      std::make_unique<RColumnSlice>(4 /*TODO*/ * kDefaultNumElements, 0);
   }
   if (fSource) {
     fSource->OnAddColumn(this);
     fCurrentSlice =
-      std::make_unique<RBasket>(4 /*TODO*/ * kDefaultNumElements, 0);
+      std::make_unique<RColumnSlice>(4 /*TODO*/ * kDefaultNumElements, 0);
     fMaxElement = fSource->GetNElements(this);
   }
 }
 
-void RTreeColumn::ShipHeadBasket() {
+void RTreeColumn::ShipHeadSlice() {
   assert(fSink);
-  fHeadBasket->Freeze();
-  fSink->OnFullBasket(fHeadBasket.get(), this);
-  fHeadBasket->Reset(fMaxElement);
+  fHeadSlice->Freeze();
+  fSink->OnFullSlice(fHeadSlice.get(), this);
+  fHeadSlice->Reset(fMaxElement);
   //std::cout << "RESETTING TO " << fMaxElement << std::endl;
 }
 

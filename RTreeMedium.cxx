@@ -10,7 +10,7 @@
 #include <string>
 #include <utility>
 
-#include "RBasket.hxx"
+#include "RColumnSlice.hxx"
 #include "RTree.hxx"
 
 namespace Toy {
@@ -57,8 +57,8 @@ void RTreeRawSink::OnAddColumn(RTreeColumn *column) {
   fEpochIndex[column] = std::make_unique<RColumnIndex>(id);
 }
 
-void RTreeRawSink::OnFullBasket(RBasket *basket, RTreeColumn *column) {
-  std::size_t size = basket->GetSize();
+void RTreeRawSink::OnFullSlice(RColumnSlice *slice, RTreeColumn *column) {
+  std::size_t size = slice->GetSize();
   std::size_t num_elements = size / column->GetModel().GetElementSize();
   std::size_t epoch = fFilePos / kEpochSize;
   if (((fFilePos + size) / kEpochSize) > epoch) {
@@ -67,11 +67,11 @@ void RTreeRawSink::OnFullBasket(RBasket *basket, RTreeColumn *column) {
     WriteMiniFooter();
   }
 
-  std::pair<uint64_t, uint64_t> entry(basket->GetRangeStart(), fFilePos);
+  std::pair<uint64_t, uint64_t> entry(slice->GetRangeStart(), fFilePos);
   auto iter_global_index = fGlobalIndex.find(column);
   auto iter_epoch_index = fEpochIndex.find(column);
-  iter_global_index->second->fBasketHeads.push_back(entry);
-  iter_epoch_index->second->fBasketHeads.push_back(entry);
+  iter_global_index->second->fSliceHeads.push_back(entry);
+  iter_epoch_index->second->fSliceHeads.push_back(entry);
 
   iter_global_index->second->fNumElements += num_elements;
   iter_epoch_index->second->fNumElements += num_elements;
@@ -87,7 +87,7 @@ void RTreeRawSink::OnFullBasket(RBasket *basket, RTreeColumn *column) {
   //     << std::endl;
   //}
 
-  write(fd, basket->GetBuffer(), size);
+  write(fd, slice->GetBuffer(), size);
   fFilePos += size;
 }
 
@@ -106,13 +106,13 @@ void RTreeRawSink::WriteFooter(std::uint64_t nentries) {
     Write(&(iter_col.second->fId), sizeof(iter_col.second->fId));
     Write(&(iter_col.second->fNumElements),
           sizeof(iter_col.second->fNumElements));
-    uint32_t nbaskets = iter_col.second->fBasketHeads.size();
-    Write(&nbaskets, sizeof(nbaskets));
-    if (nbaskets > 0) {
-      Write(iter_col.second->fBasketHeads.data(),
-            nbaskets * sizeof(std::pair<uint64_t, uint64_t>));
+    uint32_t nslices = iter_col.second->fSliceHeads.size();
+    Write(&nslices, sizeof(nslices));
+    if (nslices > 0) {
+      Write(iter_col.second->fSliceHeads.data(),
+            nslices * sizeof(std::pair<uint64_t, uint64_t>));
     }
-    iter_col.second->fBasketHeads.clear();
+    iter_col.second->fSliceHeads.clear();
   }
   Write(&footer_pos, sizeof(footer_pos));
 }
@@ -134,12 +134,12 @@ void RTreeRawSink::WriteMiniFooter() {
     Write(&(iter_col.second->fId), sizeof(iter_col.second->fId));
     Write(&(iter_col.second->fNumElements),
           sizeof(iter_col.second->fNumElements));
-    uint32_t nbaskets = iter_col.second->fBasketHeads.size();
-    Write(&nbaskets, sizeof(nbaskets));
-    if (nbaskets > 0)
-      Write(iter_col.second->fBasketHeads.data(),
-            nbaskets * sizeof(std::pair<uint64_t, uint64_t>));
-    iter_col.second->fBasketHeads.clear();
+    uint32_t nslices = iter_col.second->fSliceHeads.size();
+    Write(&nslices, sizeof(nslices));
+    if (nslices > 0)
+      Write(iter_col.second->fSliceHeads.data(),
+            nslices * sizeof(std::pair<uint64_t, uint64_t>));
+    iter_col.second->fSliceHeads.clear();
   }
 }
 
@@ -166,7 +166,7 @@ void RTreeRawSource::OnAddColumn(RTreeColumn *column) {
 void RTreeRawSource::OnMapSlice(
   RTreeColumn *column,
   std::uint64_t num,
-  RBasket *basket)
+  RColumnSlice *slice)
 {
   auto iter = fLiveColumns.find(column);
   if (iter == fLiveColumns.end())
@@ -177,38 +177,38 @@ void RTreeRawSource::OnMapSlice(
 
   // TODO: binary search
   std::uint64_t file_pos = 0;
-  std::uint64_t first_in_basket = 0;
-  std::uint64_t first_outside_basket = fColumnElements[column_id];
+  std::uint64_t first_in_slice = 0;
+  std::uint64_t first_outside_slice = fColumnElements[column_id];
   Index *idx = fIndex[column_id].get();
   bool stop = false;
   for (auto idx_elem : *idx) {
     if (stop) {
-      first_outside_basket = idx_elem.first;
+      first_outside_slice = idx_elem.first;
       break;
     }
     // TODO: this works only for sequential access
     if (idx_elem.first == num) {
-      first_in_basket = idx_elem.first;
+      first_in_slice = idx_elem.first;
       file_pos = idx_elem.second;
       stop = true;
     }
     //std::cout << "ELEM " << idx_elem.first << " FILEPOS " << idx_elem.second
     //          << std::endl;
   }
-  std::uint64_t elements_in_basket = first_outside_basket - first_in_basket;
-  std::uint64_t basket_size =
-    elements_in_basket * fColumnElementSizes[column_id];
+  std::uint64_t elements_in_slice = first_outside_slice - first_in_slice;
+  std::uint64_t slice_size =
+    elements_in_slice * fColumnElementSizes[column_id];
 
 //  std::cout << "Basket has size " << basket_size << " and " <<
 //               elements_in_basket << " elements" << std::endl;
 //  std::cout << "Mapping slice for element number " << num
 //            << " for column id " << column_id << std::endl;
 
-  basket->Reset(first_in_basket);
-  assert(basket->GetCapacity() >= basket_size);
-  basket->Reserve(basket_size);
+  slice->Reset(first_in_slice);
+  assert(slice->GetCapacity() >= slice_size);
+  slice->Reserve(slice_size);
   Seek(file_pos);
-  Read(basket->GetBuffer(), basket_size);
+  Read(slice->GetBuffer(), slice_size);
 }
 
 std::uint64_t RTreeRawSource::GetNElements(RTreeColumn *column) {
@@ -276,10 +276,10 @@ void RTreeRawSource::Attach(RTree *tree) {
     Read(&id, sizeof(id));  cur_pos += sizeof(id);
     std::uint64_t num_elements;
     Read(&num_elements, sizeof(num_elements));  cur_pos += sizeof(num_elements);
-    std::uint32_t nbaskets;
-    Read(&nbaskets, sizeof(nbaskets));  cur_pos += sizeof(nbaskets);
+    std::uint32_t nslices;
+    Read(&nslices, sizeof(nslices));  cur_pos += sizeof(nslices);
     Index* col_index = new Index();
-    for (unsigned i = 0; i < nbaskets; ++i) {
+    for (unsigned i = 0; i < nslices; ++i) {
       std::pair<std::uint64_t, std::uint64_t> index_entry;
       Read(&index_entry, sizeof(index_entry));  cur_pos += sizeof(index_entry);
       //std::cout << "  READ " << index_entry.first << "/" << index_entry.second << std::endl;
@@ -288,7 +288,7 @@ void RTreeRawSource::Attach(RTree *tree) {
     fIndex[id] = std::move(std::unique_ptr<Index>(col_index));
     fColumnElements[id] = num_elements;
     std::cout << "Read index of column " << id <<
-      " with " << nbaskets << " baskets" <<
+      " with " << nslices << " slices" <<
       " and " << num_elements << " elements" << std::endl;
   }
 }

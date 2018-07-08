@@ -14,7 +14,7 @@
 
 namespace Toy {
 
-class RBasket;
+class RColumnSlice;
 class RTree;
 class RTreeModel;
 class RTreeRawSink;
@@ -31,14 +31,14 @@ public:
 
    virtual void OnCreate() = 0;
    virtual void OnAddColumn(RTreeColumn *column) = 0;
-   virtual void OnFullBasket(RBasket *basket, RTreeColumn *column) = 0;
+   virtual void OnFullSlice(RColumnSlice *slice, RTreeColumn *column) = 0;
 };
 
 
 class RTreeRawSink : public RTreeSink {
   static constexpr std::size_t kEpochSize = 1024 * 1024 * 10;
 
-  using BasketHeads = std::vector<std::pair<uint64_t, uint64_t>>;
+  using SliceHeads = std::vector<std::pair<uint64_t, uint64_t>>;
 
   struct RColumnIndex {
     RColumnIndex(std::uint32_t id)
@@ -47,7 +47,7 @@ class RTreeRawSink : public RTreeSink {
     { }
     std::uint32_t fId;
     std::uint64_t fNumElements;
-    BasketHeads fBasketHeads;
+    SliceHeads fSliceHeads;
   };
 
   RTree *fTree;
@@ -70,7 +70,7 @@ public:
 
    virtual void OnCreate() override;
    virtual void OnAddColumn(RTreeColumn *column) override;
-   virtual void OnFullBasket(RBasket *basket, RTreeColumn *column) override;
+   virtual void OnFullSlice(RColumnSlice *slice, RTreeColumn *column) override;
 };
 
 
@@ -84,7 +84,7 @@ public:
   virtual void Attach(RTree *tree) = 0;
   virtual void OnAddColumn(RTreeColumn *column) = 0;
   virtual void OnMapSlice(
-    RTreeColumn *column, std::uint64_t num, RBasket *basket) = 0;
+    RTreeColumn *column, std::uint64_t num, RColumnSlice *slice) = 0;
   virtual std::uint64_t GetNentries() = 0;
   virtual std::uint64_t GetNElements(RTreeColumn *column) = 0;
 };
@@ -121,7 +121,7 @@ public:
    virtual void Attach(RTree *tree) override;
    virtual void OnAddColumn(RTreeColumn *column) override;
    virtual void OnMapSlice(
-    RTreeColumn *column, std::uint64_t num, RBasket *basket) override;
+    RTreeColumn *column, std::uint64_t num, RColumnSlice *slice) override;
    virtual std::uint64_t GetNentries() override {
      return fNentries;
    }

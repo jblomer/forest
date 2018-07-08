@@ -27,5 +27,23 @@ int main() {
   }
   close(fd);
 
+  fd = open("test_index64", O_RDWR | O_CREAT, 0644);
+  assert(fd >= 0);
+  for (uint64_t i = 500000; i < 510000; ++i) {
+    uint64_t val = i;
+    int retval = write(fd, &val, sizeof(val));
+    assert(retval == sizeof(val));
+  }
+  close(fd);
+
+  fd = open("test_index32", O_RDWR | O_CREAT, 0644);
+  assert(fd >= 0);
+  for (uint32_t i = 500000; i < 510000; ++i) {
+    uint32_t val = i;
+    int retval = write(fd, &val, sizeof(val));
+    assert(retval == sizeof(val));
+  }
+  close(fd);
+
   return 0;
 }

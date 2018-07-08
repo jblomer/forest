@@ -6,8 +6,9 @@ LDFLAGS_ROOT = $(shell root-config --libs)
 LDFLAGS_CUSTOM = -lstdc++fs
 LDFLAGS = $(LDFLAGS_ROOT) $(LDFLAGS_CUSTOM)
 
-UNITS = RBasket.o \
+UNITS = \
   RColumnRange.o \
+	RColumnSlice.o \
   RCargo.o \
 	RBranch.o \
   RTreeMedium.o \

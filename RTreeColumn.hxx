@@ -9,7 +9,7 @@
 #include <utility>
 #include <vector>
 
-#include "RBasket.hxx"
+#include "RColumnSlice.hxx"
 #include "RTreeColumnModel.hxx"
 #include "RTreeElement.hxx"
 
@@ -25,14 +25,14 @@ class RTreeColumn {
    RTreeColumnModel fModel;
    RTreeSource *fSource;
    RTreeSink* fSink;
-   std::unique_ptr<RBasket> fHeadBasket;
+   std::unique_ptr<RColumnSlice> fHeadSlice;
    std::uint64_t fMaxElement;
 
-   std::unique_ptr<RBasket> fCurrentSlice;
+   std::unique_ptr<RColumnSlice> fCurrentSlice;
    std::int64_t fCurrentSliceStart;
    std::int64_t fCurrentSliceEnd;
 
-   void ShipHeadBasket();
+   void ShipHeadSlice();
    void MapSlice(std::uint64_t num);
 
 public:
@@ -49,21 +49,21 @@ public:
      //std::cout << "appending to " << fModel.GetName()
      //          << "(max: " << fMaxElement << ")" << std::endl;
      //assert(element.GetColumnType() == fModel.GetType());
-     void *dst = fHeadBasket->Reserve(element.GetSize());
+     void *dst = fHeadSlice->Reserve(element.GetSize());
      if (dst == nullptr) {
-       ShipHeadBasket();
-       dst = fHeadBasket->Reserve(element.GetSize());
+       ShipHeadSlice();
+       dst = fHeadSlice->Reserve(element.GetSize());
        assert(dst != nullptr);
      }
      element.Serialize(dst);
      fMaxElement++;
-     fHeadBasket->Release();
+     fHeadSlice->Release();
    }
 
    void Flush() {
      //std::cout << "flushing head basket" << std::endl;
-     if (fMaxElement > fHeadBasket->GetRangeStart())
-       ShipHeadBasket();
+     if (fMaxElement > fHeadSlice->GetRangeStart())
+       ShipHeadSlice();
    }
 
 

@@ -5,7 +5,6 @@
 #include <iostream>
 #include <utility>
 
-#include "RBasket.hxx"
 #include "RColumnRange.hxx"
 #include "RTreeEntry.hxx"
 #include "RTreeMedium.hxx"
