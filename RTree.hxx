@@ -11,7 +11,7 @@
 
 namespace Toy {
 
-class REntryRange;
+class RColumnRange;
 class RTree;
 class RTreeEntry;
 class RTreeSource;
@@ -39,7 +39,7 @@ public:
   ~RTree();
 
   unsigned GetNentries() const { return fNentries; }
-  REntryRange GetEntryRange(RRangeType type, RTreeEntry* entry = nullptr);
+  RColumnRange GetEntryRange(RRangeType type, RTreeEntry* entry = nullptr);
 
   template <typename T>
   RTreeView<T> GetView(std::string_view name) {

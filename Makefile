@@ -7,7 +7,7 @@ LDFLAGS_CUSTOM = -lstdc++fs
 LDFLAGS = $(LDFLAGS_ROOT) $(LDFLAGS_CUSTOM)
 
 UNITS = RBasket.o \
-  REntryRange.o \
+  RColumnRange.o \
   RCargo.o \
 	RBranch.o \
   RTreeMedium.o \

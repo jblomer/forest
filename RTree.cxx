@@ -6,15 +6,15 @@
 #include <utility>
 
 #include "RBasket.hxx"
-#include "REntryRange.hxx"
+#include "RColumnRange.hxx"
 #include "RTreeEntry.hxx"
 #include "RTreeMedium.hxx"
 #include "RTreeModel.hxx"
 
 namespace Toy {
 
-REntryRange RTree::GetEntryRange(RRangeType type, RTreeEntry *entry) {
-  return REntryRange(this);
+RColumnRange RTree::GetEntryRange(RRangeType type, RTreeEntry *entry) {
+  return RColumnRange(fNentries);
 }
 
 RTree::RTree(std::shared_ptr<RTreeModel> model, std::unique_ptr<RTreeSink> sink)

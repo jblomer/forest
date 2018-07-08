@@ -65,6 +65,7 @@ int main() {
             << milliseconds.count() << " milliseconds" << std::endl;
 
   float sum = 0.0;
+  float sum_e = 0.0;
 
   start_time = stopwatch.now();
   TFile file_read("/dev/shm/test.root");
@@ -90,13 +91,16 @@ int main() {
       std::cout << "event " << i << " value " << event_read->h1_py
                 << " (" << event_read->tracks.size() << ")" << std::endl;
     sum += event_read->h1_py;
+    for (auto t : event_read->tracks)
+      sum_e += t.energy;
   }
   end_time = stopwatch.now();
   diff = end_time - start_time;
   milliseconds =
     std::chrono::duration_cast<std::chrono::milliseconds>(diff);
   std::cout << "reading took " << milliseconds.count()
-            << " milliseconds (sum " << sum << ")" << std::endl;
+            << " milliseconds (sum " << sum << ", sum_e " << sum_e << ")"
+            << std::endl;
 
   return 0;
 }

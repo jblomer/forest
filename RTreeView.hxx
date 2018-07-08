@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "RBranch.hxx"
-#include "REntryPointer.hxx"
+#include "RColumnPointer.hxx"
 #include "RCargo.hxx"
 
 namespace Toy {
@@ -24,8 +24,8 @@ public:
     , fCargo(fBranch.get())
   { }
 
-  T operator ()(const REntryPointer &p) {
-    fBranch->Read(p.fEntryNumber, &fCargo);
+  T operator ()(const RColumnPointer &p) {
+    fBranch->Read(p.GetIndex(), &fCargo);
     return *fCargo.Get();
   }
 
@@ -50,14 +50,14 @@ public:
     , fCargo(fBranch.get())
   { }
 
-  RTreeOffset operator ()(const REntryPointer &p) {
-    if (p.fEntryNumber == 0) {
-      fBranch->Read(p.fEntryNumber, &fCargo);
+  RTreeOffset operator ()(const RColumnPointer &p) {
+    if (p.GetIndex() == 0) {
+      fBranch->Read(p.GetIndex(), &fCargo);
       return *fCargo.Get();
     }
-    fBranch->Read(p.fEntryNumber - 1, &fCargo);
+    fBranch->Read(p.GetIndex() - 1, &fCargo);
     RTreeOffset lower = *fCargo.Get();
-    fBranch->Read(p.fEntryNumber, &fCargo);
+    fBranch->Read(p.GetIndex(), &fCargo);
     return *fCargo.Get() - lower;
   }
 
@@ -71,6 +71,17 @@ class RTreeViewCollection : public RTreeView<RTreeOffset> {
 public:
   RTreeViewCollection(RBranch<RTreeOffset> *b) :
     RTreeView<RTreeOffset>(b) { }
+
+  //template <typename T>
+  //RTreeView<T> GetView(std::string_view name) {
+  //  auto branch = new RBranch<T>(name);  // TODO not with raw pointer
+  //  branch->GenerateColumns(fSource, nullptr);
+  //  return RTreeView<T>(branch);
+  //}
+
+  //REntryRange GetEntryRange(RRangeType type, REntryPointer parent) {
+  //  //return REntryRange(this);
+  //}
 };
 
 
