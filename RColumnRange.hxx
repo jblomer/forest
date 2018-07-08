@@ -9,9 +9,18 @@
 
 namespace Toy {
 
-struct RColumnRange {
-  explicit RColumnRange(std::uint64_t max) : fMax(max) { }
-  std::uint64_t fMax;
+class RColumnRange {
+private:
+  std::uint64_t fBegin;
+  std::uint64_t fEnd;
+
+public:
+  explicit RColumnRange(std::uint64_t b, std::uint64_t e)
+    : fBegin(b), fEnd(e) { }
+
+  std::uint64_t GetBegin() const { return fBegin; }
+  std::uint64_t GetEnd() const { return fEnd; }
+  std::uint64_t GetSize() const { return fEnd - fBegin; }
 
   struct ColumnIterator {
     std::uint64_t pos;
@@ -19,10 +28,10 @@ struct RColumnRange {
       pos++;
     }
     inline void begin(const RColumnRange* ref) {
-      pos = 0;
+      pos = ref->fBegin;
     }
     inline void end(const RColumnRange* ref) {
-      pos = ref->fMax;
+      pos = ref->fEnd;
     }
     inline RColumnPointer get(RColumnRange* ref) {
       return RColumnPointer(pos);

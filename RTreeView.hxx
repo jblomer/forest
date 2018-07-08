@@ -8,9 +8,12 @@
 
 #include "RBranch.hxx"
 #include "RColumnPointer.hxx"
+#include "RColumnRange.hxx"
 #include "RCargo.hxx"
 
 namespace Toy {
+
+class RTreeSource;
 
 template <typename T>
 class RTreeView {
@@ -37,8 +40,10 @@ public:
 
 template <>
 class RTreeView<RTreeOffset> {
-private:
+protected:
   std::unique_ptr<RBranch<RTreeOffset>> fBranch;
+
+private:
   // For offset columns, read both the index and the one before to
   // get the size TODO
   RTreeOffset fOffsetPair[2];
@@ -50,15 +55,19 @@ public:
     , fCargo(fBranch.get())
   { }
 
-  RTreeOffset operator ()(const RColumnPointer &p) {
+  RColumnRange GetRange(const RColumnPointer &p) {
     if (p.GetIndex() == 0) {
-      fBranch->Read(p.GetIndex(), &fCargo);
-      return *fCargo.Get();
+      fBranch->Read(0, &fCargo);
+      return RColumnRange(0, *fCargo.Get());
     }
     fBranch->Read(p.GetIndex() - 1, &fCargo);
     RTreeOffset lower = *fCargo.Get();
     fBranch->Read(p.GetIndex(), &fCargo);
-    return *fCargo.Get() - lower;
+    return RColumnRange(lower, *fCargo.Get());
+  }
+
+  RTreeOffset operator ()(const RColumnPointer &p) {
+    return GetRange(p).GetSize();
   }
 
   void ReadBulk(std::uint64_t start, std::uint64_t num, RTreeOffset *buf) {
@@ -68,20 +77,19 @@ public:
 
 
 class RTreeViewCollection : public RTreeView<RTreeOffset> {
+private:
+  RTreeSource *fSource;
 public:
-  RTreeViewCollection(RBranch<RTreeOffset> *b) :
-    RTreeView<RTreeOffset>(b) { }
+  RTreeViewCollection(RBranch<RTreeOffset> *b, RTreeSource *s) :
+    RTreeView<RTreeOffset>(b), fSource(s) { }
 
-  //template <typename T>
-  //RTreeView<T> GetView(std::string_view name) {
-  //  auto branch = new RBranch<T>(name);  // TODO not with raw pointer
-  //  branch->GenerateColumns(fSource, nullptr);
-  //  return RTreeView<T>(branch);
-  //}
-
-  //REntryRange GetEntryRange(RRangeType type, REntryPointer parent) {
-  //  //return REntryRange(this);
-  //}
+  template <typename T>
+  RTreeView<T> GetView(std::string_view name) {
+    // TODO not with raw pointer
+    auto branch = new RBranch<T>(fBranch->GetName() + "/" + std::string(name));
+    branch->GenerateColumns(fSource, nullptr);
+    return RTreeView<T>(branch);
+  }
 };
 
 

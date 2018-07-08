@@ -51,7 +51,7 @@ public:
   RTreeViewCollection GetViewCollection(std::string_view name) {
     auto branch = new RBranch<RTreeOffset>(name);
     branch->GenerateColumns(fSource.get(), nullptr);
-    return RTreeViewCollection(branch);
+    return RTreeViewCollection(branch, fSource.get());
   }
 
   void Fill() { Fill(&(fModel->fDefaultEntry)); }

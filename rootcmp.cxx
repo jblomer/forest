@@ -36,7 +36,7 @@ int main() {
 
   for (unsigned i = 0; i < 3; ++i) {
     Track track;
-    track.energy = 10123421342121.0;
+    track.energy = 1.2;
     for (unsigned j = 0; j < 3; ++j) {
       Hit hit;
       hit.x = 111234231234.0;
@@ -83,6 +83,7 @@ int main() {
 
   auto nevent = tree_read->GetEntries();
   std::cout << "found " << nevent << " events" << std::endl;
+  unsigned n_energy_sum_op = 0;
   for (Int_t i = 0; i < nevent; i++) {
     //tree_read->GetEntry(i);
     br_h1_py->GetEntry(i);
@@ -91,8 +92,10 @@ int main() {
       std::cout << "event " << i << " value " << event_read->h1_py
                 << " (" << event_read->tracks.size() << ")" << std::endl;
     sum += event_read->h1_py;
-    for (auto t : event_read->tracks)
+    for (auto t : event_read->tracks) {
       sum_e += t.energy;
+      n_energy_sum_op++;
+    }
   }
   end_time = stopwatch.now();
   diff = end_time - start_time;
@@ -100,6 +103,7 @@ int main() {
     std::chrono::duration_cast<std::chrono::milliseconds>(diff);
   std::cout << "reading took " << milliseconds.count()
             << " milliseconds (sum " << sum << ", sum_e " << sum_e << ")"
+            << "   [n_energy_sum_op " << n_energy_sum_op << "]"
             << std::endl;
 
   return 0;

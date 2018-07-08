@@ -197,6 +197,7 @@ std::shared_ptr<Toy::TBranch<Float_t>> Toy::TTreeModel::Branch<Float_t>(std::str
 int main() {
    std::chrono::high_resolution_clock stopwatch;
    auto start_time = stopwatch.now();
+   using RColumnRange = Toy::RColumnRange;
    using RRangeType = Toy::RRangeType;
    using RTreeModel = Toy::RTreeModel;
    using RTreeSink = Toy::RTreeSink;
@@ -234,7 +235,7 @@ int main() {
     RTree tree(event_model, RTreeSink::MakeRawSink("/dev/shm/test.toy"));
 
     // TODO: value semantics
-    for (unsigned i = 0; i < 800000; ++i) {
+    for (unsigned i = 0; i < 8000000; ++i) {
       for (unsigned t = 0; t < 3; ++t) {
         for (unsigned h = 0; h < 3; ++h) {
           *hit_x = 4.2;
@@ -256,7 +257,8 @@ int main() {
             << milliseconds.count() << " milliseconds" << std::endl;
 
   float sum = 0.0;
-  //float sum_e = 0.0;
+  float sum_e = 0.0;
+  unsigned n_energy_sum_op = 0;
   start_time = stopwatch.now();
   {
     // event_model unused so far
@@ -265,20 +267,26 @@ int main() {
     auto view_h1_py = tree.GetView<float>("h1_py");
     auto view_tracks = tree.GetViewCollection("tracks");
     // TODO: add tracks/ prefix internally
-    //auto view_energy = view_tracks.GetView<float>("tracks/energy");
+    auto view_energy = view_tracks.GetView<float>("energy");
 
     // The non-lazy option: the iteration fills automatically an REntry
     for (auto e : tree.GetEntryRange(RRangeType::kLazy)) {
+      //std::cout << "Entry range pointer " << e.GetIndex() << std::endl;
       float v_h1_py = view_h1_py(e);
-      unsigned ntracks = view_tracks(e);
+      RColumnRange track_range = view_tracks.GetRange(e);
+      unsigned ntracks = track_range.GetSize();
       sum += v_h1_py;
       if ((e.GetIndex() % 1000000) == 0) {
         std::cout << "entry " << e.GetIndex()
                   << " value " << v_h1_py
                   << ", number of tracks " << ntracks << std::endl;
       }
-      //for (auto t : view_tracks.GetEntryRange(RRangeType::kLazy, e)) {
-      //}
+
+      for (auto t : track_range) {
+        //std::cout << "Track range pointer " << t.GetIndex() << std::endl;
+        sum_e += view_energy(t);
+        n_energy_sum_op++;
+      }
     }
 
     // The bulk read option
@@ -305,7 +313,10 @@ int main() {
   milliseconds =
     std::chrono::duration_cast<std::chrono::milliseconds>(diff);
   std::cout << "reading took " << milliseconds.count()
-            << " milliseconds (sum " << sum << ")" << std::endl;
+            << " milliseconds,    sum " << sum
+            << ",    sum_e " << sum_e
+            << "   [n_energy_sum_op " << n_energy_sum_op << "]"
+            << std::endl;
 
    //std::vector<RTreeEntry*> entries{
    //  event_model->GetDefaultEntry(),

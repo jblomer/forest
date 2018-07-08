@@ -14,7 +14,7 @@
 namespace Toy {
 
 RColumnRange RTree::GetEntryRange(RRangeType type, RTreeEntry *entry) {
-  return RColumnRange(fNentries);
+  return RColumnRange(0, fNentries);
 }
 
 RTree::RTree(std::shared_ptr<RTreeModel> model, std::unique_ptr<RTreeSink> sink)
