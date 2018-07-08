@@ -39,8 +39,8 @@ int main() {
     track.energy = 1.2;
     for (unsigned j = 0; j < 3; ++j) {
       Hit hit;
-      hit.x = 111234231234.0;
-      hit.y = 1212342134213423.0;
+      hit.x = 4.2;
+      hit.y = 8.4;
       track.hits.push_back(hit);
     }
     event.tracks.push_back(track);
@@ -65,7 +65,7 @@ int main() {
             << milliseconds.count() << " milliseconds" << std::endl;
 
   float sum = 0.0;
-  float sum_e = 0.0;
+  float sum_x = 0.0;
 
   start_time = stopwatch.now();
   TFile file_read("/dev/shm/test.root");
@@ -79,22 +79,26 @@ int main() {
   //tree_read->SetBranchStatus("h1_py", 1);
 
   TBranch* br_h1_py = tree_read->GetBranch("h1_py");
-  TBranch* br_energy = tree_read->GetBranch("tracks.energy");
+  //TBranch* br_energy = tree_read->GetBranch("tracks.energy");
+  // Note: GetBranch("tracks.hits.x") doesn't work
+  TBranch* br_hits = tree_read->GetBranch("tracks.hits");
 
   auto nevent = tree_read->GetEntries();
   std::cout << "found " << nevent << " events" << std::endl;
-  unsigned n_energy_sum_op = 0;
   for (Int_t i = 0; i < nevent; i++) {
     //tree_read->GetEntry(i);
     br_h1_py->GetEntry(i);
-    br_energy->GetEntry(i);
+    br_hits->GetEntry(i);
     if (i % 1000000 == 0)
       std::cout << "event " << i << " value " << event_read->h1_py
-                << " (" << event_read->tracks.size() << ")" << std::endl;
+                << " (" << event_read->tracks.size() << ")"
+                << ",  (" << event_read->tracks[0].hits.size() << ")"
+                << std::endl;
     sum += event_read->h1_py;
     for (auto t : event_read->tracks) {
-      sum_e += t.energy;
-      n_energy_sum_op++;
+      for (auto h : t.hits) {
+        sum_x += h.x;
+      }
     }
   }
   end_time = stopwatch.now();
@@ -102,8 +106,7 @@ int main() {
   milliseconds =
     std::chrono::duration_cast<std::chrono::milliseconds>(diff);
   std::cout << "reading took " << milliseconds.count()
-            << " milliseconds (sum " << sum << ", sum_e " << sum_e << ")"
-            << "   [n_energy_sum_op " << n_energy_sum_op << "]"
+            << " milliseconds (sum " << sum << ", sum_x " << sum_x << ")"
             << std::endl;
 
   return 0;

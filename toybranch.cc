@@ -257,8 +257,9 @@ int main() {
             << milliseconds.count() << " milliseconds" << std::endl;
 
   float sum = 0.0;
-  float sum_e = 0.0;
-  unsigned n_energy_sum_op = 0;
+  //float sum_e = 0.0;
+  float sum_x = 0.0;
+  //unsigned n_energy_sum_op = 0;
   start_time = stopwatch.now();
   {
     // event_model unused so far
@@ -267,7 +268,9 @@ int main() {
     auto view_h1_py = tree.GetView<float>("h1_py");
     auto view_tracks = tree.GetViewCollection("tracks");
     // TODO: add tracks/ prefix internally
-    auto view_energy = view_tracks.GetView<float>("energy");
+    //auto view_energy = view_tracks.GetView<float>("energy");
+    auto view_hits = view_tracks.GetViewCollection("hits");
+    auto view_hit_x = view_hits.GetView<float>("x");
 
     // The non-lazy option: the iteration fills automatically an REntry
     for (auto e : tree.GetEntryRange(RRangeType::kLazy)) {
@@ -284,8 +287,12 @@ int main() {
 
       for (auto t : track_range) {
         //std::cout << "Track range pointer " << t.GetIndex() << std::endl;
-        sum_e += view_energy(t);
-        n_energy_sum_op++;
+        //sum_e += view_energy(t);
+        RColumnRange hit_range = view_hits.GetRange(t);
+        for (auto h : hit_range) {
+          //std::cout << "Hit range pointer " << h.GetIndex() << std::endl;
+          sum_x += view_hit_x(h);
+        }
       }
     }
 
@@ -314,8 +321,8 @@ int main() {
     std::chrono::duration_cast<std::chrono::milliseconds>(diff);
   std::cout << "reading took " << milliseconds.count()
             << " milliseconds,    sum " << sum
-            << ",    sum_e " << sum_e
-            << "   [n_energy_sum_op " << n_energy_sum_op << "]"
+            << ",    sum_x " << sum_x
+            //<< "   [n_energy_sum_op " << n_energy_sum_op << "]"
             << std::endl;
 
    //std::vector<RTreeEntry*> entries{

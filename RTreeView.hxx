@@ -90,6 +90,13 @@ public:
     branch->GenerateColumns(fSource, nullptr);
     return RTreeView<T>(branch);
   }
+
+  RTreeViewCollection GetViewCollection(std::string_view name) {
+    auto branch = new RBranch<RTreeOffset>(
+      fBranch->GetName() + "/" + std::string(name));
+    branch->GenerateColumns(fSource, nullptr);
+    return RTreeViewCollection(branch, fSource);
+  }
 };
 
 
