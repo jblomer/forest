@@ -325,6 +325,27 @@ int main() {
             //<< "   [n_energy_sum_op " << n_energy_sum_op << "]"
             << std::endl;
 
+  // Read a single deeply nested branch independently of entry structure
+  sum_x = 0.0;
+  start_time = stopwatch.now();
+  {
+    // event_model unused so far
+    RTree tree(event_model, RTreeSource::MakeRawSource("/dev/shm/test.toy"));
+    auto view_hit_x = tree.GetView<float>("tracks/hits/x");
+
+    // The non-lazy option: the iteration fills automatically an REntry
+    for (auto x : view_hit_x) {
+      sum_x += x;
+    }
+  }
+  end_time = stopwatch.now();
+  diff = end_time - start_time;
+  milliseconds =
+    std::chrono::duration_cast<std::chrono::milliseconds>(diff);
+  std::cout << "independent branch reading took " << milliseconds.count()
+            << ",    sum_x " << sum_x
+            << std::endl;
+
    //std::vector<RTreeEntry*> entries{
    //  event_model->GetDefaultEntry(),
    //  event_model->GetDefaultEntry(),

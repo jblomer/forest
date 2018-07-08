@@ -211,6 +211,17 @@ void RTreeRawSource::OnMapSlice(
   Read(basket->GetBuffer(), basket_size);
 }
 
+std::uint64_t RTreeRawSource::GetNElements(RTreeColumn *column) {
+  auto iter = fLiveColumns.find(column);
+  if (iter == fLiveColumns.end())
+    throw "not found";
+  std::uint32_t column_id = iter->second;
+  std::uint64_t nelements = fColumnElements[column_id];
+  std::cout << "Column #" << column_id << " has " << nelements << " elements"
+            << std::endl;
+  return fColumnElements[column_id];
+}
+
 void RTreeRawSource::Seek(size_t pos) {
   lseek(fd, pos, SEEK_SET);
 }

@@ -6,6 +6,8 @@
 #include <utility>
 #include <vector>
 
+#include "iterator_tpl.h"
+
 #include "RBranch.hxx"
 #include "RColumnPointer.hxx"
 #include "RColumnRange.hxx"
@@ -35,6 +37,30 @@ public:
   void ReadBulk(std::uint64_t start, std::uint64_t num, T *buf) {
     fBranch->ReadV(start, num, buf);
   }
+
+  struct ViewIterator {
+    std::uint64_t pos;
+    inline void next(const RTreeView<T>* ref) {
+      pos++;
+    }
+    inline void begin(const RTreeView<T>* ref) {
+      pos = 0;
+    }
+    inline void end(const RTreeView<T>* ref) {
+      pos = ref->fBranch->GetNItems();
+    }
+    inline T get(RTreeView<T>* ref) {
+      return (*ref)(RColumnPointer(pos));
+    }
+    inline const T get(const RTreeView<T>* ref)
+    {
+      return (*ref)(RColumnPointer(pos));
+    }
+    inline bool cmp(const ViewIterator& s) const {
+      return (pos != s.pos);
+    }
+  };
+  SETUP_ITERATORS(RTreeView, T, ViewIterator);
 };
 
 

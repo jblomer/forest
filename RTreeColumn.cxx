@@ -29,6 +29,7 @@ RTreeColumn::RTreeColumn(
     fSource->OnAddColumn(this);
     fCurrentSlice =
       std::make_unique<RBasket>(4 /*TODO*/ * kDefaultNumElements, 0);
+    fMaxElement = fSource->GetNElements(this);
   }
 }
 

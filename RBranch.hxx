@@ -118,6 +118,10 @@ public:
     fPrincipalColumn->ReadV(start, num, dst);
   }
 
+  std::uint64_t GetNItems() {
+    return fPrincipalColumn->GetNElements();
+  }
+
   //void
 };
 

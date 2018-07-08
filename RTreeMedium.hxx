@@ -86,6 +86,7 @@ public:
   virtual void OnMapSlice(
     RTreeColumn *column, std::uint64_t num, RBasket *basket) = 0;
   virtual std::uint64_t GetNentries() = 0;
+  virtual std::uint64_t GetNElements(RTreeColumn *column) = 0;
 };
 
 class RTreeRawSource : public RTreeSource {
@@ -124,6 +125,7 @@ public:
    virtual std::uint64_t GetNentries() override {
      return fNentries;
    }
+   virtual std::uint64_t GetNElements(RTreeColumn *column) override;
 };
 
 }

@@ -94,6 +94,8 @@ public:
      if (likely(fModel.GetType() == RTreeColumnType::kFloat))
        memcpy(dst, buf, num * fModel.GetElementSize());
    }
+
+   std::uint64_t GetNElements() { return fMaxElement; }
 };  // RTreeColumn
 
 using RTreeColumnCollection = std::vector<RTreeColumn*>;
