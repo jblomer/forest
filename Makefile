@@ -8,7 +8,8 @@ LDFLAGS = $(LDFLAGS_ROOT) $(LDFLAGS_CUSTOM)
 
 UNITS = \
   RColumn.o \
-  RColumnModel.o \
+  RColumnElement.o \
+	RColumnModel.o \
   RColumnRange.o \
   RColumnSlice.o \
   RCargo.o \
@@ -16,7 +17,6 @@ UNITS = \
   RTreeMedium.o \
   RTreeModel.o \
   RTreeEntry.o \
-  RTreeElement.o \
   RTree.o \
   RTreeView.o
 

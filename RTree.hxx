@@ -49,7 +49,7 @@ public:
   }
 
   RTreeViewCollection GetViewCollection(std::string_view name) {
-    auto branch = new RBranch<RTreeOffset>(name);
+    auto branch = new RBranch<RColumnOffset>(name);
     branch->GenerateColumns(fSource.get(), nullptr);
     return RTreeViewCollection(branch, fSource.get());
   }

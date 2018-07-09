@@ -174,7 +174,7 @@ public:
 };
 
 template <>
-class RBranch<RTreeOffset> : public RBranchBase {
+class RBranch<RColumnOffset> : public RBranchBase {
 public:
   explicit RBranch(std::string_view name) : RBranchBase(name) {
     fIsSimple = true;

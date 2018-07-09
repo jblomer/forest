@@ -1,5 +1,5 @@
-#ifndef RTREEELEMENT_H_
-#define RTREEELEMENT_H_
+#ifndef RCOLUMNELEMENT_H_
+#define RCOLUMNELEMENT_H_
 
 #include <cassert>
 #include <cstddef>
@@ -12,7 +12,7 @@
 
 namespace Toy {
 
-class RTreeElementBase {
+class RColumnElementBase {
 protected:
    // We can indicate that on disk format == in memory format
    bool fIsMovable;
@@ -24,12 +24,12 @@ protected:
    virtual void DoSerialize(void *destination) const { assert(false); }
    virtual void DoDeserialize(void *source) const { assert(false); }
 public:
-   RTreeElementBase()
+   RColumnElementBase()
      : fIsMovable(false)
      , fRawContent(nullptr)
      , fSize(0)
      , fColumnType(RColumnType::kByte) { }
-   virtual ~RTreeElementBase() { }
+   virtual ~RColumnElementBase() { }
 
    RColumnType GetColumnType() const { return fColumnType; }
 
@@ -61,18 +61,18 @@ public:
 };
 
 
-using RTreeOffset = std::uint64_t;
+using RColumnOffset = std::uint64_t;
 
 
 template <typename T>
-class RTreeElement : public RTreeElementBase {
+class RColumnElement : public RColumnElementBase {
    T* fValue;
 
    void Initialize();
 
 public:
    template<typename... ArgsT>
-   explicit RTreeElement(T *value) : fValue(value) {
+   explicit RColumnElement(T *value) : fValue(value) {
      Initialize();
      fColumnType = MapType();
    }
@@ -83,4 +83,4 @@ public:
 
 }  // namespace Toy
 
-#endif  // RTREEELEMENT_H_
+#endif  // RCOLUMNELEMENT_H_

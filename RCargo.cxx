@@ -21,9 +21,9 @@ void RCargoSubtree::FillV(RCargoBase **cargo, unsigned size) {
 }
 
 template <>
-void Toy::RCargo<RTreeOffset>::Init() {
+void Toy::RCargo<RColumnOffset>::Init() {
   fPrincipalElement =
-    std::make_unique<Toy::RTreeElement<RTreeOffset>>(fValue.get());
+    std::make_unique<Toy::RColumnElement<RColumnOffset>>(fValue.get());
   fIsSimple = true;
 }
 
@@ -31,12 +31,13 @@ void Toy::RCargo<RTreeOffset>::Init() {
 
 template <>
 void Toy::RCargo<float>::Init() {
-  fPrincipalElement = std::make_unique<Toy::RTreeElement<float>>(fValue.get());
+  fPrincipalElement =
+    std::make_unique<Toy::RColumnElement<float>>(fValue.get());
   fIsSimple = true;
 }
 
 template <>
 void Toy::RCargoCaptured<float>::Init() {
-  fPrincipalElement = std::make_unique<Toy::RTreeElement<float>>(fValue);
+  fPrincipalElement = std::make_unique<Toy::RColumnElement<float>>(fValue);
   fIsSimple = true;
 }

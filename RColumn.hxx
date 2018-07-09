@@ -11,7 +11,7 @@
 
 #include "RColumnSlice.hxx"
 #include "RColumnModel.hxx"
-#include "RTreeElement.hxx"
+#include "RColumnElement.hxx"
 
 #define likely(x)      __builtin_expect(!!(x), 1)
 #define unlikely(x)    __builtin_expect(!!(x), 0)
@@ -45,7 +45,7 @@ public:
    RColumnType GetColumnType() { return fModel.GetType(); }
    std::string GetName() { return fModel.GetName(); }
 
-   void Append(const RTreeElementBase &element) {
+   void Append(const RColumnElementBase &element) {
      //std::cout << "appending to " << fModel.GetName()
      //          << "(max: " << fMaxElement << ")" << std::endl;
      //assert(element.GetColumnType() == fModel.GetType());
@@ -67,7 +67,7 @@ public:
    }
 
 
-   void Read(const std::int64_t num, RTreeElementBase *__restrict__ element) {
+   void Read(const std::int64_t num, RColumnElementBase *__restrict__ element) {
      if ((num < fCurrentSliceStart) || (num > fCurrentSliceEnd)) {
        MapSlice(num);
        //std::cout << "Mapped slice [" << fCurrentSliceStart << "-"

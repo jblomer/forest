@@ -12,7 +12,7 @@
 #include <utility>
 #include <vector>
 
-#include "RTreeElement.hxx"
+#include "RColumnElement.hxx"
 
 
 namespace Toy {
@@ -25,7 +25,7 @@ class RCargoBase {
 
 protected:
   RBranchBase* fBranch;
-  std::unique_ptr<RTreeElementBase> fPrincipalElement;
+  std::unique_ptr<RColumnElementBase> fPrincipalElement;
   bool fIsSimple;
 
   RCargoBase(RBranchBase *branch)
@@ -89,7 +89,8 @@ public:
     , fOffset(0)
   {
     //std::cout << "Making principal element from " << &fOffset << std::endl;
-    fPrincipalElement = std::make_unique<RTreeElement<RTreeOffset>>(&fOffset);
+    fPrincipalElement =
+      std::make_unique<RColumnElement<RColumnOffset>>(&fOffset);
     fIsSimple = true;
     fChildren = entry;
   }

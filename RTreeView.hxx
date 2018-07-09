@@ -65,18 +65,18 @@ public:
 
 
 template <>
-class RTreeView<RTreeOffset> {
+class RTreeView<RColumnOffset> {
 protected:
-  std::unique_ptr<RBranch<RTreeOffset>> fBranch;
+  std::unique_ptr<RBranch<RColumnOffset>> fBranch;
 
 private:
   // For offset columns, read both the index and the one before to
   // get the size TODO
-  RTreeOffset fOffsetPair[2];
-  RCargo<RTreeOffset> fCargo;
+  RColumnOffset fOffsetPair[2];
+  RCargo<RColumnOffset> fCargo;
 
 public:
-  RTreeView(RBranch<RTreeOffset> *branch)
+  RTreeView(RBranch<RColumnOffset> *branch)
     : fBranch(branch)
     , fCargo(fBranch.get())
   { }
@@ -87,27 +87,27 @@ public:
       return RColumnRange(0, *fCargo.Get());
     }
     fBranch->Read(p.GetIndex() - 1, &fCargo);
-    RTreeOffset lower = *fCargo.Get();
+    RColumnOffset lower = *fCargo.Get();
     fBranch->Read(p.GetIndex(), &fCargo);
     return RColumnRange(lower, *fCargo.Get());
   }
 
-  RTreeOffset operator ()(const RColumnPointer &p) {
+  RColumnOffset operator ()(const RColumnPointer &p) {
     return GetRange(p).GetSize();
   }
 
-  void ReadBulk(std::uint64_t start, std::uint64_t num, RTreeOffset *buf) {
+  void ReadBulk(std::uint64_t start, std::uint64_t num, RColumnOffset *buf) {
     fBranch->ReadV(start, num, buf);
   }
 };
 
 
-class RTreeViewCollection : public RTreeView<RTreeOffset> {
+class RTreeViewCollection : public RTreeView<RColumnOffset> {
 private:
   RTreeSource *fSource;
 public:
-  RTreeViewCollection(RBranch<RTreeOffset> *b, RTreeSource *s) :
-    RTreeView<RTreeOffset>(b), fSource(s) { }
+  RTreeViewCollection(RBranch<RColumnOffset> *b, RTreeSource *s) :
+    RTreeView<RColumnOffset>(b), fSource(s) { }
 
   template <typename T>
   RTreeView<T> GetView(std::string_view name) {
@@ -118,7 +118,7 @@ public:
   }
 
   RTreeViewCollection GetViewCollection(std::string_view name) {
-    auto branch = new RBranch<RTreeOffset>(
+    auto branch = new RBranch<RColumnOffset>(
       fBranch->GetName() + "/" + std::string(name));
     branch->GenerateColumns(fSource, nullptr);
     return RTreeViewCollection(branch, fSource);
