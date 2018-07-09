@@ -1,5 +1,5 @@
-#ifndef RTREECOLUMN_H_
-#define RTREECOLUMN_H_
+#ifndef RCOLUMN_H_
+#define RCOLUMN_H_
 
 #include <cstddef>
 #include <iostream>
@@ -21,7 +21,7 @@ namespace Toy {
 class RTreeSource;
 class RTreeSink;
 
-class RTreeColumn {
+class RColumn {
    RTreeColumnModel fModel;
    RTreeSource *fSource;
    RTreeSink* fSink;
@@ -38,8 +38,8 @@ class RTreeColumn {
 public:
    static const unsigned kDefaultNumElements = 10000;
 
-   RTreeColumn(const RTreeColumnModel &model,
-               RTreeSource *source, RTreeSink *sink);
+   RColumn(const RTreeColumnModel &model,
+           RTreeSource *source, RTreeSink *sink);
 
    RTreeColumnModel GetModel() { return fModel; }
    RTreeColumnType GetColumnType() { return fModel.GetType(); }
@@ -98,8 +98,8 @@ public:
    std::uint64_t GetNElements() { return fMaxElement; }
 };  // RTreeColumn
 
-using RTreeColumnCollection = std::vector<RTreeColumn*>;
+using RColumnCollection = std::vector<RColumn*>;
 
 }  // namespace Toy
 
-#endif  // RTREECOLUMN_H_
+#endif  // RCOLUMN_H_

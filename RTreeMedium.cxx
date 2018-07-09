@@ -51,13 +51,13 @@ void RTreeRawSink::OnCreate() {
   }
 }
 
-void RTreeRawSink::OnAddColumn(RTreeColumn *column) {
+void RTreeRawSink::OnAddColumn(RColumn *column) {
   std::uint32_t id = fGlobalIndex.size();
   fGlobalIndex[column] = std::make_unique<RColumnIndex>(id);
   fEpochIndex[column] = std::make_unique<RColumnIndex>(id);
 }
 
-void RTreeRawSink::OnFullSlice(RColumnSlice *slice, RTreeColumn *column) {
+void RTreeRawSink::OnFullSlice(RColumnSlice *slice, RColumn *column) {
   std::size_t size = slice->GetSize();
   std::size_t num_elements = size / column->GetModel().GetElementSize();
   std::size_t epoch = fFilePos / kEpochSize;
@@ -153,7 +153,7 @@ std::unique_ptr<RTreeRawSource> RTreeSource::MakeRawSource(
   return std::move(std::make_unique<RTreeRawSource>(path));
 }
 
-void RTreeRawSource::OnAddColumn(RTreeColumn *column) {
+void RTreeRawSource::OnAddColumn(RColumn *column) {
   auto iter = fColumnIds.find(column->GetModel().GetName());
   if (iter == fColumnIds.end())
     throw std::string("not found");
@@ -164,7 +164,7 @@ void RTreeRawSource::OnAddColumn(RTreeColumn *column) {
 }
 
 void RTreeRawSource::OnMapSlice(
-  RTreeColumn *column,
+  RColumn *column,
   std::uint64_t num,
   RColumnSlice *slice)
 {
@@ -211,7 +211,7 @@ void RTreeRawSource::OnMapSlice(
   Read(slice->GetBuffer(), slice_size);
 }
 
-std::uint64_t RTreeRawSource::GetNElements(RTreeColumn *column) {
+std::uint64_t RTreeRawSource::GetNElements(RColumn *column) {
   auto iter = fLiveColumns.find(column);
   if (iter == fLiveColumns.end())
     throw "not found";

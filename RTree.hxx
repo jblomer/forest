@@ -5,7 +5,7 @@
 #include <string_view>
 #include <vector>
 
-#include "RTreeColumn.hxx"
+#include "RColumn.hxx"
 #include "RTreeModel.hxx"
 #include "RTreeView.hxx"
 
@@ -27,7 +27,7 @@ class RTree {
    std::unique_ptr<RTreeSink> fSink;
    std::unique_ptr<RTreeSource> fSource;
    std::shared_ptr<RTreeModel> fModel;
-   RTreeColumnCollection fColumns;
+   RColumnCollection fColumns;
 
    unsigned fNentries;
 

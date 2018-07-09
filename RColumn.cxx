@@ -1,4 +1,4 @@
-#include "RTreeColumn.hxx"
+#include "RColumn.hxx"
 
 #include <cassert>
 #include <iostream>
@@ -7,7 +7,7 @@
 
 namespace Toy {
 
-RTreeColumn::RTreeColumn(
+RColumn::RColumn(
   const RTreeColumnModel &model,
   RTreeSource *source,
   RTreeSink *sink)
@@ -33,7 +33,7 @@ RTreeColumn::RTreeColumn(
   }
 }
 
-void RTreeColumn::ShipHeadSlice() {
+void RColumn::ShipHeadSlice() {
   assert(fSink);
   fHeadSlice->Freeze();
   fSink->OnFullSlice(fHeadSlice.get(), this);
@@ -41,7 +41,7 @@ void RTreeColumn::ShipHeadSlice() {
   //std::cout << "RESETTING TO " << fMaxElement << std::endl;
 }
 
-void RTreeColumn::MapSlice(std::uint64_t num) {
+void RColumn::MapSlice(std::uint64_t num) {
   fSource->OnMapSlice(this, num, fCurrentSlice.get());
   fCurrentSliceStart = fCurrentSlice->GetRangeStart();
   fCurrentSliceEnd = fCurrentSlice->GetRangeStart() +

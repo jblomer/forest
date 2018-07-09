@@ -7,6 +7,7 @@ LDFLAGS_CUSTOM = -lstdc++fs
 LDFLAGS = $(LDFLAGS_ROOT) $(LDFLAGS_CUSTOM)
 
 UNITS = \
+  RColumn.o \
   RColumnRange.o \
 	RColumnSlice.o \
   RCargo.o \
@@ -15,7 +16,6 @@ UNITS = \
   RTreeColumnModel.o \
 	RTreeModel.o \
   RTreeEntry.o \
-	RTreeColumn.o \
 	RTreeElement.o \
 	RTree.o \
 	RTreeView.o

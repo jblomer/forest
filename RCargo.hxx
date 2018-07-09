@@ -12,7 +12,6 @@
 #include <utility>
 #include <vector>
 
-#include "RTreeColumn.hxx"
 #include "RTreeElement.hxx"
 
 

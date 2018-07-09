@@ -10,7 +10,7 @@
 
 #include "iterator_tpl.h"
 
-#include "RTreeColumn.hxx"
+#include "RColumn.hxx"
 #include "RTreeMedium.hxx"
 #include "RCargo.hxx"
 
@@ -28,7 +28,7 @@ protected:
    std::string fDescription;
    std::string fName;
    bool fIsSimple;
-   RTreeColumn *fPrincipalColumn;
+   RColumn *fPrincipalColumn;
 
    explicit RBranchBase(std::string_view name)
      : fParent(nullptr)
@@ -91,7 +91,7 @@ public:
     fChildren.push_back(child);
   }
 
-  virtual RTreeColumn* GenerateColumns(RTreeSource *source, RTreeSink *sink)
+  virtual RColumn* GenerateColumns(RTreeSource *source, RTreeSink *sink)
     = 0;
 
   void Append(RCargoBase *__restrict__ cargo) {
@@ -142,10 +142,10 @@ public:
     fIsSimple = true;
   }
 
-  virtual RTreeColumn* GenerateColumns(RTreeSource *source, RTreeSink *sink)
+  virtual RColumn* GenerateColumns(RTreeSource *source, RTreeSink *sink)
     override
   {
-    fPrincipalColumn = new RTreeColumn(
+    fPrincipalColumn = new RColumn(
       RTreeColumnModel(fName, fDescription, RTreeColumnType::kOffset, false),
       source, sink);
     return fPrincipalColumn;
@@ -163,10 +163,10 @@ public:
     fIsSimple = true;
   }
 
-  virtual RTreeColumn* GenerateColumns(RTreeSource *source, RTreeSink *sink)
+  virtual RColumn* GenerateColumns(RTreeSource *source, RTreeSink *sink)
     override
   {
-    fPrincipalColumn = new RTreeColumn(
+    fPrincipalColumn = new RColumn(
       RTreeColumnModel(fName, fDescription, RTreeColumnType::kFloat, false),
       source, sink);
     return fPrincipalColumn;
@@ -180,10 +180,10 @@ public:
     fIsSimple = true;
   }
 
-  virtual RTreeColumn* GenerateColumns(RTreeSource *source, RTreeSink *sink)
+  virtual RColumn* GenerateColumns(RTreeSource *source, RTreeSink *sink)
     override
   {
-    fPrincipalColumn = new RTreeColumn(
+    fPrincipalColumn = new RColumn(
       RTreeColumnModel(fName, fDescription, RTreeColumnType::kOffset, false),
       source, sink);
     return fPrincipalColumn;
