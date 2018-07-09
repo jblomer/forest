@@ -3,14 +3,14 @@
 #include <cassert>
 #include <iostream>
 
-#include "RTreeMedium.hxx"
+#include "RColumnStorage.hxx"
 
 namespace Toy {
 
 RColumn::RColumn(
   const RColumnModel &model,
-  RTreeSource *source,
-  RTreeSink *sink)
+  RColumnSource *source,
+  RColumnSink *sink)
   : fModel(model)
   , fSource(source)
   , fSink(sink)

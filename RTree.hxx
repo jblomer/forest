@@ -12,9 +12,10 @@
 namespace Toy {
 
 class RColumnRange;
+class RColumnSink;
+class RColumnSource;
 class RTree;
 class RTreeEntry;
-class RTreeSource;
 
 // TODO: ROTree and RITree
 
@@ -24,8 +25,8 @@ enum class RRangeType {
 };
 
 class RTree {
-   std::unique_ptr<RTreeSink> fSink;
-   std::unique_ptr<RTreeSource> fSource;
+   std::unique_ptr<RColumnSink> fSink;
+   std::unique_ptr<RColumnSource> fSource;
    std::shared_ptr<RTreeModel> fModel;
    RColumnCollection fColumns;
 
@@ -33,9 +34,9 @@ class RTree {
 
 public:
   RTree(std::shared_ptr<RTreeModel> model,
-        std::unique_ptr<RTreeSink> sink);
+        std::unique_ptr<RColumnSink> sink);
   RTree(std::shared_ptr<RTreeModel> model,
-        std::unique_ptr<RTreeSource> source);
+        std::unique_ptr<RColumnSource> source);
   ~RTree();
 
   unsigned GetNentries() const { return fNentries; }

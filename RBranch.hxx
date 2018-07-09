@@ -10,9 +10,9 @@
 
 #include "iterator_tpl.h"
 
-#include "RColumn.hxx"
-#include "RTreeMedium.hxx"
 #include "RCargo.hxx"
+#include "RColumn.hxx"
+#include "RColumnStorage.hxx"
 
 #define likely(x)      __builtin_expect(!!(x), 1)
 #define unlikely(x)    __builtin_expect(!!(x), 0)
@@ -91,7 +91,7 @@ public:
     fChildren.push_back(child);
   }
 
-  virtual RColumn* GenerateColumns(RTreeSource *source, RTreeSink *sink)
+  virtual RColumn* GenerateColumns(RColumnSource *source, RColumnSink *sink)
     = 0;
 
   void Append(RCargoBase *__restrict__ cargo) {
@@ -142,7 +142,7 @@ public:
     fIsSimple = true;
   }
 
-  virtual RColumn* GenerateColumns(RTreeSource *source, RTreeSink *sink)
+  virtual RColumn* GenerateColumns(RColumnSource *source, RColumnSink *sink)
     override
   {
     fPrincipalColumn = new RColumn(
@@ -163,7 +163,7 @@ public:
     fIsSimple = true;
   }
 
-  virtual RColumn* GenerateColumns(RTreeSource *source, RTreeSink *sink)
+  virtual RColumn* GenerateColumns(RColumnSource *source, RColumnSink *sink)
     override
   {
     fPrincipalColumn = new RColumn(
@@ -180,7 +180,7 @@ public:
     fIsSimple = true;
   }
 
-  virtual RColumn* GenerateColumns(RTreeSource *source, RTreeSink *sink)
+  virtual RColumn* GenerateColumns(RColumnSource *source, RColumnSink *sink)
     override
   {
     fPrincipalColumn = new RColumn(

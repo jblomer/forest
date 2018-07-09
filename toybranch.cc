@@ -24,8 +24,8 @@
 #include "event.h"*/
 
 #include "RColumnRange.hxx"
+#include "RColumnStorage.hxx"
 #include "RTree.hxx"
-#include "RTreeMedium.hxx"
 #include "RTreeModel.hxx"
 
 
@@ -200,8 +200,8 @@ int main() {
    using RColumnRange = Toy::RColumnRange;
    using RRangeType = Toy::RRangeType;
    using RTreeModel = Toy::RTreeModel;
-   using RTreeSink = Toy::RTreeSink;
-   using RTreeSource = Toy::RTreeSource;
+   using RColumnSink = Toy::RColumnSink;
+   using RColumnSource = Toy::RColumnSource;
    using RTree = Toy::RTree;
    //using RTreeEntry = Toy::RTreeEntry;
 
@@ -232,7 +232,7 @@ int main() {
    //auto tracks = tree_model->Branch<std::vector<float>>("tracks");
 
   {
-    RTree tree(event_model, RTreeSink::MakeRawSink("/dev/shm/test.toy"));
+    RTree tree(event_model, RColumnSink::MakeSinkRaw("/dev/shm/test.toy"));
 
     // TODO: value semantics
     for (unsigned i = 0; i < 8000000; ++i) {
@@ -263,7 +263,7 @@ int main() {
   start_time = stopwatch.now();
   {
     // event_model unused so far
-    RTree tree(event_model, RTreeSource::MakeRawSource("/dev/shm/test.toy"));
+    RTree tree(event_model, RColumnSource::MakeSourceRaw("/dev/shm/test.toy"));
 
     auto view_h1_py = tree.GetView<float>("h1_py");
     auto view_tracks = tree.GetViewCollection("tracks");
@@ -330,7 +330,7 @@ int main() {
   start_time = stopwatch.now();
   {
     // event_model unused so far
-    RTree tree(event_model, RTreeSource::MakeRawSource("/dev/shm/test.toy"));
+    RTree tree(event_model, RColumnSource::MakeSourceRaw("/dev/shm/test.toy"));
     auto view_hit_x = tree.GetView<float>("tracks/hits/x");
 
     // The non-lazy option: the iteration fills automatically an REntry

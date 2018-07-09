@@ -18,13 +18,13 @@
 
 namespace Toy {
 
-class RTreeSource;
-class RTreeSink;
+class RColumnSource;
+class RColumnSink;
 
 class RColumn {
    RColumnModel fModel;
-   RTreeSource *fSource;
-   RTreeSink* fSink;
+   RColumnSource *fSource;
+   RColumnSink* fSink;
    std::unique_ptr<RColumnSlice> fHeadSlice;
    std::uint64_t fMaxElement;
 
@@ -39,7 +39,7 @@ public:
    static const unsigned kDefaultNumElements = 10000;
 
    RColumn(const RColumnModel &model,
-           RTreeSource *source, RTreeSink *sink);
+           RColumnSource *source, RColumnSink *sink);
 
    RColumnModel GetModel() { return fModel; }
    RColumnType GetColumnType() { return fModel.GetType(); }

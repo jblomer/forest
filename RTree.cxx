@@ -6,8 +6,8 @@
 #include <utility>
 
 #include "RColumnRange.hxx"
+#include "RColumnStorage.hxx"
 #include "RTreeEntry.hxx"
-#include "RTreeMedium.hxx"
 #include "RTreeModel.hxx"
 
 namespace Toy {
@@ -16,7 +16,8 @@ RColumnRange RTree::GetEntryRange(RRangeType type, RTreeEntry *entry) {
   return RColumnRange(0, fNentries);
 }
 
-RTree::RTree(std::shared_ptr<RTreeModel> model, std::unique_ptr<RTreeSink> sink)
+RTree::RTree(std::shared_ptr<RTreeModel> model,
+             std::unique_ptr<RColumnSink> sink)
    : fSink(std::move(sink))
    , fModel(model)
    , fNentries(0)
@@ -36,7 +37,7 @@ RTree::RTree(std::shared_ptr<RTreeModel> model, std::unique_ptr<RTreeSink> sink)
 
 RTree::RTree(
   std::shared_ptr<RTreeModel> model,
-  std::unique_ptr<RTreeSource> source)
+  std::unique_ptr<RColumnSource> source)
   : fSource(std::move(source))
   , fModel(model)
 {

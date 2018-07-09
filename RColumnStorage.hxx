@@ -1,5 +1,5 @@
-#ifndef RTREEMEDIUM_H_
-#define RTREEMEDIUM_H_
+#ifndef RCOLUMNSTORAGE_H_
+#define RCOLUMNSTORAGE_H_
 
 #include <cstddef>
 #include <cstdint>
@@ -17,15 +17,15 @@ namespace Toy {
 class RColumnSlice;
 class RTree;
 class RTreeModel;
-class RTreeRawSink;
-class RTreeRawSource;
+class RColumnSinkRaw;
+class RColumnSourceRaw;
 
-class RTreeSink {
+class RColumnSink {
 public:
-   static std::unique_ptr<RTreeRawSink> MakeRawSink(
+   static std::unique_ptr<RColumnSinkRaw> MakeSinkRaw(
      const std::filesystem::path &path);
 
-   virtual ~RTreeSink() { }
+   virtual ~RColumnSink() { }
 
    virtual void Attach(RTree *tree) = 0;
 
@@ -35,7 +35,7 @@ public:
 };
 
 
-class RTreeRawSink : public RTreeSink {
+class RColumnSinkRaw : public RColumnSink {
   static constexpr std::size_t kEpochSize = 1024 * 1024 * 10;
 
   using SliceHeads = std::vector<std::pair<uint64_t, uint64_t>>;
@@ -63,8 +63,8 @@ class RTreeRawSink : public RTreeSink {
   void WritePadding(std::size_t padding);
 
 public:
-   RTreeRawSink(const std::filesystem::path &path);
-   virtual ~RTreeRawSink();
+   RColumnSinkRaw(const std::filesystem::path &path);
+   virtual ~RColumnSinkRaw();
 
    virtual void Attach(RTree *tree) override { fTree = tree; }
 
@@ -74,12 +74,12 @@ public:
 };
 
 
-class RTreeSource {
+class RColumnSource {
 public:
-   static std::unique_ptr<RTreeRawSource> MakeRawSource(
+   static std::unique_ptr<RColumnSourceRaw> MakeSourceRaw(
      const std::filesystem::path &path);
 
-  virtual ~RTreeSource() { }
+  virtual ~RColumnSource() { }
 
   virtual void Attach(RTree *tree) = 0;
   virtual void OnAddColumn(RColumn *column) = 0;
@@ -89,7 +89,7 @@ public:
   virtual std::uint64_t GetNElements(RColumn *column) = 0;
 };
 
-class RTreeRawSource : public RTreeSource {
+class RColumnSourceRaw : public RColumnSource {
   using Index = std::vector<std::pair<std::uint64_t, std::uint64_t>>;
   using ColumnIds = std::unordered_map<std::string, std::uint32_t>;
   using ColumnElementSizes = std::unordered_map<std::uint32_t, std::size_t>;
@@ -110,13 +110,13 @@ class RTreeRawSource : public RTreeSource {
   void Seek(std::size_t size);
 
 public:
-  RTreeRawSource(const std::filesystem::path &path)
+  RColumnSourceRaw(const std::filesystem::path &path)
     : fPath(path)
     , fTree(nullptr)
     , fd(-1)
     , fNentries(0)
   { }
-  ~RTreeRawSource();
+  ~RColumnSourceRaw();
 
    virtual void Attach(RTree *tree) override;
    virtual void OnAddColumn(RColumn *column) override;
@@ -130,4 +130,4 @@ public:
 
 }
 
-#endif  // RTREEMEDIUM_H_
+#endif  // RCOLUMNSTORAGE_H_

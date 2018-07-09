@@ -12,9 +12,9 @@ UNITS = \
 	RColumnModel.o \
   RColumnRange.o \
   RColumnSlice.o \
+	RColumnStorage.o \
   RCargo.o \
   RBranch.o \
-  RTreeMedium.o \
   RTreeModel.o \
   RTreeEntry.o \
   RTree.o \

@@ -1,4 +1,4 @@
-#include "RTreeMedium.hxx"
+#include "RColumnStorage.hxx"
 
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -15,25 +15,25 @@
 
 namespace Toy {
 
-std::unique_ptr<RTreeRawSink> RTreeSink::MakeRawSink(
+std::unique_ptr<RColumnSinkRaw> RColumnSink::MakeSinkRaw(
   const std::filesystem::path &path)
 {
-   return std::move(std::make_unique<RTreeRawSink>(path));
+   return std::move(std::make_unique<RColumnSinkRaw>(path));
 }
 
-RTreeRawSink::RTreeRawSink(const std::filesystem::path &path)
+RColumnSinkRaw::RColumnSinkRaw(const std::filesystem::path &path)
   : fTree(nullptr)
   , fPath(path)
   , fd(open(fPath.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0600))
 { }
 
-RTreeRawSink::~RTreeRawSink() {
+RColumnSinkRaw::~RColumnSinkRaw() {
    WriteFooter(fTree->GetNentries());
    close(fd);
 }
 
 
-void RTreeRawSink::OnCreate() {
+void RColumnSinkRaw::OnCreate() {
   fFilePos = 0;
   std::cout << "WRITING HEADER" << std::endl;
   std::uint32_t num_cols = fGlobalIndex.size();
@@ -51,13 +51,13 @@ void RTreeRawSink::OnCreate() {
   }
 }
 
-void RTreeRawSink::OnAddColumn(RColumn *column) {
+void RColumnSinkRaw::OnAddColumn(RColumn *column) {
   std::uint32_t id = fGlobalIndex.size();
   fGlobalIndex[column] = std::make_unique<RColumnIndex>(id);
   fEpochIndex[column] = std::make_unique<RColumnIndex>(id);
 }
 
-void RTreeRawSink::OnFullSlice(RColumnSlice *slice, RColumn *column) {
+void RColumnSinkRaw::OnFullSlice(RColumnSlice *slice, RColumn *column) {
   std::size_t size = slice->GetSize();
   std::size_t num_elements = size / column->GetModel().GetElementSize();
   std::size_t epoch = fFilePos / kEpochSize;
@@ -91,14 +91,14 @@ void RTreeRawSink::OnFullSlice(RColumnSlice *slice, RColumn *column) {
   fFilePos += size;
 }
 
-void RTreeRawSink::Write(void *buf, std::size_t size) {
+void RColumnSinkRaw::Write(void *buf, std::size_t size) {
   ssize_t retval = write(fd, buf, size);
   assert(retval >= 0);
   assert(size_t(retval) == size);
   fFilePos += size;
 }
 
-void RTreeRawSink::WriteFooter(std::uint64_t nentries) {
+void RColumnSinkRaw::WriteFooter(std::uint64_t nentries) {
   std::cout << "WRITING FOOTER" << std::endl;
   size_t footer_pos = fFilePos;
   Write(&nentries, sizeof(nentries));
@@ -117,7 +117,7 @@ void RTreeRawSink::WriteFooter(std::uint64_t nentries) {
   Write(&footer_pos, sizeof(footer_pos));
 }
 
-void RTreeRawSink::WritePadding(std::size_t padding) {
+void RColumnSinkRaw::WritePadding(std::size_t padding) {
   std::array<unsigned char, 4096> zeros;
   size_t written = 0;
   while (written < padding) {
@@ -128,7 +128,7 @@ void RTreeRawSink::WritePadding(std::size_t padding) {
   fFilePos += padding;
 }
 
-void RTreeRawSink::WriteMiniFooter() {
+void RColumnSinkRaw::WriteMiniFooter() {
   std::cout << "Write Mini Footer at " << fFilePos << std::endl;
   for (auto& iter_col : fEpochIndex) {
     Write(&(iter_col.second->fId), sizeof(iter_col.second->fId));
@@ -147,13 +147,13 @@ void RTreeRawSink::WriteMiniFooter() {
 //------------------------------------------------------------------------------
 
 
-std::unique_ptr<RTreeRawSource> RTreeSource::MakeRawSource(
+std::unique_ptr<RColumnSourceRaw> RColumnSource::MakeSourceRaw(
   const std::filesystem::path &path)
 {
-  return std::move(std::make_unique<RTreeRawSource>(path));
+  return std::move(std::make_unique<RColumnSourceRaw>(path));
 }
 
-void RTreeRawSource::OnAddColumn(RColumn *column) {
+void RColumnSourceRaw::OnAddColumn(RColumn *column) {
   auto iter = fColumnIds.find(column->GetModel().GetName());
   if (iter == fColumnIds.end())
     throw std::string("not found");
@@ -163,7 +163,7 @@ void RTreeRawSource::OnAddColumn(RColumn *column) {
   fLiveColumns[column] = column_id;
 }
 
-void RTreeRawSource::OnMapSlice(
+void RColumnSourceRaw::OnMapSlice(
   RColumn *column,
   std::uint64_t num,
   RColumnSlice *slice)
@@ -211,7 +211,7 @@ void RTreeRawSource::OnMapSlice(
   Read(slice->GetBuffer(), slice_size);
 }
 
-std::uint64_t RTreeRawSource::GetNElements(RColumn *column) {
+std::uint64_t RColumnSourceRaw::GetNElements(RColumn *column) {
   auto iter = fLiveColumns.find(column);
   if (iter == fLiveColumns.end())
     throw "not found";
@@ -222,17 +222,17 @@ std::uint64_t RTreeRawSource::GetNElements(RColumn *column) {
   return fColumnElements[column_id];
 }
 
-void RTreeRawSource::Seek(size_t pos) {
+void RColumnSourceRaw::Seek(size_t pos) {
   lseek(fd, pos, SEEK_SET);
 }
 
-void RTreeRawSource::Read(void *buf, size_t size) {
+void RColumnSourceRaw::Read(void *buf, size_t size) {
   ssize_t retval = read(fd, buf, size);
   assert(retval >= 0);
   assert(size_t(retval) == size);
 }
 
-void RTreeRawSource::Attach(RTree *tree) {
+void RColumnSourceRaw::Attach(RTree *tree) {
   fTree = tree;
   fd = open(fPath.c_str(), O_RDONLY);
 
@@ -293,7 +293,7 @@ void RTreeRawSource::Attach(RTree *tree) {
   }
 }
 
-RTreeRawSource::~RTreeRawSource() {
+RColumnSourceRaw::~RColumnSourceRaw() {
   close(fd);
 }
 

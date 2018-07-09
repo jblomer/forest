@@ -15,7 +15,7 @@
 
 namespace Toy {
 
-class RTreeSource;
+class RColumnSource;
 
 template <typename T>
 class RTreeView {
@@ -104,9 +104,9 @@ public:
 
 class RTreeViewCollection : public RTreeView<RColumnOffset> {
 private:
-  RTreeSource *fSource;
+  RColumnSource *fSource;
 public:
-  RTreeViewCollection(RBranch<RColumnOffset> *b, RTreeSource *s) :
+  RTreeViewCollection(RBranch<RColumnOffset> *b, RColumnSource *s) :
     RTreeView<RColumnOffset>(b), fSource(s) { }
 
   template <typename T>
