@@ -8,7 +8,7 @@
 #include <string>
 #include <utility>
 
-#include "RTreeColumnModel.hxx"
+#include "RColumnModel.hxx"
 
 namespace Toy {
 
@@ -19,7 +19,7 @@ protected:
    void *fRawContent;
    unsigned fSize;
 
-   RTreeColumnType fColumnType;
+   RColumnType fColumnType;
 
    virtual void DoSerialize(void *destination) const { assert(false); }
    virtual void DoDeserialize(void *source) const { assert(false); }
@@ -28,10 +28,10 @@ public:
      : fIsMovable(false)
      , fRawContent(nullptr)
      , fSize(0)
-     , fColumnType(RTreeColumnType::kByte) { }
+     , fColumnType(RColumnType::kByte) { }
    virtual ~RTreeElementBase() { }
 
-   RTreeColumnType GetColumnType() const { return fColumnType; }
+   RColumnType GetColumnType() const { return fColumnType; }
 
    void Serialize(void *destination) const {
      if (!fIsMovable) {
@@ -77,7 +77,7 @@ public:
      fColumnType = MapType();
    }
 
-   static RTreeColumnType MapType();
+   static RColumnType MapType();
    static std::string GetMemoryType();
 };
 

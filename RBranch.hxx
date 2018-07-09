@@ -146,7 +146,7 @@ public:
     override
   {
     fPrincipalColumn = new RColumn(
-      RTreeColumnModel(fName, fDescription, RTreeColumnType::kOffset, false),
+      RColumnModel(fName, fDescription, RColumnType::kOffset, false),
       source, sink);
     return fPrincipalColumn;
   }
@@ -167,7 +167,7 @@ public:
     override
   {
     fPrincipalColumn = new RColumn(
-      RTreeColumnModel(fName, fDescription, RTreeColumnType::kFloat, false),
+      RColumnModel(fName, fDescription, RColumnType::kFloat, false),
       source, sink);
     return fPrincipalColumn;
   }
@@ -184,7 +184,7 @@ public:
     override
   {
     fPrincipalColumn = new RColumn(
-      RTreeColumnModel(fName, fDescription, RTreeColumnType::kOffset, false),
+      RColumnModel(fName, fDescription, RColumnType::kOffset, false),
       source, sink);
     return fPrincipalColumn;
   }

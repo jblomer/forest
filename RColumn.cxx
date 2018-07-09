@@ -8,7 +8,7 @@
 namespace Toy {
 
 RColumn::RColumn(
-  const RTreeColumnModel &model,
+  const RColumnModel &model,
   RTreeSource *source,
   RTreeSink *sink)
   : fModel(model)

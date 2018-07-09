@@ -8,17 +8,17 @@ LDFLAGS = $(LDFLAGS_ROOT) $(LDFLAGS_CUSTOM)
 
 UNITS = \
   RColumn.o \
+  RColumnModel.o \
   RColumnRange.o \
-	RColumnSlice.o \
+  RColumnSlice.o \
   RCargo.o \
-	RBranch.o \
+  RBranch.o \
   RTreeMedium.o \
-  RTreeColumnModel.o \
-	RTreeModel.o \
+  RTreeModel.o \
   RTreeEntry.o \
-	RTreeElement.o \
-	RTree.o \
-	RTreeView.o
+  RTreeElement.o \
+  RTree.o \
+  RTreeView.o
 
 all: libEvent.so compress toybranch streamer rootcmp protobufcmp fillbench
 

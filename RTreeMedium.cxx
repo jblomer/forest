@@ -40,7 +40,7 @@ void RTreeRawSink::OnCreate() {
   Write(&num_cols, sizeof(num_cols));
   for (auto& iter_col : fGlobalIndex) {
     Write(&(iter_col.second->fId), sizeof(iter_col.second->fId));
-    RTreeColumnType type = iter_col.first->GetModel().GetType();
+    RColumnType type = iter_col.first->GetModel().GetType();
     Write(&type, sizeof(type));
     std::size_t element_size = iter_col.first->GetModel().GetElementSize();
     Write(&element_size, sizeof(element_size));
@@ -242,7 +242,7 @@ void RTreeRawSource::Attach(RTree *tree) {
   for (unsigned i = 0; i < num_cols; ++i) {
     uint32_t id;
     Read(&id, sizeof(id));
-    RTreeColumnType type;
+    RColumnType type;
     Read(&type, sizeof(type));
     std::size_t element_size;
     Read(&element_size, sizeof(element_size));

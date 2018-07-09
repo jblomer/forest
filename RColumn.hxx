@@ -10,7 +10,7 @@
 #include <vector>
 
 #include "RColumnSlice.hxx"
-#include "RTreeColumnModel.hxx"
+#include "RColumnModel.hxx"
 #include "RTreeElement.hxx"
 
 #define likely(x)      __builtin_expect(!!(x), 1)
@@ -22,7 +22,7 @@ class RTreeSource;
 class RTreeSink;
 
 class RColumn {
-   RTreeColumnModel fModel;
+   RColumnModel fModel;
    RTreeSource *fSource;
    RTreeSink* fSink;
    std::unique_ptr<RColumnSlice> fHeadSlice;
@@ -38,11 +38,11 @@ class RColumn {
 public:
    static const unsigned kDefaultNumElements = 10000;
 
-   RColumn(const RTreeColumnModel &model,
+   RColumn(const RColumnModel &model,
            RTreeSource *source, RTreeSink *sink);
 
-   RTreeColumnModel GetModel() { return fModel; }
-   RTreeColumnType GetColumnType() { return fModel.GetType(); }
+   RColumnModel GetModel() { return fModel; }
+   RColumnType GetColumnType() { return fModel.GetType(); }
    std::string GetName() { return fModel.GetName(); }
 
    void Append(const RTreeElementBase &element) {
@@ -91,12 +91,12 @@ public:
      void *buf = reinterpret_cast<unsigned char *>(fCurrentSlice->GetBuffer())
                  + (start - fCurrentSliceStart) * fModel.GetElementSize();
      // TODO: what about RTreeElement?
-     if (likely(fModel.GetType() == RTreeColumnType::kFloat))
+     if (likely(fModel.GetType() == RColumnType::kFloat))
        memcpy(dst, buf, num * fModel.GetElementSize());
    }
 
    std::uint64_t GetNElements() { return fMaxElement; }
-};  // RTreeColumn
+};  // RColumn
 
 using RColumnCollection = std::vector<RColumn*>;
 

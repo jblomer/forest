@@ -1,5 +1,5 @@
-#ifndef RTREECOLUMNTYPE_H_
-#define RTREECOLUMNTYPE_H_
+#ifndef RCOLUMNMODEL_H_
+#define RCOLUMNMODEL_H_
 
 #include <iostream>
 #include <memory>
@@ -9,7 +9,7 @@
 
 namespace Toy {
 
-enum class RTreeColumnType {
+enum class RColumnType {
   kUnknown,
   kFloat,
   kInt,
@@ -18,20 +18,20 @@ enum class RTreeColumnType {
   kOffset,
 };
 
-class RTreeColumnModel {
+class RColumnModel {
   std::string fName;
   std::string fBranchProvenance;
-  RTreeColumnType fType;
+  RColumnType fType;
   bool fIsSorted;
-  RTreeColumnModel* fParent;
-  std::vector<RTreeColumnModel* /*TODO: uniqueptr*/> fChildren;
+  RColumnModel* fParent;
+  std::vector<RColumnModel* /*TODO: uniqueptr*/> fChildren;
   std::size_t fElementSize;
 
 public:
-  RTreeColumnModel()
+  RColumnModel()
     : fName()
     , fBranchProvenance()
-    , fType(RTreeColumnType::kUnknown)
+    , fType(RColumnType::kUnknown)
     , fIsSorted(false)
     , fParent(nullptr)
     , fChildren()
@@ -39,10 +39,10 @@ public:
   {
   }
 
-  RTreeColumnModel(std::string_view name,
-                   std::string_view provenance,
-                   RTreeColumnType type,
-                   bool is_sorted)
+  RColumnModel(std::string_view name,
+               std::string_view provenance,
+               RColumnType type,
+               bool is_sorted)
     : fName(name)
     , fBranchProvenance(provenance)
     , fType(type)
@@ -51,10 +51,10 @@ public:
     , fChildren()
   {
     switch (fType) {
-      case RTreeColumnType::kFloat:
+      case RColumnType::kFloat:
         fElementSize = sizeof(float);
         break;
-      case RTreeColumnType::kOffset:
+      case RColumnType::kOffset:
         fElementSize = sizeof(std::uint64_t);
         break;
       default:
@@ -62,11 +62,11 @@ public:
     }
   }
 
-  RTreeColumnType GetType() const { return fType; }
+  RColumnType GetType() const { return fType; }
   std::string GetName() const { return fName; }
   std::size_t GetElementSize() const { return fElementSize; }
 
-  void Attach(RTreeColumnModel *model) {
+  void Attach(RColumnModel *model) {
     model->fParent = this;
     fChildren.push_back(model);
   }
@@ -74,6 +74,6 @@ public:
 
 }
 
-std::ostream& operator<<(std::ostream& out, const Toy::RTreeColumnType value);
+std::ostream& operator<<(std::ostream& out, const Toy::RColumnType value);
 
-#endif // RTREECOLUMNTYPE_H_
+#endif // RCOLUMNMODEL_H_
