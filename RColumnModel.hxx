@@ -23,8 +23,6 @@ class RColumnModel {
   std::string fBranchProvenance;
   RColumnType fType;
   bool fIsSorted;
-  RColumnModel* fParent;
-  std::vector<RColumnModel* /*TODO: uniqueptr*/> fChildren;
   std::size_t fElementSize;
 
 public:
@@ -33,8 +31,6 @@ public:
     , fBranchProvenance()
     , fType(RColumnType::kUnknown)
     , fIsSorted(false)
-    , fParent(nullptr)
-    , fChildren()
     , fElementSize(0)
   {
   }
@@ -47,8 +43,6 @@ public:
     , fBranchProvenance(provenance)
     , fType(type)
     , fIsSorted(is_sorted)
-    , fParent(nullptr)
-    , fChildren()
   {
     switch (fType) {
       case RColumnType::kFloat:
@@ -65,11 +59,6 @@ public:
   RColumnType GetType() const { return fType; }
   std::string GetName() const { return fName; }
   std::size_t GetElementSize() const { return fElementSize; }
-
-  void Attach(RColumnModel *model) {
-    model->fParent = this;
-    fChildren.push_back(model);
-  }
 };
 
 }

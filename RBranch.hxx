@@ -37,7 +37,7 @@ protected:
      , fPrincipalColumn(nullptr)
    { }
 
-   virtual void DoAppend(RCargoBase *leaf) { assert(false); }
+   virtual void DoAppend(RCargoBase *cargo) { assert(false); }
    virtual void DoRead(std::uint64_t num, RCargoBase *cargo) { assert(false); }
    //virtual void DoReadV(std::uint64_t num, RLeafBase *leaf) { assert(false); }
 
@@ -153,6 +153,41 @@ public:
 
   bool IsRoot() { return fName.empty(); }
   void MakeSubBranch(std::string_view name) { fName = name; }
+};
+
+
+template <>
+class RBranch<std::vector<float>> : public RBranchBase {
+private:
+  RColumn* fValueColumn;
+
+public:
+  RBranch() : RBranchBase("") {
+    fIsSimple = false;
+  }
+  explicit RBranch(std::string_view name) : RBranchBase(name) {
+    fIsSimple = false;
+  }
+
+  virtual RColumn* GenerateColumns(RColumnSource *source, RColumnSink *sink)
+    override
+  {
+    fPrincipalColumn = new RColumn(
+      RColumnModel(fName, fDescription, RColumnType::kOffset, false),
+      source, sink);
+    fValueColumn = new RColumn(
+      RColumnModel(fName + "/@1", fDescription, RColumnType::kFloat, false),
+      source, sink);
+
+    return fPrincipalColumn;
+  }
+
+  virtual void DoAppend(RCargoBase *cargo) override {
+    //fPrincipalColumn->Append(*(cargo->fPrincipalElement));
+  }
+
+  virtual void DoRead(std::uint64_t num, RCargoBase *cargo) override {
+  }
 };
 
 

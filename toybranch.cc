@@ -217,6 +217,8 @@ int main() {
    auto h3_py = event_model->Branch<float>("h3_py", 7.0);
    auto h3_pz = event_model->Branch<float>("h3_pz", 8.0);
 
+   auto jets = event_model->Branch<std::vector<float>>("jets");
+
    float unsafe;
    event_model->BranchDynamic("unsafe", "float", &unsafe);
 

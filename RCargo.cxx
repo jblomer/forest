@@ -30,6 +30,11 @@ void Toy::RCargo<RColumnOffset>::Init() {
 }
 
 template <>
+void Toy::RCargo<std::vector<float>>::Init() {
+  // TODO
+}
+
+template <>
 void Toy::RCargo<float>::Init() {
   fPrincipalElement =
     std::make_unique<Toy::RColumnElement<float>>(fValue.get());
