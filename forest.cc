@@ -2,212 +2,27 @@
  * Playground for possible TTree/TBranch interfaces.
  */
 
-#include <array>
+#include "ROOT/RTree.hxx"
+#include "ROOT/RTreeModel.hxx"
+
 #include <chrono>
-#include <cmath>
-#include <experimental/filesystem>
-#include <functional>
-#include <iostream>
 #include <memory>
-#include <string>
-#include <string_view>
-#include <typeinfo>
-#include <vector>
-
-/*#include "ROOT/TDirectory.hxx"
-#include "TClass.h"
-#include "TClassTable.h"
-#include "TROOT.h"
-#include "TSystem.h"
-#include "TTree.h"
-
-#include "event.h"*/
-
-#include "RColumnRange.hxx"
-#include "RColumnStorage.hxx"
-#include "RTree.hxx"
-#include "RTreeModel.hxx"
-
-
-struct Point {
-   double x;
-   double y;
-};
-
-
-/**
- * In the Toy namespace, we create wrappers around the v6 classes.
- */
-/*namespace Toy {
-
-
-// Implementation notes
-//   - arbitrarily nested, split collections
-//   - can we ensure sequential writing?
-//   - can we recover partial file data if writing fails?
-//   - besides random access by event entry, possibility for secondary index desirable (timestamp)
-
-class TDynamicEntry {
-};
-
-template <typename T>
-class TBranch {
-   std::string fName;
-   std::shared_ptr<T> fSprout;
-
-public:
-   TBranch(std::string_view name) : fName(name) { }
-   std::string GetName() { return fName; }
-
-   template <typename... ArgsT>
-   std::shared_ptr<T> MakeSprout(ArgsT&&... args) {
-     fSprout = std::make_shared<T>(std::forward<ArgsT>(args)...);
-     return fSprout;
-   }
-
-   std::shared_ptr<T> GetTip() {
-     return fSprout;
-   }
-
-   T& GetTipRef() {
-     if (!fSprout) fSprout = std::make_shared<T>();
-     return *fSprout;
-   }
-
-   TBranch<T>* SetSprout(const T&& value) {
-     if (!fSprout) fSprout = std::make_shared<T>(value);
-     else *fSprout = value;
-     std::cout << "Fixed sprout to " << *fSprout << std::endl;
-     return this;
-   }
-
-   // Evaluate a function on Fill
-   void Bind(std::function<T()> fn) {
-     std::cout << "binding lambda" << std::endl;
-     std::cout << "   ... evaluating to " << fn() << std::endl;
-   }
-
-   // Write a vector of values
-   void Bind(const T* data_v, unsigned sz) {
-     std::cout << "binding vector of size " << sz << std::endl;
-   }
-};
-
-
-class TTreeModel {
-public:
-   // Templates instead of "BranchFloat" because that allows us to add a user
-   // provided event class branch with the same syntax
-   template <typename T>
-   std::shared_ptr<TBranch<T>> Branch(std::string_view name) {
-      TClass *type = TClass::GetClass(typeid(T));
-      if (!type) {
-         std::cout << "OOPS, unknown type" << std::endl;
-         return NULL;
-      }
-      std::cout << "Building branches from class " << type->GetName() << std::endl;
-      // Here we actually figured out the members of the Event class
-      //fBranches.Add("/" + name.to_string() + "/fEnergy");
-      //return fBranches.Add("/" + name.to_string());
-      return std::make_shared<TBranch<T>>("/" + std::string(name.data(), name.size()));
-   }
-
-   template <typename T, typename... ArgsT>
-   std::shared_ptr<TBranch<T>> MakeBranch(std::string_view name, ArgsT&&... args) {
-      auto branch = Branch<T>(name);
-      branch->MakeSprout(std::forward<ArgsT>(args)...);
-      return branch;
-   }
-
-   std::shared_ptr<TBranch<TDynamicEntry>> MakeDynamicBranch(std::string_view name, std::string_view type) {
-     auto branch = Branch<TDynamicEntry>(name);
-     return branch;
-   }
-};
-
-
-class TTree {
-   using TDirectory = ROOT::Experimental::TDirectory;
-
-   std::string fName;
-   std::shared_ptr<TTreeModel> fModel;
-   std::unique_ptr<TTreeMedium> fMedium;
-public:
-   static const UShort_t kMaxVectorSize = 0;
-
-   TTree() = delete;
-   TTree(const TTree &other) = default;
-
-   // FixMe01: Should the constructor become private?
-   TTree(std::string_view name, std::shared_ptr<TTreeModel> model, std::unique_ptr<TTreeMedium> &&medium)
-     : fName(name), fModel(model), fMedium(std::move(medium))
-   {
-   }
-
-   TTree(std::string_view name, std::unique_ptr<TTreeMedium> &&medium)
-     : fName(name), fMedium(std::move(medium))
-   {
-   }
-
-   ~TTree() {
-   }
-
-   void Fill(UShort_t N = kMaxVectorSize) { }
-
-   static std::shared_ptr<TTree> Make(std::string_view name,
-                                      std::shared_ptr<TTreeModel> model,
-                                      std::unique_ptr<TTreeMedium> &&medium)
-   {
-      auto t = std::make_shared<TTree>(name, model, std::move(medium));
-      //where.Add(name, t);
-      return t;
-   }
-
-   static std::shared_ptr<TTree> Open(std::string_view name,
-                                      std::unique_ptr<TTreeMedium> &&medium)
-   {
-      auto t = std::make_shared<TTree>(name, std::move(medium));
-      //where.Add(name, t);
-      return t;
-   }
-
-   static std::shared_ptr<TTree> Open(std::string_view name,
-                                      std::shared_ptr<TTreeModel> model,
-                                      std::unique_ptr<TTreeMedium> &&medium)
-   {
-      auto t = std::make_shared<TTree>(name, model, std::move(medium));
-      //where.Add(name, t);
-      return t;
-   }
-};
-
-}  // namespace Toy
-
-// Has to be in the namespace of Float_t
-template <>
-std::shared_ptr<Toy::TBranch<Float_t>> Toy::TTreeModel::Branch<Float_t>(std::string_view name) {
-   std::cout << "Adding float_t branch" << std::endl;
-   return std::make_shared<Toy::TBranch<Float_t>>("/" + std::string(name.data(), name.size()));
-}*/
-
-
-////////////////////////////////////////////////////////////////////////////////
-
+#include <utility>
 
 int main() {
    std::chrono::high_resolution_clock stopwatch;
    auto start_time = stopwatch.now();
-   using RColumnRange = Toy::RColumnRange;
-   using RRangeType = Toy::RRangeType;
-   using RTreeModel = Toy::RTreeModel;
-   using RColumnSink = Toy::RColumnSink;
-   using RColumnSource = Toy::RColumnSource;
-   using RTree = Toy::RTree;
+   //using RColumnRange = Toy::RColumnRange;
+   //using RRangeType = Toy::RRangeType;
+   //using RTreeModel = Toy::RTreeModel;
+   //using RColumnSink = Toy::RColumnSink;
+   //using RColumnSource = Toy::RColumnSource;
+   //using RTree = Toy::RTree;
    //using RTreeEntry = Toy::RTreeEntry;
 
-   auto event_model = std::make_shared<RTreeModel>();
+   auto event_model = std::make_shared<ROOT::Experimental::RTreeModel>();
 
-   auto h1_px = event_model->Branch<float>("h1_px", 0.0);
+   /*auto h1_px = event_model->Branch<float>("h1_px", 0.0);
    auto h1_py = event_model->Branch<float>("h1_py", 1.0);
    auto h1_pz = event_model->Branch<float>("h1_pz", 2.0);
    auto h2_px = event_model->Branch<float>("h2_px", 3.0);
@@ -297,7 +112,7 @@ int main() {
         }
       }
     }
-
+*/
     // The bulk read option
     /*unsigned N = tree.GetNentries();
     std::cout << "Tree has " << N << " entries" << std::endl;
@@ -316,7 +131,7 @@ int main() {
                   << " value " << cache[0] << std::endl;
       }
     }*/
-  }
+ /* }
   end_time = stopwatch.now();
   diff = end_time - start_time;
   milliseconds =
@@ -374,11 +189,15 @@ int main() {
    // make collection branch
 
 
-   //auto px = tree_model->Fork<Float_t>("px");  /* == MakeBranch<Float_t>("px")
+   //auto px = tree_model->Fork<Float_t>("px");
+
+   */
+
+  /* == MakeBranch<Float_t>("px")
    //auto px = tree_model->MakeBranch<Float_t>("px")->GetLeaf();
 
-   //auto event = /* shared pointer to Event */
-   //   tree_model->MakeBranch<Event>("my_event" /*, { constructor arguments for Event }*/)->GetTip();
+   //auto event =
+   //   tree_model->MakeBranch<Event>("my_event" )->GetTip();
    //auto& px = tree_model->MakeBranch<Float_t>("px")->GetTipRef();
    //px = 0.42;  // <-- can assign later to px without dereferencing
 //
@@ -391,8 +210,6 @@ int main() {
    //  [event = event]() -> Float_t { return (event->fEnergy < 0) ? 0.9 : 0.1; });
 
    // Capture shared pointer
-   /*auto calibration = std::make_shared<TCalibration>();
-   tree_model->MakeBranch<TCalibration>("calibration")->Bind(calibration);*
 
    // Support decoupled writer modules that don't have the types available at compile time
    auto branch_dynamic = tree_model->MakeDynamicBranch("custom", "TUserClass");
