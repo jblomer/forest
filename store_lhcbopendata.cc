@@ -51,7 +51,7 @@ int main() {
    auto cargo_h3_ip_chi2 = event_model->Branch<double>("h3_ip_chi2");
 
    RColumnRawSettings settings("B2HHH.forest");
-   //settings.fCompressionSettings = 104;  // ZLIB, level 4
+   settings.fCompressionSettings = 104;  // ZLIB, level 4
    //settings.fEpochSize = 64 * 1024 * 1024;
    RTree forest(event_model, RColumnSink::MakeSinkRaw(settings));
 
