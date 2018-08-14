@@ -16,6 +16,7 @@ int main() {
    using RColumnRange = ROOT::Experimental::RColumnRange;
    using RTree = ROOT::Experimental::RTree;
    using RTreeModel = ROOT::Experimental::RTreeModel;
+   using RColumnRawSettings = ROOT::Experimental::RColumnRawSettings;
 
    std::chrono::high_resolution_clock stopwatch;
    auto start_time = stopwatch.now();
@@ -32,7 +33,7 @@ int main() {
    auto h3_py = event_model->Branch<float>("h3_py", 7.0);
    auto h3_pz = event_model->Branch<float>("h3_pz", 8.0);
 
-   auto jets = event_model->Branch<std::vector<float>>("jets");
+   //auto jets = event_model->Branch<std::vector<float>>("jets");
 
    float unsafe;
    event_model->BranchDynamic("unsafe", "float", &unsafe);
@@ -49,7 +50,9 @@ int main() {
    //auto tracks = tree_model->Branch<std::vector<float>>("tracks");*/
 
   {
-    RTree tree(event_model, RColumnSink::MakeSinkRaw("/dev/shm/test.toy"));
+    RColumnRawSettings settings("/dev/shm/test.toy");
+    //settings.fCompressionSettings = 104;  // ZLIB, level 4
+    RTree tree(event_model, RColumnSink::MakeSinkRaw(settings));
 
     // TODO: value semantics
     for (unsigned i = 0; i < 8000000; ++i) {
