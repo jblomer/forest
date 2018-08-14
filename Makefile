@@ -1,4 +1,4 @@
-CXXFLAGS_CUSTOM = -Wall -pthread -g -O3 -std=c++1z
+CXXFLAGS_CUSTOM = -Wall -pthread -g -O2 -std=c++14
 # -fopt-info-vec-missed
 CXXFLAGS_ROOT = $(shell root-config --cflags)
 CXXFLAGS = $(CXXFLAGS_CUSTOM) $(CXXFLAGS_ROOT)

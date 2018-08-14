@@ -1,3 +1,4 @@
+#include <Compression.h>
 #include <TClass.h>
 #include <TClassTable.h>
 #include <TFile.h>
@@ -14,7 +15,7 @@ int main() {
   std::chrono::high_resolution_clock stopwatch;
   auto start_time = stopwatch.now();
   TFile *file = new TFile("/dev/shm/test.root", "RECREATE");
-  file->SetCompressionSettings(0);
+  file->SetCompressionSettings(ROOT::CompressionSettings(ROOT::kZLIB, 4));
 
   if (!TClassTable::GetDict("Event")) {
     gSystem->Load("./libEvent.so");
