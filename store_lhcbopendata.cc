@@ -136,6 +136,8 @@ int main() {
    chain->SetBranchAddress("H3_isMuon", &h3_is_muon, &br_h3_is_muon);
    chain->SetBranchAddress("H3_IpChi2", &h3_ip_chi2, &br_h3_ip_chi2);
 
+   double sum = 0.0;
+   unsigned skipped = 0;
    auto num_events = chain->GetEntries();
    std::cout << num_events << std::endl;
    for (int i = 0; i < num_events; ++i) {
@@ -194,7 +196,33 @@ int main() {
       *cargo_h3_ip_chi2  = h3_ip_chi2;
 
       forest.Fill();
+
+      if (!h1_is_muon && !h2_is_muon && !h3_is_muon) {
+         sum +=
+            h1_px +
+            h1_py +
+            h1_pz +
+            h1_prob_k +
+            h1_prob_pi +
+            double(h1_charge) +
+            h2_px +
+            h2_py +
+            h2_pz +
+            h2_prob_k +
+            h2_prob_pi +
+            double(h2_charge) +
+            h3_px +
+            h3_py +
+            h3_pz +
+            h3_prob_k +
+            h3_prob_pi +
+            double(h3_charge);
+      } else {
+         skipped++;
+      }
    }
+
+   std::cout << "Checksums: sum " << sum << "   skipped " << skipped << std::endl;
 
    return 0;
 }
