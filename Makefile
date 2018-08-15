@@ -6,7 +6,12 @@ LDFLAGS_ROOT = $(shell root-config --libs)
 LDFLAGS_CUSTOM = -lROOTForest
 LDFLAGS = $(LDFLAGS_ROOT) $(LDFLAGS_CUSTOM)
 
-all: forest store_lhcbopendata read_lhcbopendata root_lhcbopendata
+all: forest \
+  store_lhcbopendata \
+	read_lhcbopendata \
+	read_lhcbopendata~deep \
+	root_lhcbopendata \
+	store_lhcbopendata~deep
 
 .PHONY = clean
 
@@ -16,7 +21,13 @@ forest: forest.cc
 store_lhcbopendata: store_lhcbopendata.cc
 	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
+store_lhcbopendata~deep: store_lhcbopendata~deep.cc
+	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
+
 read_lhcbopendata: read_lhcbopendata.cc
+	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
+
+read_lhcbopendata~deep: read_lhcbopendata~deep.cc
 	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
 root_lhcbopendata: root_lhcbopendata.cc
@@ -25,5 +36,7 @@ root_lhcbopendata: root_lhcbopendata.cc
 clean:
 	rm -f forest \
 	  store_lhcbopendata \
+		store_lhcbopendata~deep \
 		read_lhcbopendata \
+		read_lhcbopendata~deep \
 		root_lhcbopendata
