@@ -8,6 +8,7 @@
 #include "ROOT/RTreeModel.hxx"
 
 #include <chrono>
+#include <iostream>
 #include <memory>
 #include <utility>
 
@@ -26,9 +27,10 @@ int main() {
   //unsigned n_energy_sum_op = 0;
   start_time = stopwatch.now();
 
-  auto source = RColumnSource::MakeSourceRaw("/dev/shm/test.toy");
-
-
+  auto source = RColumnSource::MakeSourceRaw("B2HHH.forest");
+  std::cout << "OK" << std::endl;
+  auto rdf = ROOT::RDataFrame(std::make_unique<ROOT::RDF::RForestDS>(source.get()));
+  std::cout << "RDF Ready" << std::endl;
 
   auto end_time = stopwatch.now();
   auto diff = end_time - start_time;
