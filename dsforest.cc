@@ -12,10 +12,29 @@
 #include <memory>
 #include <utility>
 
+void Write() {
+   using RColumnRawSettings = ROOT::Experimental::RColumnRawSettings;
+   using RColumnSink = ROOT::Experimental::RColumnSink;
+   using RTreeModel = ROOT::Experimental::RTreeModel;
+   using RTree = ROOT::Experimental::RTree;
+
+   auto event_model = std::make_shared<RTreeModel>();
+   auto h1_px = event_model->Branch<float>("h1_px");
+
+   RColumnRawSettings settings("toy.forest");
+   RTree tree(event_model, RColumnSink::MakeSinkRaw(settings));
+   *h1_px = 1.0;
+   tree.Fill();
+   *h1_px = 2.0;
+   tree.Fill();
+   *h1_px = 3.0;
+   tree.Fill();
+}
+
 int main() {
    using RColumnSource = ROOT::Experimental::RColumnSource;
-   using RTree = ROOT::Experimental::RTree;
-   using RTreeModel = ROOT::Experimental::RTreeModel;
+
+   Write();
 
    std::chrono::high_resolution_clock stopwatch;
    auto start_time = stopwatch.now();
@@ -31,6 +50,8 @@ int main() {
   std::cout << "OK" << std::endl;
   auto rdf = ROOT::RDataFrame(std::make_unique<ROOT::RDF::RForestDS>(source.get()));
   std::cout << "RDF Ready" << std::endl;
+
+  std::cout << *rdf.Max("h1_px") << std::endl;
 
   auto end_time = stopwatch.now();
   auto diff = end_time - start_time;
