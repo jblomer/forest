@@ -47,7 +47,7 @@ int main() {
    auto hits = track_model->BranchCollection("hits", hit_model);
    auto tracks = event_model->BranchCollection("tracks", track_model);
 
-   //auto tracks = tree_model->Branch<std::vector<float>>("tracks");*/
+   //auto tracks = tree_model->Branch<std::vector<float>>("tracks");
 
   {
     RColumnRawSettings settings("/dev/shm/test.toy");
