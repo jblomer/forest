@@ -8,6 +8,7 @@ LDFLAGS = $(LDFLAGS_ROOT) $(LDFLAGS_CUSTOM)
 
 all: forest \
   dsforest \
+	open_forest \
   store_lhcbopendata \
 	read_lhcbopendata \
 	read_lhcbopendata~deep \
@@ -20,6 +21,9 @@ forest: forest.cc
 	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
 dsforest: dsforest.cc
+	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
+
+open_forest: open_forest.cc
 	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
 store_lhcbopendata: store_lhcbopendata.cc
@@ -40,6 +44,7 @@ root_lhcbopendata: root_lhcbopendata.cc
 clean:
 	rm -f forest \
 	  dsforest \
+		open_forest \
 	  store_lhcbopendata \
 		store_lhcbopendata~deep \
 		read_lhcbopendata \

@@ -13,14 +13,16 @@
 #include <memory>
 #include <utility>
 
-int main() {
-   using RColumnRawSettings = ROOT::Experimental::RColumnRawSettings;
+
+using RColumnRawSettings = ROOT::Experimental::RColumnRawSettings;
+
+void Write(RColumnRawSettings settings) {
    using RColumnSink = ROOT::Experimental::RColumnSink;
    using RTree = ROOT::Experimental::RTree;
    using RTreeModel = ROOT::Experimental::RTreeModel;
 
    TChain* chain = new TChain("DecayTree");
-   chain->Add("B2HHH.root");
+   chain->Add("data/B2HHH.root");
 
    auto event_model = std::make_shared<RTreeModel>();
    auto cargo_b_flight_distance = event_model->Branch<double>("b_flight_distance");
@@ -50,9 +52,6 @@ int main() {
    auto cargo_h3_is_muon = event_model->Branch<int>("h3_is_muon");
    auto cargo_h3_ip_chi2 = event_model->Branch<double>("h3_ip_chi2");
 
-   RColumnRawSettings settings("B2HHH.forest");
-   settings.fCompressionSettings = 104;  // ZLIB, level 4
-   //settings.fEpochSize = 64 * 1024 * 1024;
    RTree forest(event_model, RColumnSink::MakeSinkRaw(settings));
 
    double b_flight_distance;
@@ -223,6 +222,17 @@ int main() {
    }
 
    std::cout << "Checksums: sum " << sum << "   skipped " << skipped << std::endl;
+}
+
+int main() {
+   RColumnRawSettings settings("data/B2HHH.forest-mem~flat");
+   //settings.fCompressionSettings = 104;  // ZLIB, level 4
+   //settings.fEpochSize = 64 * 1024 * 1024;
+   Write(settings);
+
+   settings.fPath = "data/B2HHH.forest-zlib~flat";
+   settings.fCompressionSettings = 104;
+   Write(settings);
 
    return 0;
 }

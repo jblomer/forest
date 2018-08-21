@@ -13,7 +13,7 @@
 #include <memory>
 #include <utility>
 
-int main() {
+int main(int argc, char **argv) {
    using RColumnSource = ROOT::Experimental::RColumnSource;
    using RTree = ROOT::Experimental::RTree;
    using RTreeModel = ROOT::Experimental::RTreeModel;
@@ -22,7 +22,7 @@ int main() {
    std::chrono::high_resolution_clock stopwatch;
    auto start_time = stopwatch.now();
    auto event_model = std::make_shared<RTreeModel>();
-   RTree tree(event_model, RColumnSource::MakeSourceRaw("B2HHH.forest~deep"));
+   RTree tree(event_model, RColumnSource::MakeSourceRaw(argv[1]));
 
    auto view_kaons = tree.GetViewCollection("kaons");
    auto view_h_is_muon = view_kaons.GetView<int>("h_is_muon");

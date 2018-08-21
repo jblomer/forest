@@ -36,6 +36,8 @@ int main() {
 
    Write();
 
+   ROOT::EnableImplicitMT();
+
    std::chrono::high_resolution_clock stopwatch;
    auto start_time = stopwatch.now();
 
@@ -46,7 +48,7 @@ int main() {
   //unsigned n_energy_sum_op = 0;
   start_time = stopwatch.now();
 
-  auto source = RColumnSource::MakeSourceRaw("B2HHH.forest");
+  auto source = RColumnSource::MakeSourceRaw("toy.forest");
   std::cout << "OK" << std::endl;
   auto rdf = ROOT::RDataFrame(std::make_unique<ROOT::RDF::RForestDS>(source.get()));
   std::cout << "RDF Ready" << std::endl;
