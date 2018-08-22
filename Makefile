@@ -11,6 +11,7 @@ all: forest \
 	dslhcb \
 	open_forest \
   store_lhcbopendata \
+	store_nanoaod \
 	read_lhcbopendata \
 	read_lhcbopendata~deep \
 	root_lhcbopendata \
@@ -18,16 +19,25 @@ all: forest \
 
 .PHONY = clean
 
+event.cxx: event.h event_linkdef.h
+	rootcling -f $@ event.h event_linkdef.h
+
+libEvent.so: event.cxx
+	g++ -shared -fPIC -o$@ $(CXXFLAGS) event.cxx $(LDFLAGS)
+
 forest: forest.cc
 	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
 dsforest: dsforest.cc
 	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
-dslhcb: dslhcb.cc
+dslhcb: dslhcb.cc libEvent.so
 	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
 open_forest: open_forest.cc
+	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
+
+store_nanoaod: store_nanoaod.cc
 	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
 store_lhcbopendata: store_lhcbopendata.cc
@@ -47,9 +57,12 @@ root_lhcbopendata: root_lhcbopendata.cc
 
 clean:
 	rm -f forest \
+	  event.cxx \
+	  libEvent.so \
 	  dsforest \
 		dslhcb \
 		open_forest \
+		store_nanoaod \
 	  store_lhcbopendata \
 		store_lhcbopendata~deep \
 		read_lhcbopendata \

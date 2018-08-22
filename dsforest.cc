@@ -22,6 +22,7 @@ void Write() {
    auto h1_px = event_model->Branch<float>("h1_px");
 
    RColumnRawSettings settings("toy.forest");
+   settings.fCompressionSettings = 104;
    RTree tree(event_model, RColumnSink::MakeSinkRaw(settings));
    *h1_px = 1.0;
    tree.Fill();
