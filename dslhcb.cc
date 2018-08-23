@@ -101,6 +101,47 @@ Result ReadFlat(ROOT::RDataFrame *rdf) {
 
 Result ReadDeep(ROOT::RDataFrame *rdf) {
    Result result;
+   auto fnCatMuon = [](ROOT::VecOps::RVec<int> h_isMuon)
+      {
+         bool isBad = h_isMuon[0] || h_isMuon[1] || h_isMuon[2];
+         //if (isBad) result.skipped++;
+         return !isBad;
+      };
+
+   auto fnSum = [](
+      ROOT::VecOps::RVec<double> h_px,
+      ROOT::VecOps::RVec<double> h_py,
+      ROOT::VecOps::RVec<double> h_pz,
+      ROOT::VecOps::RVec<double> h_prob_k,
+      ROOT::VecOps::RVec<double> h_prob_pi,
+      ROOT::VecOps::RVec<int> h_charge)
+      {
+         auto vec_sum =
+            h_px +
+            h_py +
+            h_pz +
+            h_prob_k +
+            h_prob_pi;
+         return vec_sum[0] + vec_sum[1] + vec_sum[2] +
+           double(h_charge[0]) + double(h_charge[1]) + double(h_charge[2]);
+      };
+
+   result.sum =
+      rdf->Filter(fnCatMuon, {"kaon_candidates.h_is_muon"}).Define("H_SUM", fnSum,
+      {
+         "kaon_candidates.h_px",
+         "kaon_candidates.h_py",
+         "kaon_candidates.h_pz",
+         "kaon_candidates.h_prob_k",
+         "kaon_candidates.h_prob_pi",
+         "kaon_candidates.h_charge"
+      }).Sum("H_SUM").GetValue();
+   return result;
+}
+
+
+Result ReadCsplit(ROOT::RDataFrame *rdf) {
+   Result result;
    auto lCatMuon = [&result](ROOT::VecOps::RVec<int> h_isMuon)
       { bool isBad = h_isMuon[0] || h_isMuon[1] || h_isMuon[2];
         if (isBad) result.skipped++;
@@ -125,23 +166,22 @@ Result ReadDeep(ROOT::RDataFrame *rdf) {
       };
 
    result.sum =
-      rdf->Filter(lCatMuon, {"kaon_candidates.h_is_muon"}).Define("H_SUM", lSum,
+      rdf->Filter(lCatMuon, {"h_is_muon"}).Define("H_SUM", lSum,
       {
-         "kaon_candidates.h_px",
-         "kaon_candidates.h_py",
-         "kaon_candidates.h_pz",
-         "kaon_candidates.h_prob_k",
-         "kaon_candidates.h_prob_pi",
-         "kaon_candidates.h_charge"
+         "h_px",
+         "h_py",
+         "h_pz",
+         "h_prob_k",
+         "h_prob_pi",
+         "h_charge"
       }).Sum("H_SUM").GetValue();
+
    return result;
 }
 
 
 int main(int argc, char **argv) {
-   if (!TClassTable::GetDict("FlatEvent")) {
-      gSystem->Load("./libEvent.so");
-   }
+   gSystem->Load("./libEvent.so");
 
    using RColumnSource = ROOT::Experimental::RColumnSource;
    using RDataFrame = ROOT::RDataFrame;
@@ -149,6 +189,7 @@ int main(int argc, char **argv) {
    std::string inputFile;
    bool useRRootDS = false;
    bool isDeep = false;
+   bool isCsplit = false;
 
    int c;
    while ((c = getopt(argc, argv, "pri:")) != -1) {
@@ -188,12 +229,17 @@ int main(int argc, char **argv) {
    if (inputFile.find("deep") != std::string::npos) {
       isDeep = true;
    }
+   if (inputFile.find("csplit") != std::string::npos) {
+      isCsplit = true;
+   }
 
    auto start_time_proc = stopwatch.now();
 
    Result result;
    if (isDeep) {
       result = ReadDeep(rdf.get());
+   } else if (isCsplit) {
+      result = ReadCsplit(rdf.get());
    } else {
       result = ReadFlat(rdf.get());
    }

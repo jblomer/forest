@@ -7,3 +7,4 @@
 #pragma link C++ class Event+;
 #pragma link C++ class DeepEvent+;
 #pragma link C++ class FlatEvent+;
+#pragma link C++ class CSplitEvent+;
