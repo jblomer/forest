@@ -229,7 +229,9 @@ int main(int argc, char **argv) {
    if (inputFile.find("deep") != std::string::npos) {
       isDeep = true;
    }
-   if (inputFile.find("csplit") != std::string::npos) {
+   if ((inputFile.find("csplit") != std::string::npos) ||
+       (inputFile.find("leaflist") != std::string::npos))
+   {
       isCsplit = true;
    }
 
