@@ -55,7 +55,7 @@ int main() {
     RTree tree(event_model, RColumnSink::MakeSinkRaw(settings));
 
     // TODO: value semantics
-    for (unsigned i = 0; i < 8000000; ++i) {
+    for (unsigned i = 0; i < 800; ++i) {
       for (unsigned t = 0; t < 3; ++t) {
         for (unsigned h = 0; h < 3; ++h) {
           *hit_x = 4.2;
@@ -79,6 +79,7 @@ int main() {
   float sum = 0.0;
   //float sum_e = 0.0;
   float sum_x = 0.0;
+  float sum_energy = 0.0;
   //unsigned n_energy_sum_op = 0;
   start_time = stopwatch.now();
   {
@@ -87,14 +88,19 @@ int main() {
 
     auto view_h1_py = tree.GetView<float>("h1_py");
     auto view_tracks = tree.GetViewCollection("tracks");
-    // TODO: add tracks/ prefix internally
     //auto view_energy = view_tracks.GetView<float>("energy");
+    auto view_energy = tree.GetView<std::vector<float>>("tracks/energy");
     auto view_hits = view_tracks.GetViewCollection("hits");
     auto view_hit_x = view_hits.GetView<float>("x");
 
     // The non-lazy option: the iteration fills automatically an REntry
     for (auto e : tree.GetEntryRange(ERangeType::kLazy)) {
       //std::cout << "Entry range pointer " << e.GetIndex() << std::endl;
+
+      for (auto energy : view_energy(e)) {
+        sum_energy += energy;
+      }
+
       float v_h1_py = view_h1_py(e);
       RColumnRange track_range = view_tracks.GetRange(e);
       unsigned ntracks = track_range.GetSize();
@@ -142,6 +148,7 @@ int main() {
   std::cout << "reading took " << milliseconds.count()
             << " milliseconds,    sum " << sum
             << ",    sum_x " << sum_x
+            << ",    sum_energy " << sum_energy
             //<< "   [n_energy_sum_op " << n_energy_sum_op << "]"
             << std::endl;
 

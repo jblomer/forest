@@ -2,22 +2,29 @@
  * Playground for possible TTree/TBranch interfaces.
  */
 
+#include "ROOT/RColumnStorageFile.hxx"
 #include "ROOT/RTree.hxx"
 #include "ROOT/RTreeModel.hxx"
 
 #include "TBranch.h"
 #include "TChain.h"
+#include "TFile.h"
 
 #include <chrono>
 #include <iostream>
 #include <memory>
 #include <utility>
 
+#include <unistd.h>
 
+
+using RColumnFileSettings = ROOT::Experimental::RColumnFileSettings;
 using RColumnRawSettings = ROOT::Experimental::RColumnRawSettings;
+using RColumnSink = ROOT::Experimental::RColumnSink;
+using RColumnSinkRaw = ROOT::Experimental::RColumnSinkRaw;
+using RColumnSinkFile = ROOT::Experimental::RColumnSinkFile;
 
-void Write(RColumnRawSettings settings) {
-   using RColumnSink = ROOT::Experimental::RColumnSink;
+void Write(RColumnSink *sink) {
    using RTree = ROOT::Experimental::RTree;
    using RTreeModel = ROOT::Experimental::RTreeModel;
 
@@ -52,7 +59,7 @@ void Write(RColumnRawSettings settings) {
    auto cargo_h3_is_muon = event_model->Branch<int>("H3_isMuon");
    auto cargo_h3_ip_chi2 = event_model->Branch<double>("H3_IpChi2");
 
-   RTree forest(event_model, RColumnSink::MakeSinkRaw(settings));
+   RTree forest(event_model, std::unique_ptr<RColumnSink>(sink));
 
    double b_flight_distance;
    double b_vertex_chi2;
@@ -224,15 +231,50 @@ void Write(RColumnRawSettings settings) {
    std::cout << "Checksums: sum " << sum << "   skipped " << skipped << std::endl;
 }
 
-int main() {
-   RColumnRawSettings settings("data/B2HHH.forest-mem~flat");
-   //settings.fCompressionSettings = 104;  // ZLIB, level 4
-   //settings.fEpochSize = 64 * 1024 * 1024;
-   Write(settings);
+int main(int argc, char** argv) {
+   bool writeMem = false;
+   bool writeZlib = false;
+   bool writeFile = false;
 
-   settings.fPath = "data/B2HHH.forest-zlib~flat";
-   settings.fCompressionSettings = 104;
-   Write(settings);
+   int c;
+   while ((c = getopt(argc, argv, "mzf")) != -1) {
+      switch (c) {
+      case 'm':
+         writeMem = true;
+         break;
+      case 'z':
+         writeZlib = true;
+         break;
+      case 'f':
+         writeFile = true;
+         break;
+      default:
+         fprintf(stderr, "Unknown option: -%c\n", c);
+         return 1;
+      }
+   }
+
+   if (writeMem) {
+     RColumnRawSettings settings_raw("data/B2HHH.forest-mem~flat");
+     //settings.fCompressionSettings = 104;  // ZLIB, level 4
+     //settings.fEpochSize = 64 * 1024 * 1024;
+     RColumnSinkRaw *sink_raw = new RColumnSinkRaw(settings_raw);
+     Write(sink_raw);
+   }
+
+   if (writeZlib) {
+      RColumnRawSettings settings_raw("data/B2HHH.forest-zlib~flat");
+      settings_raw.fCompressionSettings = 104;
+      RColumnSinkRaw *sink_raw = new RColumnSinkRaw(settings_raw);
+      Write(sink_raw);
+   }
+
+   if (writeFile) {
+      TFile* file = new TFile("data/B2HHH.tfforest", "RECREATE");
+      RColumnFileSettings settings_file(file, "Events");
+      RColumnSinkFile *sink_file = new RColumnSinkFile(settings_file);
+      Write(sink_file);
+   }
 
    return 0;
 }

@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
    }
 
    rdf = std::make_unique<ROOT::RDataFrame>("Events", inputFile);
-   rdf->Snapshot("Events", outputFile);
+   rdf->Snapshot("Events", outputFile, {"*Electron*"});
 
    return 0;
 }

@@ -80,7 +80,41 @@ Result ReadScalar(RTree* tree) {
 }
 
 
-Result ReadVectorized(RTree* tree) {
+Result ReadVec(RTree* tree) {
+   auto view_h_is_muon = tree->GetView<std::vector<int>>("kaons/h_is_muon");
+   auto view_h_px = tree->GetView<std::vector<double>>("kaons/h_px");
+   auto view_h_py = tree->GetView<std::vector<double>>("kaons/h_py");
+   auto view_h_pz = tree->GetView<std::vector<double>>("kaons/h_pz");
+   auto view_h_prob_k = tree->GetView<std::vector<double>>("kaons/h_prob_k");
+   auto view_h_prob_pi = tree->GetView<std::vector<double>>("kaons/h_prob_pi");
+   auto view_h_charge = tree->GetView<std::vector<int>>("kaons/h_charge");
+
+   Result result;
+
+   //unsigned n = 0;
+   for (auto e : tree->GetEntryRange(ROOT::Experimental::ERangeType::kLazy)) {
+      //std::cout << n++ << std::endl;
+      if (view_h_is_muon(e)[0] || view_h_is_muon(e)[1] || view_h_is_muon(e)[2]) {
+         result.skipped++;
+         continue;
+      }
+
+      for (unsigned i = 0; i < 3; ++i) {
+         result.sum +=
+            view_h_px(e)[i] +
+            view_h_py(e)[i] +
+            view_h_pz(e)[i] +
+            view_h_prob_k(e)[i] +
+            view_h_prob_pi(e)[i] +
+            double(view_h_charge(e)[i]);
+      }
+   }
+
+   return result;
+}
+
+
+Result ReadBulk(RTree* tree) {
    auto view_h1_is_muon = tree->GetView<int>("H1_isMuon");
    auto view_h2_is_muon = tree->GetView<int>("H2_isMuon");
    auto view_h3_is_muon = tree->GetView<int>("H3_isMuon");
@@ -205,7 +239,7 @@ int main(int argc, char **argv) {
    RTree tree(event_model, RColumnSource::MakeSourceRaw(argv[1]));
 
    Result result;
-   result = ReadVectorized(&tree);
+   result = ReadVec(&tree);
 
    auto end_time = stopwatch.now();
    auto diff = end_time - start_time;

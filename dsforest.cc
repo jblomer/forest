@@ -2,10 +2,13 @@
  * Playground for possible TTree/TBranch interfaces.
  */
 
+#include "ROOT/RColumnStorageFile.hxx"
 #include "ROOT/RDataFrame.hxx"
 #include "ROOT/RForestDS.hxx"
 #include "ROOT/RTree.hxx"
 #include "ROOT/RTreeModel.hxx"
+
+#include "TFile.h"
 
 #include <chrono>
 #include <iostream>
@@ -14,6 +17,7 @@
 
 void Write() {
    using RColumnRawSettings = ROOT::Experimental::RColumnRawSettings;
+   using RColumnFileSettings = ROOT::Experimental::RColumnFileSettings;
    using RColumnSink = ROOT::Experimental::RColumnSink;
    using RTreeModel = ROOT::Experimental::RTreeModel;
    using RTree = ROOT::Experimental::RTree;
@@ -21,9 +25,13 @@ void Write() {
    auto event_model = std::make_shared<RTreeModel>();
    auto h1_px = event_model->Branch<float>("h1_px");
 
-   RColumnRawSettings settings("toy.forest");
-   settings.fCompressionSettings = 104;
-   RTree tree(event_model, RColumnSink::MakeSinkRaw(settings));
+   //RColumnRawSettings settings("toy.forest");
+   //settings.fCompressionSettings = 104;
+   //RTree tree(event_model, RColumnSink::MakeSinkRaw(settings));
+   TFile* file = new TFile("toy.tfile.forest", "RECREATE");
+   RColumnFileSettings settings(file, "Forest");
+   RTree tree(event_model, RColumnSink::MakeSinkFile(settings));
+
    *h1_px = 1.0;
    tree.Fill();
    *h1_px = 2.0;
