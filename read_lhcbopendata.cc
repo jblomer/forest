@@ -2,11 +2,13 @@
  * Playground for possible TTree/TBranch interfaces.
  */
 
+#include "ROOT/RColumnStorageFile.hxx"
 #include "ROOT/RTree.hxx"
 #include "ROOT/RTreeModel.hxx"
 
 #include "TBranch.h"
 #include "TChain.h"
+#include "TFile.h"
 
 #include <chrono>
 #include <iostream>
@@ -25,6 +27,8 @@ struct Result {
 
 
 Result ReadScalar(RTree* tree) {
+   std::cout << "SCALAR READING" << std::endl;
+
    auto view_h1_is_muon = tree->GetView<int>("H1_isMuon");
    auto view_h2_is_muon = tree->GetView<int>("H2_isMuon");
    auto view_h3_is_muon = tree->GetView<int>("H3_isMuon");
@@ -231,15 +235,56 @@ Result ReadBulk(RTree* tree) {
 
 int main(int argc, char **argv) {
    using RColumnSource = ROOT::Experimental::RColumnSource;
+   using RColumnSourceFile = ROOT::Experimental::RColumnSourceFile;
    using RTreeModel = ROOT::Experimental::RTreeModel;
+
+   std::string inputFile;
+   bool readVectorized = false;
+   bool readBulk = false;
+   bool useTfile = false;
+
+   int c;
+   while ((c = getopt(argc, argv, "vbfi:")) != -1) {
+      switch (c) {
+      case 'v':
+         readVectorized = true;
+         break;
+      case 'b':
+         readBulk = true;
+         break;
+      case 'f':
+         useTfile = true;
+         break;
+      case 'i':
+         inputFile = optarg;
+         break;
+      default:
+         fprintf(stderr, "Unknown option: -%c\n", c);
+         return 1;
+      }
+   }
+
+   RTree *tree = nullptr;
 
    std::chrono::high_resolution_clock stopwatch;
    auto start_time = stopwatch.now();
+
    auto event_model = std::make_shared<RTreeModel>();
-   RTree tree(event_model, RColumnSource::MakeSourceRaw(argv[1]));
+   if (useTfile) {
+      TFile* file = new TFile(inputFile.c_str(), "READ");
+      RColumnSourceFile *source = new RColumnSourceFile(file);
+      tree = new RTree(event_model, std::unique_ptr<RColumnSourceFile>(source));
+   } else {
+      tree = new RTree(event_model, RColumnSource::MakeSourceRaw(inputFile));
+   }
 
    Result result;
-   result = ReadVec(&tree);
+   if (readVectorized)
+     result = ReadVec(tree);
+   else if (readBulk)
+     result = ReadBulk(tree);
+   else
+     result = ReadScalar(tree);
 
    auto end_time = stopwatch.now();
    auto diff = end_time - start_time;

@@ -17,9 +17,9 @@ and select the RSlice class. The CMake infrastructure will do the rest :)
 // long and needs to be persistified.
 struct RSlice {
    RSlice(){};
-   RSlice(const int size, const char* buffer): fBufferSize(size), fBuffer(buffer) {};
+   RSlice(const int size, const float* buffer): fBufferSize(size), fBuffer(buffer) {};
    const int fBufferSize = 0;
-   const char* fBuffer = nullptr; ///<[fBufferSize]
+   const float* fBuffer = nullptr; ///<[fBufferSize]
 };
 
 const auto filename = "out.root";
@@ -30,12 +30,15 @@ void write()
    TFile f(filename, "RECREATE");
    auto datasetDir = f.mkdir(datasetname);
    auto counter = 0;
-   for (const auto blob : {"foo", "bar", "Ueberfluessig", "footino"}) {
-      const auto bloblen = (int)strlen(blob);
-      RSlice slice(bloblen, blob);
-      const auto countStr = std::to_string(counter++);
-      datasetDir->WriteObject(&slice, countStr.c_str());
-   }
+   float test[] = {1.0, 2.0};
+   RSlice slice(2, test);
+   datasetDir->WriteObject(&slice, "foo");
+   //for (const auto blob : {"foo", "bar", "zig", "zag"}) {
+   //   const auto bloblen = (int)strlen(blob);
+   //   RSlice slice(bloblen, blob);
+   //   const auto countStr = std::to_string(counter++);
+   //   datasetDir->WriteObject(&slice, countStr.c_str());
+   //}
 }
 
 void read()
@@ -48,7 +51,7 @@ void read()
       const auto slice = key->ReadObject<RSlice>();
       std::cout << "Key name: " << key->GetName()
                 << " - Blob lenght " << slice->fBufferSize
-                << " - content ->" << slice->fBuffer << "<-" << std::endl;
+                << " - content ->" << (long)(slice->fBuffer) << "<-" << std::endl;
    }
 
 }

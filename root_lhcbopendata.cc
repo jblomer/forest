@@ -13,9 +13,28 @@
 #include <memory>
 #include <utility>
 
-int main() {
+#include <unistd.h>
+
+int main(int argc, char** argv) {
+   std::string inputFile;
+
+   int c;
+   while ((c = getopt(argc, argv, "i:")) != -1) {
+      switch (c) {
+      case 'i':
+         inputFile = optarg;
+         break;
+      default:
+         fprintf(stderr, "Unknown option: -%c\n", c);
+         return 1;
+      }
+   }
+
+   std::chrono::high_resolution_clock stopwatch;
+   auto start_time = stopwatch.now();
+
    TChain* chain = new TChain("DecayTree");
-   chain->Add("B2HHH.root");
+   chain->Add(inputFile.c_str());
 
    double h1_px;
    double h1_py;
@@ -144,7 +163,13 @@ int main() {
          double(h3_charge);
    }
 
+   auto end_time = stopwatch.now();
+   auto diff = end_time - start_time;
+   auto milliseconds =
+    std::chrono::duration_cast<std::chrono::milliseconds>(diff);
+
    std::cout << "sum " << sum << "   skipped " << skipped << std::endl;
+   std::cout << "Took " << milliseconds.count() << " ms" << std::endl;
 
    return 0;
 }

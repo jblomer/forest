@@ -271,6 +271,7 @@ int main(int argc, char** argv) {
 
    if (writeFile) {
       TFile* file = new TFile("data/B2HHH.tfforest", "RECREATE");
+      file->SetCompressionSettings(0);
       RColumnFileSettings settings_file(file, "Events");
       RColumnSinkFile *sink_file = new RColumnSinkFile(settings_file);
       Write(sink_file);
