@@ -53,7 +53,7 @@ read_lhcbopendata~deep: read_lhcbopendata~deep.cc
 	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
 root_lhcbopendata: root_lhcbopendata.cc
-	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
+	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS_ROOT)
 
 clean:
 	rm -f forest \

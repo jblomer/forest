@@ -2,8 +2,6 @@
  * Playground for possible TTree/TBranch interfaces.
  */
 
-#include "ROOT/RTree.hxx"
-#include "ROOT/RTreeModel.hxx"
 
 #include "TBranch.h"
 #include "TChain.h"
