@@ -10,6 +10,7 @@ all: forest \
   dsforest \
 	dslhcb \
 	open_forest \
+	convert \
   store_lhcbopendata \
 	store_nanoaod \
 	read_lhcbopendata \
@@ -37,6 +38,9 @@ dslhcb: dslhcb.cc libEvent.so
 open_forest: open_forest.cc
 	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
+convert: convert.cc
+	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
+
 store_nanoaod: store_nanoaod.cc
 	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
@@ -61,6 +65,7 @@ clean:
 	  libEvent.so \
 	  dsforest \
 		dslhcb \
+		convert \
 		open_forest \
 		store_nanoaod \
 	  store_lhcbopendata \
