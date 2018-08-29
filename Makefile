@@ -11,6 +11,7 @@ all: forest \
 	dslhcb \
 	open_forest \
 	convert \
+	store_naod_muon \
   store_lhcbopendata \
 	store_nanoaod \
 	read_lhcbopendata \
@@ -44,6 +45,9 @@ convert: convert.cc
 store_nanoaod: store_nanoaod.cc
 	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
+store_naod_muon: store_naod_muon.cc
+	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
+
 store_lhcbopendata: store_lhcbopendata.cc
 	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
@@ -68,7 +72,8 @@ clean:
 		convert \
 		open_forest \
 		store_nanoaod \
-	  store_lhcbopendata \
+	  store_naod_muon \
+		store_lhcbopendata \
 		store_lhcbopendata~deep \
 		read_lhcbopendata \
 		read_lhcbopendata~deep \

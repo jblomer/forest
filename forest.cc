@@ -33,7 +33,11 @@ int main() {
    auto h3_py = event_model->Branch<float>("h3_py", 7.0);
    auto h3_pz = event_model->Branch<float>("h3_pz", 8.0);
 
-   //auto jets = event_model->Branch<std::vector<float>>("jets");
+   //auto jets = event_model->Branch<std::vector<double>>("jets");
+   //jets->push_back(100.0);
+   //jets->push_back(200.0);
+   //jets->push_back(300.0);
+   //jets->push_back(400.0);
 
    float unsafe;
    event_model->BranchDynamic("unsafe", "float", &unsafe);
@@ -80,6 +84,7 @@ int main() {
   //float sum_e = 0.0;
   float sum_x = 0.0;
   float sum_energy = 0.0;
+  float sum_jets = 0.0;
   //unsigned n_energy_sum_op = 0;
   start_time = stopwatch.now();
   {
@@ -93,6 +98,8 @@ int main() {
     auto view_hits = view_tracks.GetViewCollection("hits");
     auto view_hit_x = view_hits.GetView<float>("x");
 
+    //auto view_jets = tree.GetView<std::vector<double>>("jets/@1");
+
     // The non-lazy option: the iteration fills automatically an REntry
     for (auto e : tree.GetEntryRange(ERangeType::kLazy)) {
       //std::cout << "Entry range pointer " << e.GetIndex() << std::endl;
@@ -100,6 +107,10 @@ int main() {
       for (auto energy : view_energy(e)) {
         sum_energy += energy;
       }
+
+      //for (auto jet : view_jets(e)) {
+      //  sum_jets += jet;
+      //}
 
       float v_h1_py = view_h1_py(e);
       RColumnRange track_range = view_tracks.GetRange(e);
@@ -149,6 +160,7 @@ int main() {
             << " milliseconds,    sum " << sum
             << ",    sum_x " << sum_x
             << ",    sum_energy " << sum_energy
+            << ",    sum_jets " << sum_jets
             //<< "   [n_energy_sum_op " << n_energy_sum_op << "]"
             << std::endl;
 
