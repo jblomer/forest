@@ -4,6 +4,7 @@
 
 #include "ROOT/RTree.hxx"
 #include "ROOT/RTreeModel.hxx"
+#include "ROOT/RVec.hxx"
 
 #include <chrono>
 #include <memory>
@@ -33,11 +34,11 @@ int main() {
    auto h3_py = event_model->Branch<float>("h3_py", 7.0);
    auto h3_pz = event_model->Branch<float>("h3_pz", 8.0);
 
-   //auto jets = event_model->Branch<std::vector<double>>("jets");
-   //jets->push_back(100.0);
-   //jets->push_back(200.0);
-   //jets->push_back(300.0);
-   //jets->push_back(400.0);
+   auto jets = event_model->Branch<std::vector<double>>("jets");
+   jets->push_back(100.0);
+   jets->push_back(200.0);
+   jets->push_back(300.0);
+   jets->push_back(400.0);
 
    float unsafe;
    event_model->BranchDynamic("unsafe", "float", &unsafe);
@@ -59,7 +60,7 @@ int main() {
     RTree tree(event_model, RColumnSink::MakeSinkRaw(settings));
 
     // TODO: value semantics
-    for (unsigned i = 0; i < 800; ++i) {
+    for (unsigned i = 0; i < 8; ++i) {
       for (unsigned t = 0; t < 3; ++t) {
         for (unsigned h = 0; h < 3; ++h) {
           *hit_x = 4.2;
@@ -98,7 +99,7 @@ int main() {
     auto view_hits = view_tracks.GetViewCollection("hits");
     auto view_hit_x = view_hits.GetView<float>("x");
 
-    //auto view_jets = tree.GetView<std::vector<double>>("jets/@1");
+    auto view_jets = tree.GetView<ROOT::VecOps::RVec<double>>("jets/@1");
 
     // The non-lazy option: the iteration fills automatically an REntry
     for (auto e : tree.GetEntryRange(ERangeType::kLazy)) {
@@ -108,9 +109,9 @@ int main() {
         sum_energy += energy;
       }
 
-      //for (auto jet : view_jets(e)) {
-      //  sum_jets += jet;
-      //}
+      for (auto jet : view_jets(e)) {
+        sum_jets += jet;
+      }
 
       float v_h1_py = view_h1_py(e);
       RColumnRange track_range = view_tracks.GetRange(e);
@@ -165,7 +166,7 @@ int main() {
             << std::endl;
 
   // Read a single deeply nested branch independently of entry structure
-  sum_x = 0.0;
+  /*sum_x = 0.0;
   start_time = stopwatch.now();
   {
     // event_model unused so far
@@ -183,7 +184,7 @@ int main() {
     std::chrono::duration_cast<std::chrono::milliseconds>(diff);
   std::cout << "independent branch reading took " << milliseconds.count()
             << ",    sum_x " << sum_x
-            << std::endl;
+            << std::endl;*/
 
    return 0;
 }
