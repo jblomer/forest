@@ -31,11 +31,11 @@ void Write(TTree *inputTree, RColumnSink *sink, int maxN) {
    constexpr int kMaxMuon = 32;
 
    auto muon_model = std::make_shared<RTreeModel>();
-   auto cargo_pt = muon_model->Branch<double>("pt");
-   auto cargo_eta = muon_model->Branch<double>("eta");
-   auto cargo_phi = muon_model->Branch<double>("phi");
-   auto cargo_mass = muon_model->Branch<double>("mass");
-   auto cargo_charge = muon_model->Branch<double>("charge");
+   auto cargo_pt = muon_model->Branch<float>("pt");
+   auto cargo_eta = muon_model->Branch<float>("eta");
+   auto cargo_phi = muon_model->Branch<float>("phi");
+   auto cargo_mass = muon_model->Branch<float>("mass");
+   auto cargo_charge = muon_model->Branch<int>("charge");
 
    auto event_model = std::make_shared<RTreeModel>();
    auto cargo_muon = event_model->BranchCollection("muons", muon_model);
@@ -43,11 +43,11 @@ void Write(TTree *inputTree, RColumnSink *sink, int maxN) {
    RTree forest(event_model, std::unique_ptr<RColumnSink>(sink));
 
    Int_t nMuon;
-   auto pt = new std::vector<double>();
-   auto eta = new std::vector<double>();
-   auto phi = new std::vector<double>();
-   auto mass = new std::vector<double>();
-   auto charge = new std::vector<double>();
+   auto pt = new std::vector<float>();
+   auto eta = new std::vector<float>();
+   auto phi = new std::vector<float>();
+   auto mass = new std::vector<float>();
+   auto charge = new std::vector<int>();
 
    TBranch* br_nMuon;
    TBranch* br_pt;

@@ -85,20 +85,22 @@ Result ReadScalar(RTree* tree) {
 
 
 Result ReadVec(RTree* tree) {
-   auto view_h_is_muon = tree->GetView<std::vector<int>>("kaons/h_is_muon");
-   auto view_h_px = tree->GetView<std::vector<double>>("kaons/h_px");
-   auto view_h_py = tree->GetView<std::vector<double>>("kaons/h_py");
-   auto view_h_pz = tree->GetView<std::vector<double>>("kaons/h_pz");
-   auto view_h_prob_k = tree->GetView<std::vector<double>>("kaons/h_prob_k");
-   auto view_h_prob_pi = tree->GetView<std::vector<double>>("kaons/h_prob_pi");
-   auto view_h_charge = tree->GetView<std::vector<int>>("kaons/h_charge");
+   auto view_h_is_muon = tree->GetView<ROOT::VecOps::RVec<int>>("kaons/h_is_muon");
+   auto view_h_px = tree->GetView<ROOT::VecOps::RVec<double>>("kaons/h_px");
+   auto view_h_py = tree->GetView<ROOT::VecOps::RVec<double>>("kaons/h_py");
+   auto view_h_pz = tree->GetView<ROOT::VecOps::RVec<double>>("kaons/h_pz");
+   auto view_h_prob_k = tree->GetView<ROOT::VecOps::RVec<double>>("kaons/h_prob_k");
+   auto view_h_prob_pi = tree->GetView<ROOT::VecOps::RVec<double>>("kaons/h_prob_pi");
+   auto view_h_charge = tree->GetView<ROOT::VecOps::RVec<int>>("kaons/h_charge");
 
    Result result;
 
    //unsigned n = 0;
    for (auto e : tree->GetEntryRange(ROOT::Experimental::ERangeType::kLazy)) {
       //std::cout << n++ << std::endl;
-      if (view_h_is_muon(e)[0] || view_h_is_muon(e)[1] || view_h_is_muon(e)[2]) {
+      auto is_muon = view_h_is_muon(e);
+      assert(is_muon.size() == 3);
+      if (is_muon[0] || is_muon[1] || is_muon[2]) {
          result.skipped++;
          continue;
       }
