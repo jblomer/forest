@@ -18,7 +18,8 @@ all: forest \
 	read_lhcbopendata~deep \
 	root_lhcbopendata \
 	store_lhcbopendata~deep \
-	nanoaod_dimuon_spectrum
+	nanoaod_dimuon_spectrum \
+	nanoaod_dimuon_spectrum.orig
 
 .PHONY = clean
 
@@ -67,6 +68,9 @@ root_lhcbopendata: root_lhcbopendata.cc
 nanoaod_dimuon_spectrum: nanoaod_dimuon_spectrum.cxx
 	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
+nanoaod_dimuon_spectrum.orig: nanoaod_dimuon_spectrum.orig.cxx
+	g++ $(CXXFLAGS) -o $@ $< $(LDFLAGS)
+
 clean:
 	rm -f forest \
 	  event.cxx \
@@ -82,4 +86,4 @@ clean:
 		read_lhcbopendata \
 		read_lhcbopendata~deep \
 		root_lhcbopendata \
-		nanoaod_dimuon_spectrum
+		nanoaod_dimuon_spectrum nanoaod_dimuon_spectrum.orig

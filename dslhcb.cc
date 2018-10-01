@@ -101,10 +101,10 @@ Result ReadFlat(ROOT::RDataFrame *rdf) {
 
 Result ReadDeep(ROOT::RDataFrame *rdf) {
    Result result;
-   auto fnCatMuon = [](ROOT::VecOps::RVec<int> h_isMuon)
+   auto fnCatMuon = [&result](ROOT::VecOps::RVec<int> h_isMuon)
       {
          bool isBad = h_isMuon[0] || h_isMuon[1] || h_isMuon[2];
-         //if (isBad) result.skipped++;
+         if (isBad) result.skipped++;
          return !isBad;
       };
 
@@ -127,14 +127,14 @@ Result ReadDeep(ROOT::RDataFrame *rdf) {
       };
 
    result.sum =
-      rdf->Filter(fnCatMuon, {"kaon_candidates.h_is_muon"}).Define("H_SUM", fnSum,
+      rdf->Filter(fnCatMuon, {"kaons/h_is_muon"}).Define("H_SUM", fnSum,
       {
-         "kaon_candidates.h_px",
-         "kaon_candidates.h_py",
-         "kaon_candidates.h_pz",
-         "kaon_candidates.h_prob_k",
-         "kaon_candidates.h_prob_pi",
-         "kaon_candidates.h_charge"
+         "kaons/h_px",
+         "kaons/h_py",
+         "kaons/h_pz",
+         "kaons/h_prob_k",
+         "kaons/h_prob_pi",
+         "kaons/h_charge"
       }).Sum("H_SUM").GetValue();
    return result;
 }
@@ -209,22 +209,13 @@ int main(int argc, char **argv) {
       }
    }
 
+   std::cout << "OK, Input File " << inputFile << std::endl;
 
    std::chrono::high_resolution_clock stopwatch;
    auto start_time_init = stopwatch.now();
 
    std::unique_ptr<RDataFrame> rdf;
    std::unique_ptr<RColumnSource> source;
-
-   if (inputFile.find("forest") != std::string::npos) {
-      source = RColumnSource::MakeSourceRaw(inputFile);
-      rdf = std::make_unique<ROOT::RDataFrame>(std::make_unique<ROOT::RDF::RForestDS>(source.get()));
-   } else {
-      if (useRRootDS)
-         rdf = std::make_unique<ROOT::RDataFrame>(ROOT::RDF::MakeRootDataFrame("DecayTree", inputFile));
-      else
-         rdf = std::make_unique<ROOT::RDataFrame>("DecayTree", inputFile);
-   }
 
    if (inputFile.find("deep") != std::string::npos) {
       isDeep = true;
@@ -233,6 +224,50 @@ int main(int argc, char **argv) {
        (inputFile.find("leaflist") != std::string::npos))
    {
       isCsplit = true;
+   }
+
+   if (inputFile.find("forest") != std::string::npos) {
+      auto eventModel = std::make_shared<ROOT::Experimental::RTreeModel>();
+      if (isDeep) {
+         eventModel->Branch<ROOT::VecOps::RVec<int>>("kaons/h_is_muon");
+         eventModel->Branch<ROOT::VecOps::RVec<double>>("kaons/h_px");
+         eventModel->Branch<ROOT::VecOps::RVec<double>>("kaons/h_py");
+         eventModel->Branch<ROOT::VecOps::RVec<double>>("kaons/h_pz");
+         eventModel->Branch<ROOT::VecOps::RVec<double>>("kaons/h_prob_k");
+         eventModel->Branch<ROOT::VecOps::RVec<double>>("kaons/h_prob_pi");
+         eventModel->Branch<ROOT::VecOps::RVec<int>>("kaons/h_charge");
+      } else {
+         eventModel->Branch<double>("H1_PX");
+         eventModel->Branch<double>("H1_PY");
+         eventModel->Branch<double>("H1_PZ");
+         eventModel->Branch<double>("H1_ProbK");
+         eventModel->Branch<double>("H1_ProbPi");
+         eventModel->Branch<int>("H1_Charge");
+         eventModel->Branch<int>("H1_isMuon");
+         eventModel->Branch<double>("H2_PX");
+         eventModel->Branch<double>("H2_PY");
+         eventModel->Branch<double>("H2_PZ");
+         eventModel->Branch<double>("H2_ProbK");
+         eventModel->Branch<double>("H2_ProbPi");
+         eventModel->Branch<int>("H2_Charge");
+         eventModel->Branch<int>("H2_isMuon");
+         eventModel->Branch<double>("H3_PX");
+         eventModel->Branch<double>("H3_PY");
+         eventModel->Branch<double>("H3_PZ");
+         eventModel->Branch<double>("H3_ProbK");
+         eventModel->Branch<double>("H3_ProbPi");
+         eventModel->Branch<int>("H3_Charge");
+         eventModel->Branch<int>("H3_isMuon");
+      }
+      auto source = RColumnSource::MakeSourceRaw(inputFile);
+      auto *tree = new ROOT::Experimental::RTree (eventModel, std::move(source));
+      rdf = std::make_unique<ROOT::RDataFrame>(std::make_unique<ROOT::RDF::RForestDS>(tree));
+   } else {
+      if (useRRootDS) {
+         rdf = std::make_unique<ROOT::RDataFrame>(ROOT::RDF::MakeRootDataFrame("DecayTree", inputFile));
+      } else {
+         rdf = std::make_unique<ROOT::RDataFrame>("DecayTree", inputFile);
+      }
    }
 
    auto start_time_proc = stopwatch.now();

@@ -40,7 +40,7 @@ void Write(TTree *inputTree, RColumnSink *sink, int maxN) {
    auto event_model = std::make_shared<RTreeModel>();
    auto cargo_muon = event_model->BranchCollection("muons", muon_model);
 
-   RTree forest(event_model, std::unique_ptr<RColumnSink>(sink));
+   RTree *forest = new RTree(event_model, std::unique_ptr<RColumnSink>(sink));
 
    Int_t nMuon;
    auto pt = new std::vector<float>();
@@ -48,6 +48,11 @@ void Write(TTree *inputTree, RColumnSink *sink, int maxN) {
    auto phi = new std::vector<float>();
    auto mass = new std::vector<float>();
    auto charge = new std::vector<int>();
+   pt->resize(kMaxMuon);
+   eta->resize(kMaxMuon);
+   phi->resize(kMaxMuon);
+   mass->resize(kMaxMuon);
+   charge->resize(kMaxMuon);
 
    TBranch* br_nMuon;
    TBranch* br_pt;
@@ -82,13 +87,14 @@ void Write(TTree *inputTree, RColumnSink *sink, int maxN) {
          *cargo_charge = (*charge)[imuon];
          cargo_muon->Fill();
       }
-      forest.Fill();
+      forest->Fill();
 
       if (i % 1000000 == 0) {
          std::cout << "  ... processed " << i << " events" << std::endl;
       }
       if ((maxN > 0) && (i >= maxN)) break;
    }
+   delete forest;
    std::cout << "Converted " << N << " entries" << std::endl;
 }
 

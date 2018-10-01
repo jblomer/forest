@@ -12,11 +12,6 @@
 /// \date August 2018
 /// \author Stefan Wunsch
 
-#include "ROOT/RColumnStorageFile.hxx"
-#include "ROOT/RForestDS.hxx"
-#include "ROOT/RTree.hxx"
-#include "ROOT/RTreeModel.hxx"
-
 #include "ROOT/RDataFrame.hxx"
 #include "ROOT/RVec.hxx"
 #include "TCanvas.h"
@@ -26,9 +21,6 @@
 #include "TStyle.h"
 
 using namespace ROOT::VecOps;
-using RColumnSource = ROOT::Experimental::RColumnSource;
-using RTree = ROOT::Experimental::RTree;
-using RTreeModel = ROOT::Experimental::RTreeModel;
 
 template <typename T> void Draw(T h_result_ptr);
 
@@ -37,22 +29,13 @@ void nanoaod_dimuon_spectrum() {
   //ROOT::EnableImplicitMT();
 
   // Create dataframe from NanoAOD file
-  auto event_model = std::make_shared<RTreeModel>();
-  // TODO create from file
-  event_model->Branch<ROOT::Experimental::OffsetColumn_t>("muons");
-  event_model->Branch<RVec<float>>("muons/pt");
-  event_model->Branch<RVec<float>>("muons/eta");
-  event_model->Branch<RVec<float>>("muons/phi");
-  event_model->Branch<RVec<float>>("muons/mass");
-  event_model->Branch<RVec<int>>("muons/charge");
-  auto tree = new RTree(event_model, RColumnSource::MakeSourceRaw("data/naod_muon.forest"));
-  ROOT::RDataFrame df(std::make_unique<ROOT::RDF::RForestDS>(tree));
-
-  //ROOT::RDataFrame df("Events", "data/naod_muon.root");
+  ROOT::RDataFrame df(
+      "Events",
+      //"http://root.cern.ch/files/NanoAOD_DoubleMuon_CMS2011OpenData.root");
+      "data/NanoAOD_DoubleMuon_CMS2011OpenData.root");
 
   // Select events with more than two muons
-  auto df_filtered = df.Filter("muons>=2", "More than two muons");
-  //auto df_filtered = df.Filter("nMuon>=2", "More than two muons");
+  auto df_filtered = df.Filter("nMuon>=2", "More than two muons");
 
   // Find muon pair with highest pt and opposite charge
   auto find_pair = [](const RVec<float> &pt, const RVec<int> &charge) {
@@ -72,8 +55,7 @@ void nanoaod_dimuon_spectrum() {
     return RVec<size_t>({});
   };
   auto df_pair =
-      df_filtered.Define("Muon_pair", find_pair, {"muons/pt", "muons/charge"})
-      //df_filtered.Define("Muon_pair", find_pair, {"Muon_pt", "Muon_charge"})
+      df_filtered.Define("Muon_pair", find_pair, {"Muon_pt", "Muon_charge"})
           .Filter("Muon_pair.size() == 2", "Found valid pair");
 
   // Compute invariant mass of the di-muon system
@@ -93,8 +75,7 @@ void nanoaod_dimuon_spectrum() {
   };
   auto df_mass = df_pair.Define(
       "Dimuon_mass", compute_mass,
-      {"muons/pt", "muons/eta", "muons/phi", "muons/mass", "Muon_pair"});
-      //{"Muon_pt", "Muon_eta", "Muon_phi", "Muon_mass", "Muon_pair"});
+      {"Muon_pt", "Muon_eta", "Muon_phi", "Muon_mass", "Muon_pair"});
 
   // Plot histogram of di-muon mass spectrum
   auto h = df_mass.Histo1D({"Dimuon_mass", "Dimuon_mass", 20000, 0.25, 300},
