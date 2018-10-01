@@ -140,5 +140,5 @@ template <typename T> void Draw(T h_result_ptr) {
   label.DrawLatex(0.10, 0.920,
       "Run2011A Double Muon Dataset (DOI: 10.7483/OPENDATA.CMS.RZ34.QR6N)");
 
-  c.SaveAs("nanoaod_dimuon_spectrum.pdf");
+  c.SaveAs("nanoaod_dimuon_spectrum.forest.pdf");
 }
