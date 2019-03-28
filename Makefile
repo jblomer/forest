@@ -23,6 +23,9 @@ all: forest \
 
 .PHONY = clean
 
+format: format.cxx
+	g++ -g -Wall -O2 -std=c++14 -o format format.cxx
+
 event.cxx: event.h event_linkdef.h
 	rootcling -f $@ event.h event_linkdef.h
 
